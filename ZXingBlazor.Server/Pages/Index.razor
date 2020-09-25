@@ -1,0 +1,111 @@
+﻿@page "/"
+
+<h3>条码扫描 BarcodeReader</h3>
+
+<h4>扫描条码/QR码。</h4>
+
+<button class="btn btn-sm btn-light"
+        type="button"
+        @onclick="(() => ShowScanBarcode = !ShowScanBarcode)">
+    [扫码]
+</button> 
+<input type="text" class="form-control" style="min-width: 100px;"
+       @bind-value="BarCode" 
+       placeholder="条码" />
+@if (ShowScanBarcode)
+{
+
+    <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
+                   ShowScanBarcode="ShowScanBarcode"
+                   Close="(()=>ShowScanBarcode=!ShowScanBarcode)" />
+
+}
+<br /><br /><br /><br />
+<div class="table-attr d-none d-md-block">
+    <!--!-->
+    <!--!--><h4>事件 Events</h4>
+
+    <!--!--><div class="table-container" _bl_79147904-531d-4e31-895f-47eb5e485a57="">
+        <!--!-->
+        <div class="table-toolbar">
+            <!--!-->
+        </div><!--!-->
+        <!--!--><!--!--><!--!-->
+        <div class="table-wrapper">
+            <!--!-->
+            <table class="table is-single table-demo">
+                <!--!-->
+                <!--!-->
+                <!--!--><!--!-->
+                <!--!--><!--!-->
+                <!--!--><!--!-->
+                <!--!-->
+                <colgroup>
+                    <!--!-->
+                    <!--!-->
+                    <col>
+                    <col>
+                    <col><!--!-->
+                </colgroup><!--!-->
+                <tbody>
+                    <!--!-->
+                    <!--!-->
+                    <tr>
+                        <!--!-->
+                        <!--!--><!--!-->
+                        <!--!--><!--!-->
+                        <td><div class="table-cell">ScanResult</div></td><!--!-->
+                        <td><div class="table-cell">扫码结果回调方法</div></td><!--!-->
+                        <td><div class="table-cell">EventCallback&lt;string&gt;</div></td><!--!-->
+                        <!--!-->
+                    </tr><!--!-->
+                    <!--!-->
+                    <!--!-->
+                    <tr>
+                        <!--!-->
+                        <!--!--><!--!-->
+                        <!--!--><!--!-->
+                        <td><div class="table-cell">Close</div></td><!--!-->
+                        <td><div class="table-cell">关闭扫码框回调方法</div></td><!--!-->
+                        <td><div class="table-cell">EventCallback</div></td><!--!-->
+                        <!--!-->
+                    </tr><!--!-->
+                    <!--!-->
+                </tbody><!--!-->
+                <thead>
+                    <!--!-->
+                    <tr>
+                        <!--!-->
+                        <!--!-->
+                        <th><div class="table-cell"><span class="table-text">参数</span></div></th>
+                        <th><div class="table-cell"><span class="table-text">说明</span></div></th>
+                        <th><div class="table-cell"><span class="table-text">类型</span></div></th><!--!-->
+                    </tr><!--!-->
+                </thead><!--!-->
+            </table><!--!-->
+        </div><!--!-->
+        <!--!-->
+        <div class="table-filter">
+            <!--!-->
+            <!--!--><!--!-->
+        </div><!--!-->
+        <!--!-->
+        <!--!-->
+    </div><!--!-->
+</div>
+
+@code{
+ 
+    /// <summary>
+    /// 显示扫码界面
+    /// </summary>
+    bool ShowScanBarcode { get; set; } = false;
+
+    /// <summary>
+    /// 条码
+    /// </summary>
+    public string? BarCode { get; set; }
+
+     
+
+} 

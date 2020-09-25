@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29911.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZXingBlazor", "src\BootstrapBlazor\ZXingBlazor.csproj", "{D0AE3016-4878-4807-A04C-C33CBEC7B092}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A2182155-43ED-44C1-BF6F-1B70EBD2DFFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZXingBlazor.Server", "ZXingBlazor.Server\ZXingBlazor.Server.csproj", "{ACA6D814-E22C-4B85-80BA-D1ED3D7EFF54}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D0AE3016-4878-4807-A04C-C33CBEC7B092}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0AE3016-4878-4807-A04C-C33CBEC7B092}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0AE3016-4878-4807-A04C-C33CBEC7B092}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0AE3016-4878-4807-A04C-C33CBEC7B092}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACA6D814-E22C-4B85-80BA-D1ED3D7EFF54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACA6D814-E22C-4B85-80BA-D1ED3D7EFF54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACA6D814-E22C-4B85-80BA-D1ED3D7EFF54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACA6D814-E22C-4B85-80BA-D1ED3D7EFF54}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D0AE3016-4878-4807-A04C-C33CBEC7B092} = {A2182155-43ED-44C1-BF6F-1B70EBD2DFFE}
+		{ACA6D814-E22C-4B85-80BA-D1ED3D7EFF54} = {A2182155-43ED-44C1-BF6F-1B70EBD2DFFE}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0DCB0756-34FA-4FD0-AE1D-D3F08B5B3A6B}
+	EndGlobalSection
+EndGlobal

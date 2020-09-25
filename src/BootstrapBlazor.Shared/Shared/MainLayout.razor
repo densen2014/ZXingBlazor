@@ -1,0 +1,22 @@
+﻿@inherits LayoutComponentBase
+@layout BaseLayout
+
+<section class="section">
+    <div class="sidebar">
+        <Scroll IsDark="true">
+            <NavMenu />
+        </Scroll>
+    </div>
+
+    <div class="main">
+        <div class="content p-3">
+            @Body
+        </div>
+    </div>
+</section>
+
+<footer></footer>
+
+<Toast></Toast>
+
+<PopoverConfirm></PopoverConfirm>

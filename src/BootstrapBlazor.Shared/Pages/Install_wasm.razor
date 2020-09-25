@@ -1,0 +1,18 @@
+﻿@page "/install-wasm"
+
+<InstallContent Title="客户端渲染模式">
+<Pre>public class Program
+{
+    public static async Task Main(string[] args)
+    {
+        var builder = WebAssemblyHostBuilder.CreateDefault(args);
+        builder.RootComponents.Add&lt;App&gt;("app");
+        builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+
+        // 添加本行代码
+        builder.Services.AddBootstrapBlazor();
+
+        await builder.Build().RunAsync();
+    }
+}</Pre>
+</InstallContent>
