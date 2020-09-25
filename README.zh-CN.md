@@ -12,7 +12,7 @@ https://zxingblazor.app1.es
 
 
 ## Nuget 包安装
-Install-Package ZXingBlazor -Version 0.1.0
+https://www.nuget.org/packages/ZXingBlazor/
 
 ## 使用
 Pages/_Host.cshtml
