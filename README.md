@@ -1,4 +1,4 @@
-﻿# Bootstrap Blazor Component
+﻿# ZXing Blazor Component
 
 English | <a href="README.zh-CN.md">中文</a>
 
