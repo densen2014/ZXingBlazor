@@ -11,10 +11,32 @@ This project is a Blazor component library packaged with ZXing
 https://zxingblazor.app1.es
 
 ## Screenshot
-![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif)
-![ZXingBlazor1](https://user-images.githubusercontent.com/8428709/94275849-c3258b80-ff47-11ea-843b-ba4b6d8f1a79.jpg)
-![ZXingBlazor2](https://user-images.githubusercontent.com/8428709/94275850-c3be2200-ff47-11ea-9728-e81f52a98db0.jpg)
+![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif) 
 
+## Step
+Pages/_Host.cshtml
+
+    <script src="_content/ZXingBlazor/lib/barcodereader/zxing.js"></script>
+    <script src="_content/ZXingBlazor/lib/barcodereader/barcode.js"></script>
+
+In your Razor page
+
+<button class="btn btn-sm btn-light"
+        type="button"
+        @onclick="(() => ShowScanBarcode = !ShowScanBarcode)">
+    [扫码]
+</button> 
+<input type="text" class="form-control" style="min-width: 100px;"
+       @bind-value="BarCode" 
+       placeholder="条码" />
+@if (ShowScanBarcode)
+{
+
+    <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
+                   ShowScanBarcode="ShowScanBarcode"
+                   Close="(()=>ShowScanBarcode=!ShowScanBarcode)" />
+
+}
 
 ## Participate in contribution
 
