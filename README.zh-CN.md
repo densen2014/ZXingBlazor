@@ -10,16 +10,12 @@
 ## 演示地址  
 https://zxingblazor.app1.es
 
-## 使用
 
-Nuget 包安装
 
-PackageReference
-<PackageReference Include="ZXingBlazor" Version="0.1.0" />
-Package Manager
+## Nuget 包安装
 Install-Package ZXingBlazor -Version 0.1.0
 
-
+## 使用
 Pages/_Host.cshtml
 
     <script src="_content/ZXingBlazor/lib/barcodereader/zxing.js"></script>
