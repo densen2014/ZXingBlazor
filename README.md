@@ -4,18 +4,18 @@ English | <a href="README.zh-CN.md">中文</a>
 
 ---
 
-## 项目介绍
-本项目是利用 ZXing 进行封装的 Blazor 组件库 
+## Introduction
+This project is a Blazor component library packaged with ZXing
 
-## 演示地址  
-[![website](https://img.shields.io/badge/linux-http://blazor.sdgxgz.com-success.svg?logo=buzzfeed&logoColor=green)](https://zxingblazor.app1.es)
+## DEMO  
+https://zxingblazor.app1.es
 
-## 项目截图
+## Screenshot
  
 
-## 参与贡献
+## Participate in contribution
 
-1. Fork 本项目
-2. 新建 Feat_xxx 分支
-3. 提交代码
-4. 新建 Pull Request 
+1. Fork this project
+2. Create new Feat_xxx branch
+3. Submit the code
+4. New Pull Request
