@@ -354,3 +354,4 @@ src/**/*.xml
 # Coverage 
 coverage*.xml
 tools/
+nuget.config
