@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
-
-    <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
-        <OutputType>Library</OutputType>
-        <RazorLangVersion>3.0</RazorLangVersion>
-    </PropertyGroup>
-
-</Project>
