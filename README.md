@@ -7,11 +7,8 @@ English | <a href="README.zh-CN.md">中文</a>
 ## Introduction
 This project is a Blazor component library packaged with ZXing
 
-## DEMO  
+## Demo  
 https://zxingblazor.app1.es
-
-## Screenshot
-![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif) 
 
 ## Step
 Pages/_Host.cshtml
@@ -29,6 +26,8 @@ In your Razor page
 <input type="text" class="form-control" style="min-width: 100px;"
        @bind-value="BarCode" 
        placeholder="条码" />
+
+
 @if (ShowScanBarcode)
 {
 
@@ -37,6 +36,11 @@ In your Razor page
                    Close="(()=>ShowScanBarcode=!ShowScanBarcode)" />
 
 }
+
+
+## Screenshot
+![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif) 
+
 
 ## Participate in contribution
 
