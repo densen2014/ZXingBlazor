@@ -10,6 +10,9 @@ This project is a Blazor component library packaged with ZXing
 ## Demo  
 https://zxingblazor.app1.es
 
+## Nuget 包安装
+Install-Package ZXingBlazor -Version 0.1.0
+
 ## Step
 Pages/_Host.cshtml
 
