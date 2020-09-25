@@ -8,7 +8,7 @@ English | <a href="README.zh-CN.md">中文</a>
 本项目是利用 ZXing 进行封装的 Blazor 组件库 
 
 ## 演示地址  
-[![website](https://img.shields.io/badge/linux-http://blazor.sdgxgz.com-success.svg?logo=buzzfeed&logoColor=green)](https://zxingblazor.app1.es)
+https://zxingblazor.app1.es
 
 ## 项目截图
  
