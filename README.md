@@ -11,7 +11,7 @@ This project is a Blazor component library packaged with ZXing
 https://zxingblazor.app1.es
 
 ## Nuget 包安装
-Install-Package ZXingBlazor -Version 0.1.0
+https://www.nuget.org/packages/ZXingBlazor/
 
 ## Step
 Pages/_Host.cshtml
