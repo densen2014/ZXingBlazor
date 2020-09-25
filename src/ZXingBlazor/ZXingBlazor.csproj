@@ -7,7 +7,21 @@
         <IsPackable>true</IsPackable>
         <PackageIcon>logo.png</PackageIcon>
         <Version>0.1</Version>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <Company>Densen Informatica</Company>
+        <Authors>Alex Chow</Authors>
+        <Description>ZXing Blazor 扫码组件 / Barcode Scaner for Blazor
+
+本项目是利用 ZXing 进行封装的 Blazor 组件库
+直接调用手机或者桌面电脑摄像头进行扫码
+
+This project is a Blazor component library packaged with ZXing
+Directly call the mobile phone or desktop computer camera to scan the code</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/densen2014/ZXingBlazor</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/densen2014/ZXingBlazor</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>ZXingBlazor</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>
