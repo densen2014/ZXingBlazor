@@ -1,4 +1,4 @@
-﻿# ZXing Blazor Component
+﻿# ZXing Blazor 扫码组件
 
 English | <a href="README.zh-CN.md">中文</a>
 
@@ -11,7 +11,10 @@ English | <a href="README.zh-CN.md">中文</a>
 https://zxingblazor.app1.es
 
 ## 项目截图
- 
+![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif)
+![ZXingBlazor1](https://user-images.githubusercontent.com/8428709/94275849-c3258b80-ff47-11ea-843b-ba4b6d8f1a79.jpg)
+![ZXingBlazor2](https://user-images.githubusercontent.com/8428709/94275850-c3be2200-ff47-11ea-9728-e81f52a98db0.jpg)
+
 
 ## 参与贡献
 
