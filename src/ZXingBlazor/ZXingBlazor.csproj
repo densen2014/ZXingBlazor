@@ -6,7 +6,7 @@
         <RazorLangVersion>3.0</RazorLangVersion>
         <IsPackable>true</IsPackable>
         <PackageIcon>logo.png</PackageIcon>
-        <Version>0.1.1</Version>
+        <Version>0.1.2</Version>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <Company>Densen Informatica</Company>
         <Authors>Alex Chow</Authors>
