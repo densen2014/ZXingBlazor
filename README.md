@@ -10,6 +10,7 @@ This project is a Blazor component library packaged with ZXing
 ## Demo  
 ssr
 https://zxingblazor.app1.es
+
 wasm
 https://densen2014.github.io/
 
