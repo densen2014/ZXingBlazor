@@ -1,6 +1,6 @@
 using System;
 
-namespace ZXingBlazor.Server.Data
+namespace Demo.Server.Data
 {
     public class WeatherForecast
     {

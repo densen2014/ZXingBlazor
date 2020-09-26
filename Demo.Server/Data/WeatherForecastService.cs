@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ZXingBlazor.Server.Data
+namespace Demo.Server.Data
 {
     public class WeatherForecastService
     {
