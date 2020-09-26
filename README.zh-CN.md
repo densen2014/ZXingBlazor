@@ -8,7 +8,11 @@
 本项目是利用 ZXing 进行封装的 Blazor 组件库 
 
 ## 演示地址  
+ssr
 https://zxingblazor.app1.es
+
+wasm
+https://densen2014.github.io/
 
 
 ## Nuget 包安装
