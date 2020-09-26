@@ -8,7 +8,10 @@ English | <a href="README.zh-CN.md">中文</a>
 This project is a Blazor component library packaged with ZXing
 
 ## Demo  
+ssr
 https://zxingblazor.app1.es
+wasm
+https://densen2014.github.io/
 
 ## Nuget 包安装
 https://www.nuget.org/packages/ZXingBlazor/
