@@ -15,32 +15,14 @@ https://zxingblazor.app1.es
 https://www.nuget.org/packages/ZXingBlazor/
 
 ## 使用
-Pages/_Host.cshtml
+
+在文件Pages/_Host.cshtml添加引用
 
     <script src="_content/ZXingBlazor/lib/barcodereader/zxing.js"></script>
     <script src="_content/ZXingBlazor/lib/barcodereader/barcode.js"></script>
 
-In your Razor page
-
-<button class="btn btn-sm btn-light"
-        type="button"
-        @onclick="(() => ShowScanBarcode = !ShowScanBarcode)">
-    [扫码]
-</button> 
-<input type="text" class="form-control" style="min-width: 100px;"
-       @bind-value="BarCode" 
-       placeholder="条码" />
-
-
-@if (ShowScanBarcode)
-{
-
-    <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
-                   ShowScanBarcode="ShowScanBarcode"
-                   Close="(()=>ShowScanBarcode=!ShowScanBarcode)" />
-
-}
-
+在Blazor页面添加代码
+![QQ图片20200926035359](https://user-images.githubusercontent.com/8428709/94327539-fd287900-ffab-11ea-8783-a26cd5f29f9a.png)
 
 
 ## 项目截图
