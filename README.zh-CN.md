@@ -20,7 +20,7 @@ https://www.nuget.org/packages/ZXingBlazor/
 
 ## 使用
 
-在文件Pages/_Host.cshtml添加引用
+在文件Pages/_Host.cshtml添加引用,  wasm项目对应文件是 wwwroot/index.html
 
     <script src="_content/ZXingBlazor/lib/barcodereader/zxing.js"></script>
     <script src="_content/ZXingBlazor/lib/barcodereader/barcode.js"></script>
