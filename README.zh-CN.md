@@ -32,10 +32,14 @@ https://www.nuget.org/packages/ZXingBlazor/
 ## 项目截图
 ![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif)
 
-## 新加
-手写签名 Handwritten 组件
+## 新加模块
+手写签名 Handwritten 组件 2020.10.05
 ![Sign](https://user-images.githubusercontent.com/8428709/95032378-96e1db80-06ba-11eb-8291-c00c3c2ea9fb.gif)
 
+Pages/_Host.cshtml  , in wasm is: wwwroot/index.html
+
+    <script src="_content/ZXingBlazor/lib/handwritten/handwritten.js"></script>
+    
 ## 参与贡献
 
 1. Fork 本项目
