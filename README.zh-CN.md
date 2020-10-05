@@ -34,6 +34,7 @@ https://www.nuget.org/packages/ZXingBlazor/
 
 ## 新加
 手写签名 Handwritten 组件
+![Sign](https://user-images.githubusercontent.com/8428709/95032378-96e1db80-06ba-11eb-8291-c00c3c2ea9fb.gif)
 
 ## 参与贡献
 
