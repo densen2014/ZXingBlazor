@@ -35,6 +35,10 @@ In your Blazor page
 Handwritten 
 ![Sign](https://user-images.githubusercontent.com/8428709/95032378-96e1db80-06ba-11eb-8291-c00c3c2ea9fb.gif)
 
+Pages/_Host.cshtml  , in wasm is: wwwroot/index.html
+
+    <script src="_content/ZXingBlazor/lib/handwritten/handwritten.js"></script>
+    
 ## Participate in contribution
 
 1. Fork this project
