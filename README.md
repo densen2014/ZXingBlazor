@@ -31,6 +31,8 @@ In your Blazor page
 ## Screenshot
 ![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif) 
 
+## New Components
+Handwritten 
 
 ## Participate in contribution
 

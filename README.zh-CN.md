@@ -32,6 +32,8 @@ https://www.nuget.org/packages/ZXingBlazor/
 ## 项目截图
 ![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif)
 
+## 新加
+手写签名 Handwritten 组件
 
 ## 参与贡献
 
