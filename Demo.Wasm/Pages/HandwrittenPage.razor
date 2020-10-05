@@ -1,29 +1,24 @@
-﻿@page "/"
+﻿@page "/HandwrittenPage"
 
-<h3>条码扫描 BarcodeReader</h3>
-
-<h4>扫描条码/QR码。</h4>
+<h3>Handwritten 手写签名</h3>
 
 <button class="btn btn-primary"
         type="button"
-        @onclick="(() => ShowScanBarcode = !ShowScanBarcode)">
-    [扫码]
-</button>
-<input type="text" class="form-control" style="min-width: 100px;"
-       @bind-value="BarCode"
-       placeholder="条码" />
-@if (ShowScanBarcode)
+        @onclick="(() => ShowHandwritten = !ShowHandwritten)">
+    [签名]
+</button> 
+<textarea type="text" class="form-control" style="min-width: 100px;" rows="10"
+       @bind="DrawBase64" 
+       placeholder="Base64" />
+@if (ShowHandwritten)
 {
 
-    <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
-                   ShowScanBarcode="ShowScanBarcode"
-                   Close="(()=>ShowScanBarcode=!ShowScanBarcode)" />
+    <Handwritten HandwrittenBase64="((e) => { DrawBase64=e; ShowHandwritten = !ShowHandwritten; })"
+                   ShowHandwritten="ShowHandwritten"
+                   Close="(()=>ShowHandwritten=!ShowHandwritten)" />
 
 }
-<br />
-<br />
-<br />
-<br />
+<br /><br /><br /><br />
 <div class="table-attr d-none d-md-block">
     <!--!-->
     <!--!--><h4>事件 Events</h4>
@@ -57,8 +52,8 @@
                         <!--!-->
                         <!--!--><!--!-->
                         <!--!--><!--!-->
-                        <td><div class="table-cell">ScanResult</div></td><!--!-->
-                        <td><div class="table-cell">扫码结果回调方法</div></td><!--!-->
+                        <td><div class="table-cell">HandwrittenBase64</div></td><!--!-->
+                        <td><div class="table-cell">签名结果回调方法</div></td><!--!-->
                         <td><div class="table-cell">EventCallback&lt;string&gt;</div></td><!--!-->
                         <!--!-->
                     </tr><!--!-->
@@ -69,7 +64,7 @@
                         <!--!--><!--!-->
                         <!--!--><!--!-->
                         <td><div class="table-cell">Close</div></td><!--!-->
-                        <td><div class="table-cell">关闭扫码框回调方法</div></td><!--!-->
+                        <td><div class="table-cell">关闭签名框回调方法</div></td><!--!-->
                         <td><div class="table-cell">EventCallback</div></td><!--!-->
                         <!--!-->
                     </tr><!--!-->
@@ -100,14 +95,14 @@
 @code{
 
     /// <summary>
-    /// 显示扫码界面
+    /// 显示签名界面
     /// </summary>
-    bool ShowScanBarcode { get; set; } = false;
+    bool ShowHandwritten { get; set; } = false;
 
     /// <summary>
-    /// 条码
+    /// 签名Base64
     /// </summary>
-    public string? BarCode { get; set; }
+    public string? DrawBase64 { get; set; }
 
 
 

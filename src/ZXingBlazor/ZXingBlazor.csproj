@@ -6,14 +6,17 @@
         <RazorLangVersion>3.0</RazorLangVersion>
         <IsPackable>true</IsPackable>
         <PackageIcon>logo.png</PackageIcon>
-        <Version>0.1.2</Version>
-        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <Version>0.1.3</Version>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Company>Densen Informatica</Company>
         <Authors>Alex Chow</Authors>
         <Description>ZXing Blazor 扫码组件 / Barcode Scaner for Blazor
 
 本项目是利用 ZXing 进行封装的 Blazor 组件库
 直接调用手机或者桌面电脑摄像头进行扫码
+
+1.ZXing Blazor 扫码组件
+2.Handwritten 手写签名组件
 
 This project is a Blazor component library packaged with ZXing
 Directly call the mobile phone or desktop computer camera to scan the code</Description>
