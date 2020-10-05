@@ -6,7 +6,7 @@
         <RazorLangVersion>3.0</RazorLangVersion>
         <IsPackable>true</IsPackable>
         <PackageIcon>logo.png</PackageIcon>
-        <Version>0.1.3</Version>
+        <Version>0.1.4</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Company>Densen Informatica</Company>
         <Authors>Alex Chow</Authors>
@@ -25,6 +25,7 @@ Directly call the mobile phone or desktop computer camera to scan the code</Desc
         <RepositoryUrl>https://github.com/densen2014/ZXingBlazor</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>ZXingBlazor</PackageTags>
+        <AssemblyVersion>0.1.4.0</AssemblyVersion>
     </PropertyGroup>
 
     <ItemGroup>

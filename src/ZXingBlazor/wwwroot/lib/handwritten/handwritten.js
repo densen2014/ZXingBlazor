@@ -78,7 +78,7 @@
                 this.canvas.height = this.el.clientHeight;
 
                 this.cxt.fillStyle = this.background;
-                this.cxt.fillRect(0, 0, this.canvas.width, this.canvas.width);
+                this.cxt.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
                 //this.cxt.fillStyle = "red";
                 //this.cxt.font = "16px verdana";
