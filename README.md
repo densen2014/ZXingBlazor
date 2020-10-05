@@ -33,6 +33,7 @@ In your Blazor page
 
 ## New Components
 Handwritten 
+![Sign](https://user-images.githubusercontent.com/8428709/95032378-96e1db80-06ba-11eb-8291-c00c3c2ea9fb.gif)
 
 ## Participate in contribution
 
