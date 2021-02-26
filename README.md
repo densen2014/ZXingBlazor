@@ -18,6 +18,10 @@ https://densen2014.github.io/
 https://www.nuget.org/packages/ZXingBlazor/
 
 ## Step
+_Imports.razor 
+
+@using ZXingBlazor.Components
+
 Pages/_Host.cshtml  , in wasm is: wwwroot/index.html
 
     <script src="_content/ZXingBlazor/lib/barcodereader/zxing.js"></script>

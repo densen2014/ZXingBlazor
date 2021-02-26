@@ -18,7 +18,12 @@ https://densen2014.github.io/
 ## Nuget 包安装
 https://www.nuget.org/packages/ZXingBlazor/
 
-## 使用
+## 使用 
+
+_Imports.razor 
+
+@using ZXingBlazor.Components
+
 
 在文件Pages/_Host.cshtml添加引用,  wasm项目对应文件是 wwwroot/index.html
 

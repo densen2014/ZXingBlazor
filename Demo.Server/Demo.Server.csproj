@@ -1,9 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UserSecretsId>dc129ef5-8946-4566-b75b-463edf18558a</UserSecretsId>
+    <TargetFramework>net5.0</TargetFramework>
+    <IsWebProject>true</IsWebProject>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\src\ZXingBlazor\ZXingBlazor.csproj" />
