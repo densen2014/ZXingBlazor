@@ -22,7 +22,7 @@ https://www.nuget.org/packages/ZXingBlazor/
 
 _Imports.razor 
 
-@using ZXingBlazor.Components
+    @using ZXingBlazor.Components
 
 
 在文件Pages/_Host.cshtml添加引用,  wasm项目对应文件是 wwwroot/index.html
