@@ -45,6 +45,9 @@ Pages/_Host.cshtml  , in wasm is: wwwroot/index.html
 
     <script src="_content/ZXingBlazor/lib/handwritten/handwritten.js"></script>
     
+## Updates
+2021-5-13 BarcodeReader 支持定义按钮文本,支持多语言
+
 ## 参与贡献
 
 1. Fork 本项目

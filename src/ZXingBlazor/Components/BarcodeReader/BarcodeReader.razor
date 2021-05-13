@@ -7,12 +7,12 @@
             <!-- Edit form for the current item -->
             <div class="modal-body">
 
-                <button class="btn btn-primary p-2 m-1 w-25" id="startButton">扫码</button>
-                <button class="btn btn-secondary p-2 m-1 w-25" id="resetButton">复位</button>
-                <button type="button" class="btn btn-info p-2 m-1 w-25" id="closeButton">关闭</button>
+                <button class="btn btn-primary p-2 m-1 w-25" id="startButton">@ScanBtnTitle</button>
+                <button class="btn btn-secondary p-2 m-1 w-25" id="resetButton">@ResetBtnTitle</button>
+                <button type="button" class="btn btn-info p-2 m-1 w-25" id="closeButton">@CloseBtnTitle</button>
 
                 <div id="sourceSelectPanel" style="display:none">
-                    <label for="sourceSelect">选择设备:</label><span class="text-dark" id="result"></span>
+                    <label for="sourceSelect">@SelectDeviceBtnTitle:</label><span class="text-dark" id="result"></span>
                     <select id="sourceSelect" style="max-width:100%" class="form-control">
                     </select>
                 </div>
@@ -32,29 +32,52 @@
     /// BarcodeReader 条码扫描
     /// </summary>
 
+    /// <summary>
+    /// 扫码按钮文本/Scan button title
+    /// </summary>
+    [Parameter]
+    public string ScanBtnTitle { get; set; } = "扫码";
+
+    /// <summary>
+    /// 复位按钮文本/Reset button title
+    /// </summary>
+    [Parameter]
+    public string ResetBtnTitle { get; set; } = "复位";
+
+    /// <summary>
+    /// 关闭按钮文本/Close button title
+    /// </summary>
+    [Parameter]
+    public string CloseBtnTitle { get; set; } = "关闭";
+
+    /// <summary>
+    /// 选择设备按钮文本/Select device button title
+    /// </summary>
+    [Parameter]
+    public string SelectDeviceBtnTitle { get; set; } = "选择设备";
 
 
     /// <summary>
-    /// 扫码结果回调方法
+    /// 扫码结果回调方法/Scan result callback method
     /// </summary>
     [Parameter]
     public EventCallback<string> ScanResult { get; set; }
 
     /// <summary>
-    /// 关闭扫码框回调方法
+    /// 关闭扫码框回调方法/Close scan code callback method
     /// </summary>
     [Parameter]
     public EventCallback Close { get; set; }
 
 
     /// <summary>
-    /// 扫码结果
+    /// 扫码结果/Scan result
     /// </summary>
     [Parameter]
     public string? Result { get; set; }
 
     /// <summary>
-    /// 显示扫码框
+    /// 显示扫码框/Show scan box
     /// </summary>
     [Parameter]
     public bool ShowScanBarcode { get; set; }
