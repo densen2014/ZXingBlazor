@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <IsWebProject>true</IsWebProject>
+    <UserSecretsId>d9068fee-be2f-4365-8cf8-c51b6b94937c</UserSecretsId>
   </PropertyGroup>
   
   <ItemGroup>
