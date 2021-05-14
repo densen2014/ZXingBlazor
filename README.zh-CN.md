@@ -47,6 +47,27 @@ Pages/_Host.cshtml  , in wasm is: wwwroot/index.html
     
 ## 更新
 2021-5-13 BarcodeReader 支持定义按钮文本,支持多语言
+----
+定义按钮文本:
+code
+https://github.com/densen2014/ZXingBlazor/blob/master/Demo.Server/Pages/IndexEN.razor
+demo
+https://zxingblazor.app1.es/
+
+```
+    <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
+                   ShowScanBarcode="ShowScanBarcode"
+                   Close="(()=>ShowScanBarcode=!ShowScanBarcode)" 
+                   ScanBtnTitle="Scan"
+                   ResetBtnTitle="Reset"
+                   CloseBtnTitle="Close"
+                   SelectDeviceBtnTitle="Select Device"
+                   />
+```
+
+![barcode](https://user-images.githubusercontent.com/8428709/118119633-f6416000-b3ee-11eb-8537-ec356242f63b.jpg)
+
+
 
 ## 参与贡献
 
