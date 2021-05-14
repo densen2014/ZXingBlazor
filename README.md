@@ -46,6 +46,7 @@ Pages/_Host.cshtml  , in wasm is: wwwroot/index.html
 
 ## Updates
 2021-5-13 BarcodeReader supports defining button text and supports multiple languages
+-----
 now support set button text:
 code
 https://github.com/densen2014/ZXingBlazor/blob/master/Demo.Server/Pages/IndexEN.razor
