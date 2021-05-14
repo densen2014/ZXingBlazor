@@ -46,6 +46,26 @@ Pages/_Host.cshtml  , in wasm is: wwwroot/index.html
 
 ## Updates
 2021-5-13 BarcodeReader supports defining button text and supports multiple languages
+now support set button text:
+code
+https://github.com/densen2014/ZXingBlazor/blob/master/Demo.Server/Pages/IndexEN.razor
+demo
+https://zxingblazor.app1.es/
+
+```
+    <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
+                   ShowScanBarcode="ShowScanBarcode"
+                   Close="(()=>ShowScanBarcode=!ShowScanBarcode)" 
+                   ScanBtnTitle="Scan"
+                   ResetBtnTitle="Reset"
+                   CloseBtnTitle="Close"
+                   SelectDeviceBtnTitle="Select Device"
+                   />
+```
+
+![barcode](https://user-images.githubusercontent.com/8428709/118119633-f6416000-b3ee-11eb-8537-ec356242f63b.jpg)
+
+
 
 ## Participate in contribution
 
