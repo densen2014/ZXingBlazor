@@ -1,6 +1,6 @@
 ﻿# ZXing Blazor Component
 
-English | <a href="README.zh-CN.md">中文</a>
+English | <a href="README.zh-CN.md">中文</a>  | <a href="README.zh-CN.md"> Orther demos</a>
 
 ---
 
