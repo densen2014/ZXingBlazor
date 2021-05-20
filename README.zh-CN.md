@@ -1,6 +1,6 @@
 ﻿# ZXing Blazor 扫码组件
 
- <a href="README.md">English</a> |中文
+ <a href="README.md">English</a> |中文  | <a href="MyDemos.md"> 其他demo</a>
 
 ---
 
