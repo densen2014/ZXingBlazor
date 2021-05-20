@@ -1,6 +1,6 @@
 ﻿# ZXing Blazor Component
 
-English | <a href="README.zh-CN.md">中文</a>  | <a href="README.zh-CN.md"> Orther demos</a>
+English | <a href="README.zh-CN.md">中文</a>  | <a href="https://github.com/densen2014/FreeSqlDemos/blob/master/MyDemos.md"> Orther demos</a>
 
 ---
 
