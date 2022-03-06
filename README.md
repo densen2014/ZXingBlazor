@@ -21,6 +21,8 @@ https://www.nuget.org/packages/ZXingBlazor/
 _Imports.razor 
 
     @using ZXingBlazor.Components
+    
+[Destructive upgrade] The file Pages/_Host.cshtml or wasm project is wwwroot/index.html, no need to add references!!!!
 
 In your Blazor page
 
