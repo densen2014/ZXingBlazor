@@ -1,0 +1,25 @@
+﻿@page "/viewer"
+    @using ZXingBlazor.Components
+
+    <Viewerjs Images="Images" />
+
+    @code{
+        List<string> Images;
+        ViewerOptions ViewerOptions = new ViewerOptions()
+        {
+            toolbarlite = true,
+        };
+
+        protected override void OnInitialized()
+        {
+
+            Images = new List<string>();
+            if (!Images.Any())
+            {
+                for (int i = 1; i <= 9; i++)
+                {
+                    Images.Add($"https://fengyuanchen.github.io/viewerjs/images/thumbnails/tibet-{i}.jpg");
+                }
+            }
+        }
+    }

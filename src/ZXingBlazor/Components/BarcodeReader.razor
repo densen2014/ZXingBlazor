@@ -1,5 +1,6 @@
-﻿@namespace ZXingBlazor.Components 
-@inject IJSRuntime JsRuntime
+﻿@implements IAsyncDisposable
+@namespace ZXingBlazor.Components
+@inject IJSRuntime JS
 
 <div class="modal alert-popup" tabindex="-1" style="display:block" role="dialog">
     <div class="modal-dialog">
@@ -82,12 +83,15 @@
     [Parameter]
     public bool ShowScanBarcode { get; set; }
 
+    private IJSObjectReference? module;
 
     // To prevent making JavaScript interop calls during prerendering
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-        await JsRuntime.InvokeAsync<string>("zxing.start", true, DotNetObjectReference.Create(this));
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/lib/zxing/zxingjs.js");
+        await module.InvokeVoidAsync("init", true, DotNetObjectReference.Create(this), null);
+
     }
 
     [JSInvokable("invokeFromJS")]
@@ -96,7 +100,6 @@
         Result = val;
         StateHasChanged();
         await ScanResult.InvokeAsync(val);
-        //return Task.CompletedTask;
     }
 
     [JSInvokable("invokeFromJSClose")]
@@ -105,6 +108,14 @@
         await Close.InvokeAsync(null);
     }
 
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (module is not null)
+        {
+            //await module.InvokeVoidAsync("destroy", Options);
+            await module.DisposeAsync();
+        }
+    }
 
 }
 

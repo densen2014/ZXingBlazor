@@ -1,47 +1,48 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <IsPackable>true</IsPackable>
-    <IsPackable>true</IsPackable>
-    <PackageIcon>logo.png</PackageIcon>
-    <Version>0.1.6</Version>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Company>Densen Informatica</Company>
-    <Authors>Alex Chow</Authors>
-    <Description>
-      ZXing Blazor 扫码组件 / Barcode Scaner for Blazor
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <IsPackable>true</IsPackable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <PackageIcon>logo.png</PackageIcon>
+        <Version>0.2.0</Version>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Company>Densen Informatica</Company>
+        <Authors>Alex Chow</Authors>
+        <Description>
+            ZXing Blazor 扫码组件 / Barcode Scaner for Blazor
 
-      本项目是利用 ZXing 进行封装的 Blazor 组件库
-      直接调用手机或者桌面电脑摄像头进行扫码
+            本项目是利用 ZXing 进行封装的 Blazor 组件库
+            直接调用手机或者桌面电脑摄像头进行扫码
 
-      1.ZXing Blazor 扫码组件
-      2.Handwritten 手写签名组件
+            1.ZXing Blazor 扫码组件
+            2.Handwritten 手写签名组件
+            3.Viewer 图片浏览器
 
-      This project is a Blazor component library packaged with ZXing
-      Directly call the mobile phone or desktop computer camera to scan the code
+            This project is a Blazor component library packaged with ZXing
+            Directly call the mobile phone or desktop computer camera to scan the code
 
-      Demo
+            Demo
 
-      ssr https://zxingblazor.app1.es
+            ssr https://zxingblazor.app1.es
 
-      wasm https://densen2014.github.io/
-      
-    </Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/densen2014/ZXingBlazor</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/densen2014/ZXingBlazor</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageTags>ZXingBlazor</PackageTags>
-    <AssemblyVersion>0.1.5.0</AssemblyVersion>
-  </PropertyGroup>
+            wasm https://densen2014.github.io/
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.6" />
-  </ItemGroup>
+        </Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/densen2014/ZXingBlazor</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/densen2014/ZXingBlazor</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>ZXingBlazor</PackageTags>
+        <AssemblyVersion>0.2.0.0</AssemblyVersion>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="logo.png" Pack="true" PackagePath="" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="logo.png" Pack="true" PackagePath="" />
+    </ItemGroup>
 
 </Project>
