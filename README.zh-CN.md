@@ -25,8 +25,8 @@ _Imports.razor
     @using ZXingBlazor.Components
 
 
-在文件Pages/_Host.cshtml添加引用,  wasm项目对应文件是 wwwroot/index.html
-
+[破坏性升级] 文件Pages/_Host.cshtml,  wasm项目对应文件是 wwwroot/index.html 都无需添加引用!!!!
+以前版本如果有这两句,请删掉
     <script src="_content/ZXingBlazor/lib/barcodereader/zxing.js"></script>
     <script src="_content/ZXingBlazor/lib/barcodereader/barcode.js"></script>
 
@@ -41,12 +41,11 @@ _Imports.razor
 手写签名 Handwritten 组件 2020.10.05
 ![Sign](https://user-images.githubusercontent.com/8428709/95032378-96e1db80-06ba-11eb-8291-c00c3c2ea9fb.gif)
 
-Pages/_Host.cshtml  , in wasm is: wwwroot/index.html
-
-    <script src="_content/ZXingBlazor/lib/handwritten/handwritten.js"></script>
+图片浏览器Viewer 组件 2022.3.6
     
 ## 更新
-2021-5-13 BarcodeReader 支持定义按钮文本,支持多语言
+2022.3.6 升级为js隔离版本,添加图片浏览器 Viewer组件, 演示工程升级为net6格式
+2021.5.13 BarcodeReader 支持定义按钮文本,支持多语言
 ----
 定义按钮文本:
 code
