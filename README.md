@@ -22,11 +22,6 @@ _Imports.razor
 
     @using ZXingBlazor.Components
 
-Pages/_Host.cshtml  , in wasm is: wwwroot/index.html
-
-    <script src="_content/ZXingBlazor/lib/barcodereader/zxing.js"></script>
-    <script src="_content/ZXingBlazor/lib/barcodereader/barcode.js"></script>
-
 In your Blazor page
 
 ![QQ图片20200926035359](https://user-images.githubusercontent.com/8428709/94327539-fd287900-ffab-11ea-8783-a26cd5f29f9a.png)
@@ -39,13 +34,12 @@ In your Blazor page
 Handwritten  2020.10.05
 ![Sign](https://user-images.githubusercontent.com/8428709/95032378-96e1db80-06ba-11eb-8291-c00c3c2ea9fb.gif)
 
-Pages/_Host.cshtml  , in wasm is: wwwroot/index.html
-
-    <script src="_content/ZXingBlazor/lib/handwritten/handwritten.js"></script>
+ImageViewer  2022.3.6
     
 
 ## Updates
-2021-5-13 BarcodeReader supports defining button text and supports multiple languages
+2022.3.6 Upgrade to js isolated version, add image browser Viewer component, and upgrade demo project to net6 format
+2021.5.13 BarcodeReader supports defining button text and supports multiple languages
 -----
 now support set button text:
 code
