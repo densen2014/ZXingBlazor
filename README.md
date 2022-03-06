@@ -40,8 +40,11 @@ ImageViewer  2022.3.6
     
 
 ## Updates
+
 2022.3.6 Upgrade to js isolated version, add image browser Viewer component, and upgrade demo project to net6 format
+
 2021.5.13 BarcodeReader supports defining button text and supports multiple languages
+
 -----
 now support set button text:
 code
