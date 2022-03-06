@@ -26,7 +26,9 @@ _Imports.razor
 
 
 [破坏性升级] 文件Pages/_Host.cshtml,  wasm项目对应文件是 wwwroot/index.html 都无需添加引用!!!!
+
 以前版本如果有这两句,请删掉
+
     <script src="_content/ZXingBlazor/lib/barcodereader/zxing.js"></script>
     <script src="_content/ZXingBlazor/lib/barcodereader/barcode.js"></script>
 
@@ -44,8 +46,11 @@ _Imports.razor
 图片浏览器Viewer 组件 2022.3.6
     
 ## 更新
+
 2022.3.6 升级为js隔离版本,添加图片浏览器 Viewer组件, 演示工程升级为net6格式
+
 2021.5.13 BarcodeReader 支持定义按钮文本,支持多语言
+
 ----
 定义按钮文本:
 code
