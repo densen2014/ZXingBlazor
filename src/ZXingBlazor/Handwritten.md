@@ -18,11 +18,12 @@ https://zxingblazor.app1.es/handwritten
 
 
 3.razor页面
-
+```
     <Handwritten HandwrittenBase64="((e) => { DrawBase64=e; ShowHandwritten = !ShowHandwritten; })"
                    ShowHandwritten="ShowHandwritten"
                    Close="(()=>ShowHandwritten=!ShowHandwritten)" />
-
+```
+```
 @code{
 
     /// <summary>
@@ -35,6 +36,5 @@ https://zxingblazor.app1.es/handwritten
     /// </summary>
     public string? DrawBase64 { get; set; }
 
-
-
-} 
+}
+```

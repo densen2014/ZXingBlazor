@@ -18,11 +18,12 @@ https://zxingblazor.app1.es/
 
 
 3.razor页面
-
+```
     <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
                    ShowScanBarcode="ShowScanBarcode"
                    Close="(()=>ShowScanBarcode=!ShowScanBarcode)" />
-
+```
+```
 @code{
 
     /// <summary>
@@ -35,6 +36,5 @@ https://zxingblazor.app1.es/
     /// </summary>
     public string? BarCode { get; set; }
 
-
-
 } 
+```
