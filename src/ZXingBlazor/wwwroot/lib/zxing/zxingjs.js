@@ -1,20 +1,27 @@
 import '/_content/ZXingBlazor/lib/zxing/zxing.min.js';
 var codeReader = null;
-export function init(autostop, wrapper, options) {
-    console.log('autostop' + autostop);
-
+var id = null;
+export function init(autostop, wrapper, element, elementid) {
+    console.log('init' + elementid);
+    id = elementid;
     let selectedDeviceId;
-    //const codeReader = new ZXing.BrowserBarcodeReader()
+    const sourceSelect = element.querySelector("[data-action=sourceSelect]");
+    const sourceSelectPanel = element.querySelector("[data-action=sourceSelectPanel]");
+    const sourceOption = element.querySelector('[data-action=option]')
+    let startButton = element.querySelector("[data-action=startButton]");
+    let resetButton = element.querySelector("[data-action=resetButton]");
+    let closeButton = element.querySelector("[data-action=closeButton]");
+
+    console.log('init' + startButton.innerHTML);
+   //const codeReader = new ZXing.BrowserBarcodeReader()
     codeReader = new ZXing.BrowserMultiFormatReader()
     console.log('ZXing code reader initialized')
     codeReader.getVideoInputDevices()
         .then((videoInputDevices) => {
-            const sourceSelect = document.getElementById('sourceSelect')
             selectedDeviceId = videoInputDevices[0].deviceId
             console.log('videoInputDevices:' + videoInputDevices.length);
             if (videoInputDevices.length > 1) {
                 videoInputDevices.forEach((element) => {
-                    const sourceOption = document.createElement('option')
                     sourceOption.text = element.label
                     sourceOption.value = element.deviceId
                     sourceSelect.appendChild(sourceOption)
@@ -27,13 +34,12 @@ export function init(autostop, wrapper, options) {
                     StartScan();
                 }
 
-                const sourceSelectPanel = document.getElementById('sourceSelectPanel')
                 sourceSelectPanel.style.display = 'block'
             }
 
             StartScan(autostop);
 
-            document.getElementById('startButton').addEventListener('click', () => {
+            startButton.addEventListener('click', () => {
                 StartScan();
             })
 
@@ -48,41 +54,42 @@ export function init(autostop, wrapper, options) {
                     if (autostop) {
                         console.log('autostop');
                         codeReader.reset();
-                        return wrapper.invokeMethodAsync("invokeFromJS", result.text);
+                        return wrapper.invokeMethodAsync("GetResult", result.text);
                     } else {
                         console.log('None-stop');
                         codeReader.reset();
-                        wrapper.invokeMethodAsync("invokeFromJS", result.text);
+                        wrapper.invokeMethodAsync("GetResult", result.text);
                     }
 
                 }).catch((err) => {
-                    console.error(err)
-                    document.getElementById('result').textContent = err
+                    console.log(err)
+                    wrapper.invokeMethodAsync("GetError", err+'');
                 })
                 console.log(`Started continous decode from camera with id ${selectedDeviceId}`)
             }
 
-            document.getElementById('resetButton').addEventListener('click', () => {
-                document.getElementById('result').textContent = '';
+            resetButton.addEventListener('click', () => {
                 codeReader.reset();
                 console.log('Reset.')
             })
 
-            document.getElementById('closeButton').addEventListener('click', () => {
-                document.getElementById('result').textContent = '';
+            closeButton.addEventListener('click', () => {
                 codeReader.reset();
                 console.log('closeButton.')
-                wrapper.invokeMethodAsync("invokeFromJSClose");
+                wrapper.invokeMethodAsync("CloseScan");
             })
 
         })
         .catch((err) => {
-            console.error(err)
+            console.log(err)
+            wrapper.invokeMethodAsync("GetError", err + '');
         })
 }
-export function destroy(options) {
-    if (undefined !== codeReader && null !== codeReader && options.id == codeReader.element.id) {
-        codeReader.destroy();
-        console.log(codeReader.element.id, 'destroy');
+export function destroy(elementid) {
+    if (undefined !== codeReader && null !== codeReader && id == elementid) {
+        codeReader.reset();
+        codeReader = null;
+        //id = null;
+        console.log(id, 'destroy');
     }
 }

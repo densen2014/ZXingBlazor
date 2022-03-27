@@ -2,36 +2,35 @@
 @namespace ZXingBlazor.Components
 @inject IJSRuntime JS
 
-<div class="modal alert-popup" tabindex="-1" style="display:block" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <!-- Edit form for the current item -->
-            <div class="modal-body">
+@if (UseBuiltinDiv)
+{
+    <div class="modal alert-popup" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Edit form for the current item -->
+                <div class="modal-body" @ref="barcodeScannerElement">
 
-                <button class="btn btn-primary p-2 m-1 w-25" id="startButton">@ScanBtnTitle</button>
-                <button class="btn btn-secondary p-2 m-1 w-25" id="resetButton">@ResetBtnTitle</button>
-                <button type="button" class="btn btn-info p-2 m-1 w-25" id="closeButton">@CloseBtnTitle</button>
+                    <button class="btn btn-primary p-2 m-1 w-25" data-action="startButton">@ScanBtnTitle</button>
+                    <button class="btn btn-secondary p-2 m-1 w-25" data-action="resetButton">@ResetBtnTitle</button>
+                    <button type="button" class="btn btn-info p-2 m-1 w-25" data-action="closeButton">@CloseBtnTitle</button>
 
-                <div id="sourceSelectPanel" style="display:none">
-                    <label for="sourceSelect">@SelectDeviceBtnTitle:</label><span class="text-dark" id="result"></span>
-                    <select id="sourceSelect" style="max-width:100%" class="form-control">
-                    </select>
+                    <div data-action="sourceSelectPanel" style="display:none">
+                        <label for="sourceSelect">@SelectDeviceBtnTitle:</label>
+                        <select data-action="sourceSelect" style="max-width:100%" class="form-control">
+                        </select>
+                    </div>
+                    <div>
+                        <video id="video" style="min-height:150px;max-height:60%; max-width: 100%;border: 1px solid gray"></video>
+                    </div>
+
                 </div>
-                <div>
-                    <video id="video" style="min-height:150px;max-height:60%; max-width: 100%;border: 1px solid gray"></video>
-                </div>
-
             </div>
         </div>
     </div>
-</div>
-@Result
+}
 
 
 @code {
-    /// <summary>
-    /// BarcodeReader 条码扫描
-    /// </summary>
 
     /// <summary>
     /// 扫码按钮文本/Scan button title
@@ -70,6 +69,11 @@
     [Parameter]
     public EventCallback Close { get; set; }
 
+    /// <summary>
+    /// 错误回调方法/Error callback method
+    /// </summary>
+    [Parameter]
+    public Func<string, Task>? OnError { get; set; }
 
     /// <summary>
     /// 扫码结果/Scan result
@@ -78,46 +82,63 @@
     public string? Result { get; set; }
 
     /// <summary>
+    /// 使用内置DIV/Use builtin Div
+    /// </summary>
+    [Parameter] public bool UseBuiltinDiv { get; set; } = true;
+
+    /// <summary>
     /// 显示扫码框/Show scan box
     /// </summary>
     [Parameter]
+    [Obsolete]
     public bool ShowScanBarcode { get; set; }
 
     private IJSObjectReference? module;
+    private DotNetObjectReference<BarcodeReader>? objRef;
+
+    /// <summary>
+    ///
+    /// </summary>
+    public ElementReference barcodeScannerElement { get; set; }
 
     // To prevent making JavaScript interop calls during prerendering
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender) return;
-        module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/lib/zxing/zxingjs.js");
-        await module.InvokeVoidAsync("init", true, DotNetObjectReference.Create(this), null);
+        try
+        {
+            if (!firstRender) return;
+            objRef = DotNetObjectReference.Create(this);
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/lib/zxing/zxingjs.js");
+
+            await module.InvokeVoidAsync("init", true, objRef, barcodeScannerElement, barcodeScannerElement.Id);
+        }
+        catch (Exception e)
+        {
+            if (OnError != null) await OnError.Invoke(e.Message);
+        }
 
     }
 
-    [JSInvokable("invokeFromJS")]
-    public async Task ChangeValue(string val)
-    {
-        Result = val;
-        StateHasChanged();
-        await ScanResult.InvokeAsync(val);
-    }
+    [JSInvokable]
+    public async Task GetResult(string val) => await ScanResult.InvokeAsync(val);
 
-    [JSInvokable("invokeFromJSClose")]
-    public async Task CloseScan()
+    [JSInvokable]
+    public async Task CloseScan()=> await Close.InvokeAsync();
+
+    [JSInvokable]
+    public async Task GetError(string err)
     {
-        await Close.InvokeAsync(null);
+        if (OnError != null) await OnError.Invoke(err);
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         if (module is not null)
         {
-            //await module.InvokeVoidAsync("destroy", Options);
+            await module.InvokeVoidAsync("destroy", barcodeScannerElement.Id);
             await module.DisposeAsync();
         }
+        objRef?.Dispose();
     }
 
 }
-
-
-
