@@ -17,14 +17,87 @@
 
     <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
                    ShowScanBarcode="ShowScanBarcode"
-                   Close="(()=>ShowScanBarcode=!ShowScanBarcode)" 
+                   Close="(()=>ShowScanBarcode=!ShowScanBarcode)"
                    ScanBtnTitle="Scan"
                    ResetBtnTitle="Reset"
                    CloseBtnTitle="Close"
-                   SelectDeviceBtnTitle="Select Device"
-                   />
+                   SelectDeviceBtnTitle="Select Device" />
 
 }
+
+<button class="btn btn-secondary"
+        type="button"
+        @onclick="(() => ShowCodes = !ShowCodes)">
+    Code
+</button>
+
+@if (ShowCodes)
+{
+<pre>
+    <code>
+        @@if (ShowScanBarcode)
+        {
+
+            &lt;BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
+                           Close="(()=>ShowScanBarcode=!ShowScanBarcode)"
+                           OnError="OnError" /&gt;
+            @@code{
+                bool ShowScanBarcode { get; set; } = false;
+
+                public string? BarCode { get; set; }
+
+                private string message;
+
+                private Task OnError(string message)
+                {
+                    this.message = message;
+                    StateHasChanged();
+                    return Task.CompletedTask;
+                }
+
+            }
+        }
+    </code>
+</pre>
+}
+<br />
+
+<button class="btn btn-primary"
+        type="button"
+        @onclick="(() => ShowScanBarcodeCustom = !ShowScanBarcodeCustom)">
+    Scan code [custom interface]
+</button>
+<input type="text" class="form-control" style="min-width: 100px;"
+       @bind-value="BarCodeCustom"
+       placeholder="条码" />
+@if (ShowScanBarcodeCustom)
+{
+    <BarcodeReader ScanResult="((e) => { BarCodeCustom=e; ShowScanBarcodeCustom = !ShowScanBarcodeCustom; })"
+                   Close="(()=>ShowScanBarcodeCustom=!ShowScanBarcodeCustom)"
+                   OnError="OnError"
+                   UseBuiltinDiv="false"
+                   @ref="barcodeReaderCustom" />
+
+    <div @ref="barcodeReaderCustom.barcodeScannerElement">
+        <div style="width: 480px; max-width: 100%">
+            <button class="btn btn-outline-success p-2 m-1 w-25" data-action="startButton">Scan</button>
+            <button class="btn btn-outline-success p-2 m-1 w-25" data-action="resetButton">Reset</button>
+            <button type="button" class="btn btn-outline-success p-2 m-1 w-25" data-action="closeButton">Close</button>
+
+            <div data-action="sourceSelectPanel" style="display:none">
+                <label for="sourceSelect">SelectDevice:</label><span class="text-dark" data-action="result"></span>
+                <select data-action="sourceSelect" style="max-width:100%" class="form-control">
+                </select>
+            </div>
+            <div>
+                <video id="video" style="height:480px;width: 640px;border: 1px solid red"></video>
+            </div>
+        </div>
+    </div>
+
+
+}
+<p>@message</p>
 <br />
 <br />
 <br />
@@ -57,11 +130,6 @@
                         <td><div class="table-cell">EventCallback</div></td>
                     </tr>
                     <tr>
-                        <td><div class="table-cell">ShowScanBarcode</div></td>
-                        <td><div class="table-cell">Show scan box</div></td>
-                        <td><div class="table-cell">EventCallback</div></td>
-                    </tr>
-                    <tr>
                         <td><div class="table-cell">ScanBtnTitle</div></td>
                         <td><div class="table-cell">Scan button title</div></td>
                         <td><div class="table-cell">Parameter</div></td>
@@ -80,6 +148,16 @@
                         <td><div class="table-cell">SelectDeviceBtnTitle</div></td>
                         <td><div class="table-cell">Select device button title</div></td>
                         <td><div class="table-cell">Parameter</div></td>
+                    </tr>
+                    <tr>
+                        <td><div class="table-cell">OnError</div></td>
+                        <td><div class="table-cell">Error callback method</div></td>
+                        <td><div class="table-cell">Func&lt;string, Task&gt;</div></td>
+                    </tr>
+                    <tr>
+                        <td><div class="table-cell">UseBuiltinDiv</div></td>
+                        <td><div class="table-cell">Use builtin interface,defallt True</div></td>
+                        <td><div class="table-cell">bool</div></td>
                     </tr>
                 </tbody>
                 <thead>
@@ -101,15 +179,39 @@
 @code{
 
     /// <summary>
-    /// 显示扫码界面
+    /// Display the scan code interface
     /// </summary>
     bool ShowScanBarcode { get; set; } = false;
 
     /// <summary>
-    /// 条码
+    /// BarCode
     /// </summary>
     public string? BarCode { get; set; }
 
+    private string message;
 
+    private Task OnError(string message)
+    {
+        this.message = message;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
 
+    bool ShowCodes;
+
+    #region Custom
+
+    /// <summary>
+    /// Display the Custom scan code interface
+    /// </summary>
+    bool ShowScanBarcodeCustom { get; set; } = false;
+
+    /// <summary>
+    /// BarCodeCustom
+    /// </summary>
+    public string? BarCodeCustom { get; set; }
+
+    BarcodeReader barcodeReaderCustom;
+
+    #endregion
 } 
