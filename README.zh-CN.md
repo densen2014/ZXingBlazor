@@ -12,7 +12,7 @@ ssr
 https://zxingblazor.app1.es
 
 wasm
-https://densen2014.github.io/
+https://zxingblazorwasm.app1.es
 
 
 ## Nuget 包安装
