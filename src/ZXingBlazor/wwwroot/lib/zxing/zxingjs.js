@@ -46,8 +46,7 @@ export function init(autostop, wrapper, element, elementid) {
             function StartScan(autostop) {
                 codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
                     console.log(result)
-                    document.getElementById('result').textContent = result.text
-
+                    
                     var supportsVibrate = "vibrate" in navigator;
                     if (supportsVibrate) navigator.vibrate(1000);
 

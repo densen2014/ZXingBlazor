@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <IsPackable>true</IsPackable>
         <ImplicitUsings>enable</ImplicitUsings>
         <PackageIcon>logo.png</PackageIcon>
-        <Version>0.2.1</Version>
+        <Version>0.2.2</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Company>Densen Informatica</Company>
         <Authors>Alex Chow</Authors>
@@ -38,7 +38,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.2" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.3" />
     </ItemGroup>
 
     <ItemGroup>

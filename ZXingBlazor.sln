@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{12861AA6-2965-4F25-B711-184D7C0BAEEE}"
 	ProjectSection(SolutionItems) = preProject
 		nuget.config = nuget.config
+		demo.md = demo.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.Wasm", "Demo.Wasm\Demo.Wasm.csproj", "{20A35B6C-A7BC-4595-82C6-C3798EBCD14D}"
