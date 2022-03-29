@@ -28,6 +28,7 @@ _Imports.razor
 ## [破坏性升级] 文件Pages/_Host.cshtml,  wasm项目对应文件是 wwwroot/index.html 都无需添加引用!!!!
 ## 如果是旧版升级上来,请移除zxing.js引用
 >  !!移除!!   <script src="_content/ZXingBlazor/lib/barcodereader/zxing.js"></script>
+>  
 >  !!移除!!   <script src="_content/ZXingBlazor/lib/barcodereader/barcode.js"></script>
 
 > 新版使用了[JavaScript 模块中的 JavaScript 隔离](https://docs.microsoft.com/zh-cn/aspnet/core/blazor/javascript-interoperability/?view=aspnetcore-6.0#javascript-isolation-in-javascript-modules)
