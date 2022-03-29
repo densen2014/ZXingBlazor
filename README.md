@@ -22,7 +22,19 @@ _Imports.razor
 
     @using ZXingBlazor.Components
     
-[Destructive upgrade] The file Pages/_Host.cshtml or wasm project is wwwroot/index.html, no need to add references!!!!
+# <font color='red'>[Destructive upgrade] The file Pages/_Host.cshtml or wasm project is wwwroot/index.html, no need to add references!!!!</font> 
+# If it is an upgrade from an older version, please remove the reference of zxing.js
+
+
+> The new version use [JavaScript isolation in JavaScript modules](https://docs.microsoft.com/en-us/aspnet/core/blazor/javascript-interoperability/?view=aspnetcore-6.0#javascript-isolation-in-javascript-modules)
+> 
+> Blazor enables JavaScript (JS) isolation in standard [JavaScript modules](https://developer.mozilla.org/docs/Web/JavaScript/Guide/Modules) ([ECMAScript specification](https://tc39.es/ecma262/#sec-modules)).
+> 
+> JS isolation provides the following benefits:
+> 
+> - Imported JS no longer pollutes the global namespace.
+> - Consumers of a library and components aren't required to import the related JS.
+
 
 In your Blazor page
 
