@@ -27,6 +27,8 @@ _Imports.razor
 
 ## [破坏性升级] 文件Pages/_Host.cshtml,  wasm项目对应文件是 wwwroot/index.html 都无需添加引用!!!!
 ## 如果是旧版升级上来,请移除zxing.js引用
+>  !!移除!!   <script src="_content/ZXingBlazor/lib/barcodereader/zxing.js"></script>
+>  !!移除!!   <script src="_content/ZXingBlazor/lib/barcodereader/barcode.js"></script>
 
 > 新版使用了[JavaScript 模块中的 JavaScript 隔离](https://docs.microsoft.com/zh-cn/aspnet/core/blazor/javascript-interoperability/?view=aspnetcore-6.0#javascript-isolation-in-javascript-modules)
 > 
@@ -34,14 +36,10 @@ _Imports.razor
 > 
 > JS 隔离具有以下优势：
 > 
-> 导入的 JS 不再污染全局命名空间。
-> 库和组件的使用者不需要导入相关的 JS。
+> - 导入的 JS 不再污染全局命名空间。
+> - 库和组件的使用者不需要导入相关的 JS。
 > 有关详细信息，请参阅 Call JavaScript functions from .NET methods in ASP.NET Core Blazor。
-> 
-> 以前版本如果有这两句,请删掉
-> 
->     <script src="_content/ZXingBlazor/lib/barcodereader/zxing.js"></script>
->     <script src="_content/ZXingBlazor/lib/barcodereader/barcode.js"></script>
+
 
 在Blazor页面添加代码
 ![QQ图片20200926035359](https://user-images.githubusercontent.com/8428709/94327539-fd287900-ffab-11ea-8783-a26cd5f29f9a.png)
