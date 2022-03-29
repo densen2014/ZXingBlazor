@@ -26,6 +26,7 @@ _Imports.razor
 # If it is an upgrade from an older version, please remove the reference of zxing.js
 > 
 > !!REMOVE!!    <script src="_content/ZXingBlazor/lib/barcodereader/zxing.js"></script>
+> 
 > !!REMOVE!!    <script src="_content/ZXingBlazor/lib/barcodereader/barcode.js"></script>
 
 > The new version use [JavaScript isolation in JavaScript modules](https://docs.microsoft.com/en-us/aspnet/core/blazor/javascript-interoperability/?view=aspnetcore-6.0#javascript-isolation-in-javascript-modules)
