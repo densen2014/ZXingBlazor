@@ -177,6 +177,9 @@
     </div>
 </div>
 
+<h6 style="color:lightskyblue;">@ver</h6>
+<h6 style="color:lightskyblue;">@build</h6>
+
 @code{
 
     /// <summary>
@@ -215,4 +218,20 @@
     BarcodeReader barcodeReaderCustom;
 
     #endregion
+
+
+    string? ver { get; set; }
+    string? build { get; set; }
+
+
+    Version? version { get; set; } = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        ver = $"Ver {version?.Major}.{version?.Minor}.{version?.Build}";
+        build = "Build:" +  File.GetLastWriteTime(Path.Combine(Directory.GetCurrentDirectory(), "Blazor100.dll")).ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+
+    }
 } 
