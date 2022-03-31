@@ -7,7 +7,6 @@ export function init(autostop, wrapper, element, elementid) {
     let selectedDeviceId;
     const sourceSelect = element.querySelector("[data-action=sourceSelect]");
     const sourceSelectPanel = element.querySelector("[data-action=sourceSelectPanel]");
-    const sourceOption = element.querySelector('[data-action=option]')
     let startButton = element.querySelector("[data-action=startButton]");
     let resetButton = element.querySelector("[data-action=resetButton]");
     let closeButton = element.querySelector("[data-action=closeButton]");
@@ -22,6 +21,7 @@ export function init(autostop, wrapper, element, elementid) {
             console.log('videoInputDevices:' + videoInputDevices.length);
             if (videoInputDevices.length > 1) {
                 videoInputDevices.forEach((element) => {
+                    const sourceOption = document.createElement('option');
                     sourceOption.text = element.label
                     sourceOption.value = element.deviceId
                     sourceSelect.appendChild(sourceOption)
