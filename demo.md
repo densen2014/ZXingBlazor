@@ -11,7 +11,7 @@ dotnet add demo1 package ZXingBlazor
 <button class="btn btn-primary"
         type="button"
         @onclick="(() => ShowScanBarcode = !ShowScanBarcode)">
-    [Sacn]
+    Scan
 </button>
 <input type="text" class="form-control" style="min-width: 100px;"
        @bind-value="BarCode"
