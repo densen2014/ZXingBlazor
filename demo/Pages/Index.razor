@@ -1,0 +1,88 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+
+<button class="btn btn-primary"
+        type="button"
+        @onclick="(() => ShowScanBarcode = !ShowScanBarcode)">
+    Scan
+</button>
+<input type="text" class="form-control" style="min-width: 100px;"
+       @bind-value="BarCode"
+       placeholder="BarCode" />
+@if (ShowScanBarcode)
+{
+
+    <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
+                   ShowScanBarcode="ShowScanBarcode"
+                   Close="(()=>ShowScanBarcode=!ShowScanBarcode)"
+                   ScanBtnTitle="Scan"
+                   ResetBtnTitle="Reset"
+                   CloseBtnTitle="Close"
+                   SelectDeviceBtnTitle="Select Device" />
+
+}
+
+
+@code{
+
+    /// <summary>
+    /// Display the scan code interface
+    /// </summary>
+    bool ShowScanBarcode { get; set; } = false;
+
+    /// <summary>
+    /// BarCode
+    /// </summary>
+    public string? BarCode { get; set; }
+
+    private string message;
+
+    private Task OnError(string message)
+    {
+        this.message = message;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    bool ShowCodes;
+
+    #region Custom
+
+    /// <summary>
+    /// Display the Custom scan code interface
+    /// </summary>
+    bool ShowScanBarcodeCustom { get; set; } = false;
+
+    /// <summary>
+    /// BarCodeCustom
+    /// </summary>
+    public string? BarCodeCustom { get; set; }
+
+    BarcodeReader barcodeReaderCustom;
+
+    #endregion
+
+
+    string? ver { get; set; }
+    string? build { get; set; }
+
+
+    Version? version { get; set; } = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        ver = $"Ver {version?.Major}.{version?.Minor}.{version?.Build}";
+        build = "Build:" + File.GetLastWriteTime(Path.Combine(Directory.GetCurrentDirectory(), "Blazor100.dll")).ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+
+    }
+}
