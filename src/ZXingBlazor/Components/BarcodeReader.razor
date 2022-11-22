@@ -100,6 +100,12 @@
     public bool Pdf417 { get; set; }
 
     /// <summary>
+    /// 单次|连续解码,默认单次 / Decode Once or Decode Continuously, default is Once
+    /// </summary>
+    [Parameter]
+    public bool Decodeonce { get; set; } = true;
+
+    /// <summary>
     /// 选项/ZXingOptions
     /// </summary>
     [Parameter]
@@ -123,9 +129,9 @@
             module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/lib/zxing/zxingjs.js");
             if (options == null)
             {
-                options   = new ZXingOptions() { Pdf417= Pdf417 };
+                options   = new ZXingOptions() { Pdf417= Pdf417 , Decodeonce = Decodeonce };
             }
-            await module.InvokeVoidAsync("init", true, objRef, barcodeScannerElement, barcodeScannerElement.Id, options);
+            await module.InvokeVoidAsync("init", objRef, barcodeScannerElement, barcodeScannerElement.Id, options);
         }
         catch (Exception e)
         {

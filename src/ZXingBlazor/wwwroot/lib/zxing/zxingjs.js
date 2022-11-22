@@ -1,7 +1,8 @@
 import '/_content/ZXingBlazor/lib/zxing/zxing.min.js';
 var codeReader = null;
 var id = null;
-export function init(autostop, wrapper, element, elementid, options) {
+var supportsVibrate = false;
+export function init(wrapper, element, elementid, options) {
     console.log('init' + elementid);
     id = elementid;
     let selectedDeviceId;
@@ -10,6 +11,7 @@ export function init(autostop, wrapper, element, elementid, options) {
     let startButton = element.querySelector("[data-action=startButton]");
     let resetButton = element.querySelector("[data-action=resetButton]");
     let closeButton = element.querySelector("[data-action=closeButton]");
+    supportsVibrate = "vibrate" in navigator;
 
     console.log('init' + startButton.innerHTML);
     if (options.pdf417) {
@@ -42,36 +44,44 @@ export function init(autostop, wrapper, element, elementid, options) {
                 sourceSelectPanel.style.display = 'block'
             }
 
-            StartScan(autostop);
+            StartScan();
 
             startButton.addEventListener('click', () => {
                 StartScan();
             })
 
-            function StartScan(autostop) {
-                codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
-                    console.log(result)
-                    
-                    var supportsVibrate = "vibrate" in navigator;
-                    if (supportsVibrate) navigator.vibrate(1000);
-
-                    if (autostop) {
+            function StartScan() {
+                if (options.decodeonce) {
+                    codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
+                        console.log(result)
+                        if (supportsVibrate) navigator.vibrate(1000);                        
                         console.log('autostop');
                         codeReader.reset();
                         return wrapper.invokeMethodAsync("GetResult", result.text);
-                    } else {
-                        console.log('None-stop');
-                        codeReader.reset();
-                        wrapper.invokeMethodAsync("GetResult", result.text);
-                    }
+                    }).catch((err) => {
+                        if (err && !(err instanceof ZXing.NotFoundException)) {
+                            console.log(err)
+                            wrapper.invokeMethodAsync("GetError", err + '');
+                        }
+                    })
+                } else {
+                    codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
+                        if (result) {
+                            console.log(result)
+                            if (supportsVibrate) navigator.vibrate(1000);
+                            console.log('None-stop');
+                            wrapper.invokeMethodAsync("GetResult", result.text);
+                        }
+                        if (err && !(err instanceof ZXing.NotFoundException)) {
+                            console.log(err)
+                            wrapper.invokeMethodAsync("GetError", err + '');
+                        }
+                    })
+                }
 
-                }).catch((err) => {
-                    if (err && !(err instanceof ZXing.NotFoundException)) {
-                        console.log(err)
-                        wrapper.invokeMethodAsync("GetError", err + '');
-                    }
-                })
-                console.log(`Started continous decode from camera with id ${selectedDeviceId}`)
+                var x = `decodeContinuously`;
+                if (options.decodeonce) x = `decodeOnce`;
+                console.log(`Started ` + x +` decode from camera with id ${selectedDeviceId}`)
             }
 
             resetButton.addEventListener('click', () => {

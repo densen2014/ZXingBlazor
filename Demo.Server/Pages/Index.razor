@@ -3,7 +3,7 @@
 
 <h3>BarcodeReader</h3>
 
-<h4>Barcode/QR code</h4>
+<h5>1D/2D barcode, QR code, Pdf417</h5>
 
 <button class="btn btn-primary"
         type="button"
@@ -11,12 +11,15 @@
     Scan
 </button>
 
+<br />
 Pdf417
 <input type="checkbox" @bind-value="Pdf417" />
+<br />
 
-<input type="text" class="form-control" style="min-width: 100px;"
-       @bind-value="BarCode"
-       placeholder="BarCode" />
+连续解码/DecodeContinuously
+<input type="checkbox" @bind-value="DecodeContinuously" />
+
+<br />
 
 @if (Pdf417)
 {
@@ -24,17 +27,30 @@ Pdf417
     <br />
     <pre>@BarCode</pre>
 }
+else if (DecodeContinuously)
+{
+    <b>DecodeContinuously:</b>
+    <br />
+    <pre>@BarCode</pre>
+}
+else
+{
+    <input type="text" class="form-control" style="min-width: 100px;"
+           @bind-value="BarCode"
+           placeholder="BarCode" />
+}
 
 @if (ShowScanBarcode)
 {
 
-    <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
+    <BarcodeReader ScanResult="ScanResult"
                    ShowScanBarcode="ShowScanBarcode"
                    Close="(()=>ShowScanBarcode=!ShowScanBarcode)"
                    ScanBtnTitle="Scan"
                    ResetBtnTitle="Reset"
                    CloseBtnTitle="Close"
                    Pdf417="Pdf417"
+                   Decodeonce="!DecodeContinuously"
                    SelectDeviceBtnTitle="Select Device" />
 
 }
@@ -165,6 +181,11 @@ Pdf417
                         <td><div class="table-cell">Parameter</div></td>
                     </tr>
                     <tr>
+                        <td><div class="table-cell">Decodeonce</div></td>
+                        <td><div class="table-cell">true</div></td>
+                        <td><div class="table-cell">Parameter</div></td>
+                    </tr>
+                    <tr>
                         <td><div class="table-cell">SelectDeviceBtnTitle</div></td>
                         <td><div class="table-cell">Select device button title</div></td>
                         <td><div class="table-cell">Parameter</div></td>
@@ -212,6 +233,7 @@ Pdf417
     public string? BarCode { get; set; }
 
     public bool Pdf417 { get; set; }
+    public bool DecodeContinuously { get; set; }
 
     private string message;
 
@@ -223,6 +245,19 @@ Pdf417
     }
 
     bool ShowCodes;
+
+    private void ScanResult(string e)
+    {
+        if (!DecodeContinuously)
+        {
+            BarCode = e;
+            ShowScanBarcode = !ShowScanBarcode;
+        }
+        else
+        {
+            BarCode += e + Environment.NewLine;
+        }
+    }
 
     #region Custom
 

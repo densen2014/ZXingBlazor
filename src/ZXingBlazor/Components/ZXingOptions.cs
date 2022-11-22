@@ -14,7 +14,15 @@ namespace ZXingBlazor.Components;
 /// </summary>
 public class ZXingOptions
 {
-    public bool Pdf417 { get; set; }  
+    /// <summary>
+    /// decode only Pdf417 format
+    /// </summary>
+    public bool Pdf417 { get; set; }
+
+    /// <summary>
+    /// decodeOnce or decodeContinuously
+    /// </summary>
+    public bool Decodeonce { get; set; } = true;
 }
 
 

@@ -5,7 +5,7 @@
         <IsPackable>true</IsPackable>
         <ImplicitUsings>enable</ImplicitUsings>
         <PackageIcon>logo.png</PackageIcon>
-        <Version>0.2.4</Version>
+        <Version>0.2.5</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Company>Densen Informatica</Company>
         <Authors>Alex Chow</Authors>
