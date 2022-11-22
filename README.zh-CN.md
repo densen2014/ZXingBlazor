@@ -1,4 +1,4 @@
-﻿# ZXing Blazor 扫码组件 0.2.4
+﻿# ZXing Blazor 扫码组件 0.2.5
 
  <a href="README.md">English</a> |中文  | <a href="https://github.com/densen2014/FreeSqlDemos/blob/master/MyDemos.md"> 其他demo</a>
 
