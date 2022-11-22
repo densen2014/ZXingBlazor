@@ -14,14 +14,22 @@ export function init(wrapper, element, elementid, options) {
     supportsVibrate = "vibrate" in navigator;
 
     console.log('init' + startButton.innerHTML);
+
     if (options.pdf417) {
         codeReader = new ZXing.BrowserPDF417Reader();
         console.log('ZXing code PDF417 reader initialized')
+    } else if (options.DecoddeAllFormats) {
+        const hints = new Map();
+        const formats = options.formats;
+        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
+        codeReader = new ZXing.BrowserMultiFormatReader(hints)
+        console.log('ZXing code reader initialized with all formats')
     } else {
-        //const codeReader = new ZXing.BrowserBarcodeReader()
         codeReader = new ZXing.BrowserMultiFormatReader()
         console.log('ZXing code reader initialized')
     }
+    codeReader.timeBetweenDecodingAttempts = options.timeBetweenDecodingAttempts;
+
     codeReader.listVideoInputDevices()
         .then((videoInputDevices) => {
             selectedDeviceId = videoInputDevices[0].deviceId

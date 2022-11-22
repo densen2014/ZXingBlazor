@@ -20,9 +20,8 @@
                         </select>
                     </div>
                     <div>
-                        <video id="video" style="min-height:150px;max-height:60%; max-width: 100%;border: 1px solid gray"></video>
+                        <video id="video" playsinline autoplay style="min-height:150px;max-height:50%; max-width: 100%;border: 1px solid gray"></video>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -104,6 +103,12 @@
     /// </summary>
     [Parameter]
     public bool Decodeonce { get; set; } = true;
+
+    /// <summary>
+    /// 解码所有编码形式,性能较差, 开启后可用 options.formats 指定编码形式.默认为 false | Decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false
+    /// </summary>
+    [Parameter]
+    public bool DecoddeAllFormats { get; set; }
 
     /// <summary>
     /// 选项/ZXingOptions

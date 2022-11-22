@@ -12,18 +12,21 @@
 </button>
 
 <br />
-Pdf417
 <input type="checkbox" @bind-value="Pdf417" />
+Pdf417
 <br />
 
-连续解码/DecodeContinuously
 <input type="checkbox" @bind-value="DecodeContinuously" />
-
+Decode continuously
 <br />
 
-@if (Pdf417)
+<input type="checkbox" @bind-value="DecoddeAllFormats" />
+Decodde all formats (+ PDF_417 / DATA_MATRIX...)
+<br />
+
+@if (Pdf417 | DecoddeAllFormats)
 {
-    <b>Pdf417:</b>
+    <b>Result:</b>
     <br />
     <pre>@BarCode</pre>
 }
@@ -51,11 +54,12 @@ else
                    CloseBtnTitle="Close"
                    Pdf417="Pdf417"
                    Decodeonce="!DecodeContinuously"
+                   DecoddeAllFormats="DecoddeAllFormats"
                    SelectDeviceBtnTitle="Select Device" />
 
 }
-
-<button class="btn btn-secondary"
+<hr/>
+<button class="btn btn-sm btn-outline-secondary"
         type="button"
         @onclick="(() => ShowCodes = !ShowCodes)">
     Code
@@ -90,14 +94,14 @@ else
     </code>
 </pre>
 }
-<br />
+<hr />
 
 <button class="btn btn-primary"
         type="button"
         @onclick="(() => ShowScanBarcodeCustom = !ShowScanBarcodeCustom)">
-    Scan code [custom interface]
+    Scan code [customize]
 </button>
-
+<br/>
 <input type="text" class="form-control" style="min-width: 100px;"
        @bind-value="BarCodeCustom"
        placeholder="条码" />
@@ -121,7 +125,7 @@ else
                 </select>
             </div>
             <div>
-                <video id="video" style="height:480px;width: 640px;border: 1px solid red"></video>
+                <video id="video" playsinline autoplay style="height:480px;width: 640px;border: 1px solid red"></video>
             </div>
         </div>
     </div>
@@ -137,18 +141,10 @@ else
 
     <h4>Events</h4>
 
-    <div class="table-container" _bl_79147904-531d-4e31-895f-47eb5e485a57="">
-
-        <div class="table-toolbar">
-        </div>
+    <div class="table-container">
 
         <div class="table-wrapper">
             <table class="table is-single table-demo">
-                <colgroup>
-                    <col>
-                    <col>
-                    <col>
-                </colgroup>
                 <tbody>
                     <tr>
                         <td><div class="table-cell">ScanResult</div></td>
@@ -177,12 +173,22 @@ else
                     </tr>
                     <tr>
                         <td><div class="table-cell">Pdf417</div></td>
-                        <td><div class="table-cell">false</div></td>
+                        <td><div class="table-cell">decode only Pdf417 format</div></td>
                         <td><div class="table-cell">Parameter</div></td>
                     </tr>
                     <tr>
                         <td><div class="table-cell">Decodeonce</div></td>
-                        <td><div class="table-cell">true</div></td>
+                        <td><div class="table-cell">Decode Once or Decode Continuously, default is Once</div></td>
+                        <td><div class="table-cell">Parameter</div></td>
+                    </tr>
+                    <tr>
+                        <td><div class="table-cell">DecoddeAllFormats</div></td>
+                        <td><div class="table-cell">Decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false</div></td>
+                        <td><div class="table-cell">Parameter</div></td>
+                    </tr>
+                    <tr>
+                        <td><div class="table-cell">options</div></td>
+                        <td><div class="table-cell">ZXingOptions: Pdf417 | Decodeonce | TimeBetweenDecodingAttempts | DecoddeAllFormats | formats</div></td>
                         <td><div class="table-cell">Parameter</div></td>
                     </tr>
                     <tr>
@@ -211,10 +217,61 @@ else
             </table>
         </div>
 
-        <div class="table-filter">
-        </div>
-
     </div>
+</div>
+
+<br />
+
+<div class="table-attr d-none d-md-block table-container">
+
+    <h4>BarcodeFormat</h4>
+
+    <table class="table is-single table-demo">
+        <thead>
+            <tr>
+                <th>1D product</th>
+                <th>1D industrial</th>
+                <th>2D</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>UPC-A</td>
+                <td>Code 39</td>
+                <td>QR Code</td>
+            </tr>
+            <tr>
+                <td>UPC-E</td>
+                <td><del>Code 93</del></td>
+                <td>Data Matrix</td>
+            </tr>
+            <tr>
+                <td>EAN-8</td>
+                <td>Code 128</td>
+                <td>Aztec</td>
+            </tr>
+            <tr>
+                <td>EAN-13</td>
+                <td><del>Codabar</del></td>
+                <td>PDF 417</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>ITF</td>
+                <td><del>MaxiCode</del></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>RSS-14</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><del>RSS-Expanded</del> *</td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
 </div>
 
 <h6 style="color:lightskyblue;">@ver</h6>
@@ -234,6 +291,7 @@ else
 
     public bool Pdf417 { get; set; }
     public bool DecodeContinuously { get; set; }
+    public bool DecoddeAllFormats { get; set; }
 
     private string message;
 
