@@ -1,4 +1,4 @@
-﻿# ZXing Blazor Component 0.2.4
+﻿# ZXing Blazor Component 0.2.5
 
 English | <a href="README.zh-CN.md">中文</a>  | <a href="https://github.com/densen2014/FreeSqlDemos/blob/master/MyDemos.md"> Orther demos</a>
 
