@@ -11,15 +11,15 @@
 </button>
 <br />
 <input type="checkbox" @bind-value="Pdf417" />
-Pdf417
+只解码 Pdf417 格式
 <br />
 
 <input type="checkbox" @bind-value="DecodeContinuously" />
-Decode continuously
+连续解码
 <br />
 
 <input type="checkbox" @bind-value="DecoddeAllFormats" />
-Decodde all formats (+ PDF_417 / DATA_MATRIX...)
+解码所有编码形式 (+ PDF_417 / DATA_MATRIX...)
 <br />
 
 @if (Pdf417 | DecoddeAllFormats)

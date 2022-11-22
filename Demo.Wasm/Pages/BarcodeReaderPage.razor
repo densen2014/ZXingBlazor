@@ -2,24 +2,57 @@
 
 <h3>条码扫描 BarcodeReader</h3>
 
-<h4>扫描条码/QR码。</h4>
+<h4>条码,QR码,Pdf417</h4>
 
 <button class="btn btn-primary"
         type="button"
         @onclick="(() => ShowScanBarcode = !ShowScanBarcode)">
-    扫码
+    [扫码]
 </button>
-<input type="text" class="form-control" style="min-width: 100px;"
-       @bind-value="BarCode"
-       placeholder="条码" />
+<br />
+<input type="checkbox" @bind-value="Pdf417" />
+只解码 Pdf417 格式
+<br />
+
+<input type="checkbox" @bind-value="DecodeContinuously" />
+连续解码
+<br />
+
+<input type="checkbox" @bind-value="DecoddeAllFormats" />
+解码所有编码形式 (+ PDF_417 / DATA_MATRIX...)
+<br />
+
+@if (Pdf417 | DecoddeAllFormats)
+{
+    <b>Result:</b>
+    <br />
+    <pre>@BarCode</pre>
+}
+else if (DecodeContinuously)
+{
+    <b>DecodeContinuously:</b>
+    <br />
+    <pre>@BarCode</pre>
+}
+else
+{
+    <input type="text" class="form-control" style="min-width: 100px;"
+           @bind-value="BarCode"
+           placeholder="条码" />
+}
+
 @if (ShowScanBarcode)
 {
-
-    <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
+    <BarcodeReader ScanResult="ScanResult"
+                   ShowScanBarcode="ShowScanBarcode"
                    Close="(()=>ShowScanBarcode=!ShowScanBarcode)"
-                   OnError="OnError" />
+                   OnError="OnError"
+                   Pdf417="Pdf417"
+                   Decodeonce="!DecodeContinuously"
+                   DecoddeAllFormats="DecoddeAllFormats" />
 
 }
+<hr />
 
 <button class="btn btn-secondary"
         type="button"
@@ -56,13 +89,14 @@
     </code>
 </pre>
 }
-<br />
+<hr />
 
 <button class="btn btn-primary"
         type="button"
         @onclick="(() => ShowScanBarcodeCustom = !ShowScanBarcodeCustom)">
     扫码[自定义界面]
 </button>
+<br />
 <input type="text" class="form-control" style="min-width: 100px;"
        @bind-value="BarCodeCustom"
        placeholder="条码" />
@@ -86,7 +120,7 @@
                 </select>
             </div>
             <div>
-                <video id="video" style="height:480px;width: 640px;border: 1px solid red"></video>
+                <video id="video" playsinline autoplay style="height:480px;width: 640px;border: 1px solid red"></video>
             </div>
         </div>
     </div>
@@ -104,17 +138,8 @@
     <h4>事件 Events</h4>
 
     <div class="table-container" _bl_79147904-531d-4e31-895f-47eb5e485a57="">
-
-        <div class="table-toolbar">
-        </div>
-
         <div class="table-wrapper">
             <table class="table is-single table-demo">
-                <colgroup>
-                    <col>
-                    <col>
-                    <col>
-                </colgroup>
                 <tbody>
                     <tr>
                         <td><div class="table-cell">ScanResult</div></td>
@@ -142,8 +167,28 @@
                         <td><div class="table-cell">Parameter</div></td>
                     </tr>
                     <tr>
+                        <td><div class="table-cell">Pdf417</div></td>
+                        <td><div class="table-cell">只解码 Pdf417 格式</div></td>
+                        <td><div class="table-cell">Parameter</div></td>
+                    </tr>
+                    <tr>
+                        <td><div class="table-cell">Decodeonce</div></td>
+                        <td><div class="table-cell">单次|连续解码,默认单次</div></td>
+                        <td><div class="table-cell">Parameter</div></td>
+                    </tr>
+                    <tr>
+                        <td><div class="table-cell">DecoddeAllFormats</div></td>
+                        <td><div class="table-cell">解码所有编码形式,性能较差, 开启后可用 options.formats 指定编码形式.默认为 false</div></td>
+                        <td><div class="table-cell">Parameter</div></td>
+                    </tr>
+                    <tr>
+                        <td><div class="table-cell">options</div></td>
+                        <td><div class="table-cell">ZXingOptions 选项: Pdf417 | Decodeonce | TimeBetweenDecodingAttempts | DecoddeAllFormats | formats</div></td>
+                        <td><div class="table-cell">Parameter</div></td>
+                    </tr>
+                    <tr>
                         <td><div class="table-cell">SelectDeviceBtnTitle</div></td>
-                        <td><div class="table-cell">选择设备按钮文本/Select device button title</div></td>
+                        <td><div class="table-cell">选择设备按钮文本</div></td>
                         <td><div class="table-cell">Parameter</div></td>
                     </tr>
                     <tr>
@@ -167,11 +212,66 @@
             </table>
         </div>
 
-        <div class="table-filter">
-        </div>
-
     </div>
 </div>
+
+
+<br />
+
+<div class="table-attr d-none d-md-block table-container">
+
+    <h4>条码格式 BarcodeFormat</h4>
+
+    <table class="table is-single table-demo">
+        <thead>
+            <tr>
+                <th>1D product</th>
+                <th>1D industrial</th>
+                <th>2D</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>UPC-A</td>
+                <td>Code 39</td>
+                <td>QR Code</td>
+            </tr>
+            <tr>
+                <td>UPC-E</td>
+                <td><del>Code 93</del></td>
+                <td>Data Matrix</td>
+            </tr>
+            <tr>
+                <td>EAN-8</td>
+                <td>Code 128</td>
+                <td>Aztec</td>
+            </tr>
+            <tr>
+                <td>EAN-13</td>
+                <td><del>Codabar</del></td>
+                <td>PDF 417</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>ITF</td>
+                <td><del>MaxiCode</del></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>RSS-14</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><del>RSS-Expanded</del> *</td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<h6 style="color:lightskyblue;">@ver</h6>
+<h6 style="color:lightskyblue;">@build</h6>
 
 @code{
 
@@ -185,6 +285,10 @@
     /// </summary>
     public string? BarCode { get; set; }
 
+    public bool Pdf417 { get; set; }
+    public bool DecodeContinuously { get; set; }
+    public bool DecoddeAllFormats { get; set; }
+
     private string message;
 
     private Task OnError(string message)
@@ -195,6 +299,19 @@
     }
 
     bool ShowCodes;
+
+    private void ScanResult(string e)
+    {
+        if (!DecodeContinuously)
+        {
+            BarCode = e;
+            ShowScanBarcode = !ShowScanBarcode;
+        }
+        else
+        {
+            BarCode += e + Environment.NewLine;
+        }
+    }
 
     #region Custom
 
@@ -211,4 +328,20 @@
     BarcodeReader barcodeReaderCustom;
 
     #endregion
-} 
+
+
+    string? ver { get; set; }
+    string? build { get; set; }
+
+
+    Version? version { get; set; } = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        ver = $"Ver {version?.Major}.{version?.Minor}.{version?.Build}";
+        build = "Build:" + File.GetLastWriteTime(Path.Combine(Directory.GetCurrentDirectory(), "Demo.Server.dll")).ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+
+    }
+}
