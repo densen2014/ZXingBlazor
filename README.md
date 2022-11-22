@@ -1,11 +1,11 @@
-﻿# ZXing Blazor Component 0.2.1
+﻿# ZXing Blazor Component 0.2.4
 
 English | <a href="README.zh-CN.md">中文</a>  | <a href="https://github.com/densen2014/FreeSqlDemos/blob/master/MyDemos.md"> Orther demos</a>
 
 ---
 
 ## Introduction
-This project is a Blazor component library packaged with ZXing
+This project is a Blazor component library packaged with ZXing, Support barcode, QR code, PDF417 format.
 
 ## Demo  
 ssr

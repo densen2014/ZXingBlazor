@@ -1,11 +1,11 @@
-﻿# ZXing Blazor 扫码组件 0.2.1
+﻿# ZXing Blazor 扫码组件 0.2.4
 
  <a href="README.md">English</a> |中文  | <a href="https://github.com/densen2014/FreeSqlDemos/blob/master/MyDemos.md"> 其他demo</a>
 
 ---
 
 ## 项目介绍
-本项目是利用 ZXing 进行封装的 Blazor 组件库 
+本项目是利用 ZXing 进行封装的 Blazor 组件库, 支持条码,二维码,PDF417格式.
 
 ## 演示地址  
 ssr
