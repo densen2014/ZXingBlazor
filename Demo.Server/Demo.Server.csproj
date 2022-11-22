@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+      <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
       <ImplicitUsings>enable</ImplicitUsings>
       <IsWebProject>true</IsWebProject>
     <UserSecretsId>d9068fee-be2f-4365-8cf8-c51b6b94937c</UserSecretsId>

@@ -1,15 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
         <ImplicitUsings>enable</ImplicitUsings>
         <BlazorWebAssemblyEnableLinking>false</BlazorWebAssemblyEnableLinking>
     </PropertyGroup>
 
-    <ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.2" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.2" PrivateAssets="all" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.0" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>

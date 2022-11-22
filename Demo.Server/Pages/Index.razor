@@ -10,9 +10,21 @@
         @onclick="(() => ShowScanBarcode = !ShowScanBarcode)">
     Scan
 </button>
+
+Pdf417
+<input type="checkbox" @bind-value="Pdf417" />
+
 <input type="text" class="form-control" style="min-width: 100px;"
        @bind-value="BarCode"
        placeholder="BarCode" />
+
+@if (Pdf417)
+{
+    <b>Pdf417:</b>
+    <br />
+    <pre>@BarCode</pre>
+}
+
 @if (ShowScanBarcode)
 {
 
@@ -22,6 +34,7 @@
                    ScanBtnTitle="Scan"
                    ResetBtnTitle="Reset"
                    CloseBtnTitle="Close"
+                   Pdf417="Pdf417"
                    SelectDeviceBtnTitle="Select Device" />
 
 }
@@ -68,6 +81,7 @@
         @onclick="(() => ShowScanBarcodeCustom = !ShowScanBarcodeCustom)">
     Scan code [custom interface]
 </button>
+
 <input type="text" class="form-control" style="min-width: 100px;"
        @bind-value="BarCodeCustom"
        placeholder="条码" />
@@ -146,6 +160,11 @@
                         <td><div class="table-cell">Parameter</div></td>
                     </tr>
                     <tr>
+                        <td><div class="table-cell">Pdf417</div></td>
+                        <td><div class="table-cell">false</div></td>
+                        <td><div class="table-cell">Parameter</div></td>
+                    </tr>
+                    <tr>
                         <td><div class="table-cell">SelectDeviceBtnTitle</div></td>
                         <td><div class="table-cell">Select device button title</div></td>
                         <td><div class="table-cell">Parameter</div></td>
@@ -192,6 +211,8 @@
     /// </summary>
     public string? BarCode { get; set; }
 
+    public bool Pdf417 { get; set; }
+
     private string message;
 
     private Task OnError(string message)
@@ -231,7 +252,7 @@
         await base.OnInitializedAsync();
 
         ver = $"Ver {version?.Major}.{version?.Minor}.{version?.Build}";
-        build = "Build:" +  File.GetLastWriteTime(Path.Combine(Directory.GetCurrentDirectory(), "Blazor100.dll")).ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+        build = "Build:" + File.GetLastWriteTime(Path.Combine(Directory.GetCurrentDirectory(), "Demo.Server.dll")).ToLocalTime().ToString("yyyy-MM-dd HH:mm");
 
     }
-} 
+}

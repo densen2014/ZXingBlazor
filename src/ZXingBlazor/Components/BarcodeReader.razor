@@ -93,6 +93,18 @@
     [Obsolete]
     public bool ShowScanBarcode { get; set; }
 
+    /// <summary>
+    /// Pdf417
+    /// </summary>
+    [Parameter]
+    public bool Pdf417 { get; set; }
+
+    /// <summary>
+    /// 选项/ZXingOptions
+    /// </summary>
+    [Parameter]
+    public ZXingOptions options { get; set; }
+
     private IJSObjectReference? module;
     private DotNetObjectReference<BarcodeReader>? objRef;
 
@@ -109,8 +121,11 @@
             if (!firstRender) return;
             objRef = DotNetObjectReference.Create(this);
             module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/lib/zxing/zxingjs.js");
-
-            await module.InvokeVoidAsync("init", true, objRef, barcodeScannerElement, barcodeScannerElement.Id);
+            if (options == null)
+            {
+                options   = new ZXingOptions() { Pdf417= Pdf417 };
+            }
+            await module.InvokeVoidAsync("init", true, objRef, barcodeScannerElement, barcodeScannerElement.Id, options);
         }
         catch (Exception e)
         {
@@ -123,7 +138,7 @@
     public async Task GetResult(string val) => await ScanResult.InvokeAsync(val);
 
     [JSInvokable]
-    public async Task CloseScan()=> await Close.InvokeAsync();
+    public async Task CloseScan() => await Close.InvokeAsync();
 
     [JSInvokable]
     public async Task GetError(string err)

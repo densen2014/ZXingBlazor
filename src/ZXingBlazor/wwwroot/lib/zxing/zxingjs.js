@@ -1,7 +1,7 @@
 import '/_content/ZXingBlazor/lib/zxing/zxing.min.js';
 var codeReader = null;
 var id = null;
-export function init(autostop, wrapper, element, elementid) {
+export function init(autostop, wrapper, element, elementid, options) {
     console.log('init' + elementid);
     id = elementid;
     let selectedDeviceId;
@@ -12,10 +12,15 @@ export function init(autostop, wrapper, element, elementid) {
     let closeButton = element.querySelector("[data-action=closeButton]");
 
     console.log('init' + startButton.innerHTML);
-   //const codeReader = new ZXing.BrowserBarcodeReader()
-    codeReader = new ZXing.BrowserMultiFormatReader()
-    console.log('ZXing code reader initialized')
-    codeReader.getVideoInputDevices()
+    if (options.pdf417) {
+        codeReader = new ZXing.BrowserPDF417Reader();
+        console.log('ZXing code PDF417 reader initialized')
+    } else {
+        //const codeReader = new ZXing.BrowserBarcodeReader()
+        codeReader = new ZXing.BrowserMultiFormatReader()
+        console.log('ZXing code reader initialized')
+    }
+    codeReader.listVideoInputDevices()
         .then((videoInputDevices) => {
             selectedDeviceId = videoInputDevices[0].deviceId
             console.log('videoInputDevices:' + videoInputDevices.length);
@@ -61,8 +66,10 @@ export function init(autostop, wrapper, element, elementid) {
                     }
 
                 }).catch((err) => {
-                    console.log(err)
-                    wrapper.invokeMethodAsync("GetError", err+'');
+                    if (err && !(err instanceof ZXing.NotFoundException)) {
+                        console.log(err)
+                        wrapper.invokeMethodAsync("GetError", err + '');
+                    }
                 })
                 console.log(`Started continous decode from camera with id ${selectedDeviceId}`)
             }
@@ -77,12 +84,13 @@ export function init(autostop, wrapper, element, elementid) {
                 console.log('closeButton.')
                 wrapper.invokeMethodAsync("CloseScan");
             })
-
+             
         })
         .catch((err) => {
             console.log(err)
             wrapper.invokeMethodAsync("GetError", err + '');
         })
+
 }
 export function destroy(elementid) {
     if (undefined !== codeReader && null !== codeReader && id == elementid) {
