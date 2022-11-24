@@ -1,6 +1,6 @@
 ﻿# ZXing Blazor Component 0.2.6
 
-English | <a href="README.zh-CN.md">中文</a>  | <a href="https://blazor.app1.es/"> Other Blazor components</a>
+English | <a href="https://blazor.app1.es/"> Other Blazor components</a>
 
 ---
 
@@ -82,9 +82,9 @@ https://www.nuget.org/packages/ZXingBlazor/
 
 ----
 
-# ZXing Blazor 扫码组件 0.2.5
+# ZXing Blazor 扫码组件 0.2.6
 
- <a href="README.md">English</a> |中文  | <a href="https://blazor.app1.es/"> 其他 Blazor 组件</a>
+ <a href="https://blazor.app1.es/"> 其他 Blazor 组件</a>
 
 ---
 
