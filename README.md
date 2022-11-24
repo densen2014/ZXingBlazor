@@ -18,6 +18,9 @@ https://zxingblazorwasm.app1.es
 
 https://www.nuget.org/packages/ZXingBlazor/
 
+## Screenshot
+![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif) 
+
 ## Instructions:
 
 1. NuGet install pack 
@@ -57,10 +60,6 @@ https://www.nuget.org/packages/ZXingBlazor/
     }
 
     ```
-
-## Screenshot
-![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif) 
-
 ## Updates
 
 2022.11.23 Add optiones
@@ -72,11 +71,6 @@ https://www.nuget.org/packages/ZXingBlazor/
 2022.3.6 Upgrade to js isolated version, add image browser Viewer component, and upgrade demo project to net6 format
 
 2021.5.13 BarcodeReader supports defining button text and supports multiple languages
- 
-
-![barcode](https://user-images.githubusercontent.com/8428709/118119633-f6416000-b3ee-11eb-8537-ec356242f63b.jpg)
-
-
 
 ## Participate in contribution
 
@@ -147,10 +141,6 @@ https://www.nuget.org/packages/ZXingBlazor/
     }
 
     ```
-
-
-## 项目截图
-![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif)
     
 ## 更新
 
@@ -164,10 +154,6 @@ https://www.nuget.org/packages/ZXingBlazor/
 2022.3.6 升级为js隔离版本,添加图片浏览器 Viewer组件, 演示工程升级为net6格式
 
 2021.5.13 BarcodeReader 支持定义按钮文本,支持多语言
-
-
-![barcode](https://user-images.githubusercontent.com/8428709/118119633-f6416000-b3ee-11eb-8537-ec356242f63b.jpg)
-
 
 
 ## 参与贡献
