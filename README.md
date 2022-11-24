@@ -61,13 +61,6 @@ https://www.nuget.org/packages/ZXingBlazor/
 ## Screenshot
 ![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif) 
 
-## New Components
-Handwritten  2020.10.05
-![Sign](https://user-images.githubusercontent.com/8428709/95032378-96e1db80-06ba-11eb-8291-c00c3c2ea9fb.gif)
-
-ImageViewer  2022.3.6
-    
-
 ## Updates
 
 2022.11.23 Add optiones
@@ -79,24 +72,7 @@ ImageViewer  2022.3.6
 2022.3.6 Upgrade to js isolated version, add image browser Viewer component, and upgrade demo project to net6 format
 
 2021.5.13 BarcodeReader supports defining button text and supports multiple languages
-
------
-now support set button text:
-code
-https://github.com/densen2014/ZXingBlazor/blob/master/Demo.Server/Pages/IndexEN.razor
-demo
-https://zxingblazor.app1.es/
-
-```
-    <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
-                   ShowScanBarcode="ShowScanBarcode"
-                   Close="(()=>ShowScanBarcode=!ShowScanBarcode)" 
-                   ScanBtnTitle="Scan"
-                   ResetBtnTitle="Reset"
-                   CloseBtnTitle="Close"
-                   SelectDeviceBtnTitle="Select Device"
-                   />
-```
+ 
 
 ![barcode](https://user-images.githubusercontent.com/8428709/118119633-f6416000-b3ee-11eb-8537-ec356242f63b.jpg)
 
@@ -175,12 +151,6 @@ https://www.nuget.org/packages/ZXingBlazor/
 
 ## 项目截图
 ![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif)
-
-## 新加模块
-手写签名 Handwritten 组件 2020.10.05
-![Sign](https://user-images.githubusercontent.com/8428709/95032378-96e1db80-06ba-11eb-8291-c00c3c2ea9fb.gif)
-
-图片浏览器Viewer 组件 2022.3.6
     
 ## 更新
 
@@ -195,23 +165,6 @@ https://www.nuget.org/packages/ZXingBlazor/
 
 2021.5.13 BarcodeReader 支持定义按钮文本,支持多语言
 
-----
-定义按钮文本:
-code
-https://github.com/densen2014/ZXingBlazor/blob/master/Demo.Server/Pages/IndexEN.razor
-demo
-https://zxingblazor.app1.es/
-
-```
-    <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
-                   ShowScanBarcode="ShowScanBarcode"
-                   Close="(()=>ShowScanBarcode=!ShowScanBarcode)" 
-                   ScanBtnTitle="Scan"
-                   ResetBtnTitle="Reset"
-                   CloseBtnTitle="Close"
-                   SelectDeviceBtnTitle="Select Device"
-                   />
-```
 
 ![barcode](https://user-images.githubusercontent.com/8428709/118119633-f6416000-b3ee-11eb-8537-ec356242f63b.jpg)
 
