@@ -1,0 +1,17 @@
+<Project>
+    <PropertyGroup>
+        <Copyright>DensenInformatica</Copyright>
+        <Authors>Alex Chow</Authors>
+        <Company>Densen Informatica</Company>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Version>0.2.6</Version>
+    </PropertyGroup>
+ 
+</Project>

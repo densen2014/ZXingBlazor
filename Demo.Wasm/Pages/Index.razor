@@ -13,18 +13,18 @@
 
 <br />
 <input type="checkbox" @bind-value="Pdf417" />
-Pdf417
+Pdf417 Only
 <br />
 
 <input type="checkbox" @bind-value="DecodeContinuously" />
 Decode continuously
 <br />
 
-<input type="checkbox" @bind-value="DecoddeAllFormats" />
+<input type="checkbox" @bind-value="DecodeAllFormats" />
 Decodde all formats (+ PDF_417 / DATA_MATRIX...)
 <br />
 
-@if (Pdf417 | DecoddeAllFormats)
+@if (Pdf417 | DecodeAllFormats)
 {
     <b>Result:</b>
     <br />
@@ -52,13 +52,13 @@ else
                    ScanBtnTitle="Scan"
                    ResetBtnTitle="Reset"
                    CloseBtnTitle="Close"
-                   Pdf417="Pdf417"
+                   Pdf417Only="Pdf417"
                    Decodeonce="!DecodeContinuously"
-                   DecoddeAllFormats="DecoddeAllFormats"
+                   DecodeAllFormats="DecodeAllFormats"
                    SelectDeviceBtnTitle="Select Device" />
 
 }
-<hr/>
+<hr />
 <button class="btn btn-sm btn-outline-secondary"
         type="button"
         @onclick="(() => ShowCodes = !ShowCodes)">
@@ -101,7 +101,7 @@ else
         @onclick="(() => ShowScanBarcodeCustom = !ShowScanBarcodeCustom)">
     Scan code [customize]
 </button>
-<br/>
+<br />
 <input type="text" class="form-control" style="min-width: 100px;"
        @bind-value="BarCodeCustom"
        placeholder="条码" />
@@ -182,13 +182,13 @@ else
                         <td><div class="table-cell">Parameter</div></td>
                     </tr>
                     <tr>
-                        <td><div class="table-cell">DecoddeAllFormats</div></td>
+                        <td><div class="table-cell">DecodeAllFormats</div></td>
                         <td><div class="table-cell">Decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false</div></td>
                         <td><div class="table-cell">Parameter</div></td>
                     </tr>
                     <tr>
                         <td><div class="table-cell">options</div></td>
-                        <td><div class="table-cell">ZXingOptions: Pdf417 | Decodeonce | TimeBetweenDecodingAttempts | DecoddeAllFormats | formats</div></td>
+                        <td><div class="table-cell">ZXingOptions: Pdf417 | Decodeonce | TimeBetweenDecodingAttempts | DecodeAllFormats | formats</div></td>
                         <td><div class="table-cell">Parameter</div></td>
                     </tr>
                     <tr>
@@ -291,7 +291,7 @@ else
 
     public bool Pdf417 { get; set; }
     public bool DecodeContinuously { get; set; }
-    public bool DecoddeAllFormats { get; set; }
+    public bool DecodeAllFormats { get; set; }
 
     private string message;
 

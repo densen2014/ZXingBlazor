@@ -15,12 +15,12 @@ namespace ZXingBlazor.Components;
 public class ZXingOptions
 {
     /// <summary>
-    /// decode only Pdf417 format
+    /// 只解码 Pdf417 格式 / decode only Pdf417 format
     /// </summary>
     public bool Pdf417 { get; set; }
 
     /// <summary>
-    /// decodeOnce or decodeContinuously
+    /// 单次|连续解码,默认单次 / Decode Once or Decode Continuously, default is Once
     /// </summary>
     public bool Decodeonce { get; set; } = true;
 
@@ -29,7 +29,10 @@ public class ZXingOptions
     /// </summary>
     public int TimeBetweenDecodingAttempts { get; set; } = 10;
 
-    public bool DecoddeAllFormats { get; set; }
+    /// <summary>
+    /// 解码所有编码形式,性能较差, 开启后可用 options.formats 指定编码形式.默认为 false | Decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false
+    /// </summary>
+    public bool DecodeAllFormats { get; set; }
 
     public List<BarcodeFormat> formats { get; set; }= new List<BarcodeFormat>() {
         BarcodeFormat.AZTEC ,

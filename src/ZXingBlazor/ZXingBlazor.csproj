@@ -4,11 +4,6 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <IsPackable>true</IsPackable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <PackageIcon>logo.png</PackageIcon>
-        <Version>0.2.5</Version>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Company>Densen Informatica</Company>
-        <Authors>Alex Chow</Authors>
         <Description>
             ZXing Blazor 扫码组件 / Barcode Scaner for Blazor
 
@@ -29,12 +24,12 @@
             wasm https://zxingblazorwasm.app1.es/
 
         </Description>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/densen2014/ZXingBlazor</PackageProjectUrl>
         <RepositoryUrl>https://github.com/densen2014/ZXingBlazor</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>ZXingBlazor</PackageTags>
-        <AssemblyVersion>0.2.0.0</AssemblyVersion>
+        <AssemblyName>ZXingBlazor</AssemblyName>
+        <RootNamespace>ZXingBlazor</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
@@ -43,9 +38,4 @@
     <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.0" />
     </ItemGroup>
-
-    <ItemGroup>
-        <None Include="logo.png" Pack="true" PackagePath="" />
-    </ItemGroup>
-
 </Project>

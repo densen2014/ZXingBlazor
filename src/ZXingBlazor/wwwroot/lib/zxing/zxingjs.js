@@ -18,7 +18,7 @@ export function init(wrapper, element, elementid, options) {
     if (options.pdf417) {
         codeReader = new ZXing.BrowserPDF417Reader();
         console.log('ZXing code PDF417 reader initialized')
-    } else if (options.DecoddeAllFormats) {
+    } else if (options.decodeAllFormats) {
         const hints = new Map();
         const formats = options.formats;
         hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);

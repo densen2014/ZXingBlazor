@@ -18,11 +18,11 @@
 连续解码
 <br />
 
-<input type="checkbox" @bind-value="DecoddeAllFormats" />
+<input type="checkbox" @bind-value="DecodeAllFormats" />
 解码所有编码形式 (+ PDF_417 / DATA_MATRIX...)
 <br />
 
-@if (Pdf417 | DecoddeAllFormats)
+@if (Pdf417 | DecodeAllFormats)
 {
     <b>Result:</b>
     <br />
@@ -49,7 +49,7 @@ else
                    OnError="OnError"
                    Pdf417="Pdf417"
                    Decodeonce="!DecodeContinuously"
-                   DecoddeAllFormats="DecoddeAllFormats" />
+                   DecodeAllFormats="DecodeAllFormats" />
 
 }
 <hr />
@@ -177,13 +177,13 @@ else
                         <td><div class="table-cell">Parameter</div></td>
                     </tr>
                     <tr>
-                        <td><div class="table-cell">DecoddeAllFormats</div></td>
+                        <td><div class="table-cell">DecodeAllFormats</div></td>
                         <td><div class="table-cell">解码所有编码形式,性能较差, 开启后可用 options.formats 指定编码形式.默认为 false</div></td>
                         <td><div class="table-cell">Parameter</div></td>
                     </tr>
                     <tr>
                         <td><div class="table-cell">options</div></td>
-                        <td><div class="table-cell">ZXingOptions 选项: Pdf417 | Decodeonce | TimeBetweenDecodingAttempts | DecoddeAllFormats | formats</div></td>
+                        <td><div class="table-cell">ZXingOptions 选项: Pdf417 | Decodeonce | TimeBetweenDecodingAttempts | DecodeAllFormats | formats</div></td>
                         <td><div class="table-cell">Parameter</div></td>
                     </tr>
                     <tr>
@@ -287,7 +287,7 @@ else
 
     public bool Pdf417 { get; set; }
     public bool DecodeContinuously { get; set; }
-    public bool DecoddeAllFormats { get; set; }
+    public bool DecodeAllFormats { get; set; }
 
     private string message;
 

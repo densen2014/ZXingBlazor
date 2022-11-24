@@ -93,10 +93,17 @@
     public bool ShowScanBarcode { get; set; }
 
     /// <summary>
-    /// Pdf417
+    /// [Obsolete] use new Parameter Pdf417Only
     /// </summary>
     [Parameter]
+    [Obsolete]
     public bool Pdf417 { get; set; }
+
+    /// <summary>
+    /// 只解码 Pdf417 格式 / decode only Pdf417 format
+    /// </summary>
+    [Parameter]
+    public bool Pdf417Only { get; set; }
 
     /// <summary>
     /// 单次|连续解码,默认单次 / Decode Once or Decode Continuously, default is Once
@@ -108,13 +115,13 @@
     /// 解码所有编码形式,性能较差, 开启后可用 options.formats 指定编码形式.默认为 false | Decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false
     /// </summary>
     [Parameter]
-    public bool DecoddeAllFormats { get; set; }
+    public bool DecodeAllFormats { get; set; }
 
     /// <summary>
     /// 选项/ZXingOptions
     /// </summary>
     [Parameter]
-    public ZXingOptions options { get; set; }
+    public ZXingOptions Options { get; set; }
 
     private IJSObjectReference? module;
     private DotNetObjectReference<BarcodeReader>? objRef;
@@ -132,11 +139,18 @@
             if (!firstRender) return;
             objRef = DotNetObjectReference.Create(this);
             module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/lib/zxing/zxingjs.js");
-            if (options == null)
+            if (Options == null)
             {
-                options   = new ZXingOptions() { Pdf417= Pdf417 , Decodeonce = Decodeonce };
+                Options = new ZXingOptions()
+                {
+#pragma warning disable CS0612
+                    Pdf417 = Pdf417 || Pdf417Only,
+#pragma warning restore CS0612
+                    Decodeonce = Decodeonce,
+                    DecodeAllFormats = DecodeAllFormats
+                };
             }
-            await module.InvokeVoidAsync("init", objRef, barcodeScannerElement, barcodeScannerElement.Id, options);
+            await module.InvokeVoidAsync("init", objRef, barcodeScannerElement, barcodeScannerElement.Id, Options);
         }
         catch (Exception e)
         {
