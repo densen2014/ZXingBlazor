@@ -1,6 +1,6 @@
 ﻿# ZXing Blazor Component 0.2.6
 
-English | <a href="README.zh-CN.md">中文</a>  | <a href="https://blazor.app1.es/"> Orther Blazor components</a>
+English | <a href="README.zh-CN.md">中文</a>  | <a href="https://blazor.app1.es/"> Other Blazor components</a>
 
 ---
 
