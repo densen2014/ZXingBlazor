@@ -30,27 +30,42 @@ export function init(wrapper, element, elementid, options) {
     }
     codeReader.timeBetweenDecodingAttempts = options.timeBetweenDecodingAttempts;
 
+
     codeReader.listVideoInputDevices()
         .then((videoInputDevices) => {
             selectedDeviceId = videoInputDevices[0].deviceId
             console.log('videoInputDevices:' + videoInputDevices.length);
-            if (videoInputDevices.length > 1) {
-                videoInputDevices.forEach((element) => {
-                    const sourceOption = document.createElement('option');
-                    sourceOption.text = element.label
-                    sourceOption.value = element.deviceId
-                    sourceSelect.appendChild(sourceOption)
-                    selectedDeviceId = element.deviceId;
-                })
 
-                sourceSelect.onchange = () => {
-                    selectedDeviceId = sourceSelect.value;
-                    codeReader.reset();
-                    StartScan();
-                }
+            //Iphone has the second [1] as back camera, Android also wich is the most common to scan with
+            if (videoInputDevices.length > 1) { selectedDeviceId = videoInputDevices[1].deviceId }
 
-                sourceSelectPanel.style.display = 'block'
-            }
+            //No need for this Select when scanning barcodes for most users
+            sourceSelectPanel.style.display = 'none';
+
+            //if (videoInputDevices.length > 1) {
+            //    videoInputDevices.forEach((element) => {
+            //        const sourceOption = document.createElement('option');
+            //        sourceOption.text = element.label
+            //        sourceOption.value = element.deviceId
+            //        sourceSelect.appendChild(sourceOption)
+            //        selectedDeviceId = element.deviceId;
+
+            //        //Set the second device as default
+            //        selectedDeviceId = videoInputDevices[1].deviceId
+            //    })
+
+            //    //Set the second device as default if exist
+            //    if (videoInputDevices.length > 1) { selectedDeviceId = videoInputDevices[1].deviceId }
+
+            //    //sourceSelect.onchange = () => {
+            //    //    selectedDeviceId = sourceSelect.value;
+            //    //    codeReader.reset();
+            //    //    StartScan();
+            //    //}
+
+            //    //sourceSelectPanel.style.display = 'block'
+            //    sourceSelectPanel.style.display = 'none';
+            //}
 
             StartScan();
 
