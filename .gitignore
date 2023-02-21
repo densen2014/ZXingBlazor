@@ -355,3 +355,5 @@ src/**/*.xml
 coverage*.xml
 tools/
 nuget.config
+/Demo.Server/Properties/launchSettings.json
+/src/ZXingBlazor/ZXingBlazor.csproj
