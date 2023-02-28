@@ -6,15 +6,16 @@
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ZXingBlazor.Components;
 
 /// <summary>
 /// 条码扫描 BarcodeScanner
 /// </summary>
-public partial class BarcodeReader
+public partial class BarcodeReader: IAsyncDisposable
 {
-
+    [Inject][NotNull] IJSRuntime? JS { get; set; }
 
     /// <summary>
     /// 扫码按钮文本/Scan button title
@@ -99,7 +100,7 @@ public partial class BarcodeReader
     /// 选项/ZXingOptions
     /// </summary>
     [Parameter]
-    public ZXingOptions Options { get; set; }
+    public ZXingOptions? Options { get; set; }
 
     private IJSObjectReference? module;
     private DotNetObjectReference<BarcodeReader>? objRef;

@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-        <Version>0.2.7</Version>
+        <Version>0.2.8</Version>
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <IsPackable>true</IsPackable>
+        <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <Description>
             ZXing Blazor 扫码组件 / Barcode Scaner for Blazor

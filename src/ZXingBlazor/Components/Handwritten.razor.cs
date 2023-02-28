@@ -6,14 +6,16 @@
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ZXingBlazor.Components;
 
 /// <summary>
 /// 手写签名 Handwritten
 /// </summary>
-public partial class Handwritten
+public partial class Handwritten : IAsyncDisposable
 {
+    [Inject][NotNull] IJSRuntime? JS { get; set; }
 
     /// <summary>
     /// Handwritten 手写签名

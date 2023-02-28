@@ -6,14 +6,16 @@
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ZXingBlazor.Components;
 
 /// <summary>
 /// 图片浏览器 Viewer
 /// </summary>
-public partial class Viewerjs
+public partial class Viewerjs : IAsyncDisposable
 {
+    [Inject][NotNull] IJSRuntime? JS { get; set; }
 
     /// <summary>
     /// 使用内置图片DIV
