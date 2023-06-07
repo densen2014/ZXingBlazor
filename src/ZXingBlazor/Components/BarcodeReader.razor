@@ -18,7 +18,15 @@
                         </select>
                     </div>
                     <div>
-                        <video id="video" playsinline autoplay style="min-height:150px;max-height:50%; max-width: 100%;border: 1px solid gray"></video>
+                        <video id="video"
+                               muted
+                               webkit-playsinline
+                               playsinline
+                               x-webkit-airplay="allow"
+                               x5-video-player-type="h5"
+                               x5-video-player-fullscreen="true"
+                               x5-video-orientation="portraint">
+                               style="min-height:150px;max-height:50%; max-width: 100%;border: 1px solid gray"></video>
                     </div>
                 </div>
             </div>
