@@ -62,7 +62,7 @@ export function init(wrapper, element, elementid, options) {
                 if (options.decodeonce) {
                     codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
                         console.log(result)
-                        if (supportsVibrate) navigator.vibrate(1000);                        
+                        if (supportsVibrate) navigator.vibrate(1000);
                         console.log('autostop');
                         codeReader.reset();
                         return wrapper.invokeMethodAsync("GetResult", result.text);
@@ -89,7 +89,7 @@ export function init(wrapper, element, elementid, options) {
 
                 var x = `decodeContinuously`;
                 if (options.decodeonce) x = `decodeOnce`;
-                console.log(`Started ` + x +` decode from camera with id ${selectedDeviceId}`)
+                console.log(`Started ` + x + ` decode from camera with id ${selectedDeviceId}`)
             }
 
             resetButton.addEventListener('click', () => {
@@ -102,7 +102,7 @@ export function init(wrapper, element, elementid, options) {
                 console.log('closeButton.')
                 wrapper.invokeMethodAsync("CloseScan");
             })
-             
+
         })
         .catch((err) => {
             console.log(err)
@@ -110,6 +110,88 @@ export function init(wrapper, element, elementid, options) {
         })
 
 }
+
+export function QRCodeSvg(wrapper, input, element, tobase64,size=300) {
+    const codeWriter = new ZXing.BrowserQRCodeSvgWriter()
+
+    console.log('ZXing code writer initialized')
+
+    if (tobase64) {
+        const elementTemp = document.createElement('elementTemp');
+        codeWriter.writeToDom(elementTemp, input, size, size)
+        let svgElement = elementTemp.firstChild
+        const svgData = (new XMLSerializer()).serializeToString(svgElement)
+        //const blob = new Blob([svgData])
+        wrapper.invokeMethodAsync("GetQRCode", svgData);
+    } else {
+        codeWriter.writeToDom(element.querySelector("[data-action=result]"), input, size, size)
+    }
+}
+
+export function DecodeFormImage(wrapper, element, options) {
+    var codeReaderImage = null; 
+    if (options.pdf417) {
+        codeReaderImage = new ZXing.BrowserPDF417Reader();
+        console.log('ZXing code PDF417 reader initialized')
+    } else if (options.decodeAllFormats) {
+        const hints = new Map();
+        const formats = options.formats;
+        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
+        codeReaderImage = new ZXing.BrowserMultiFormatReader(hints)
+        console.log('ZXing code reader initialized with all formats')
+    } else {
+        codeReaderImage = new ZXing.BrowserMultiFormatReader()
+        console.log('ZXing code reader initialized')
+    }
+    console.log('ZXing code reader initialized')
+
+    const resetFile = () => {
+        let file = element.querySelector('[type="file"]')
+        if (file) {
+            file.removeEventListener('change', scanImageHandler)
+            file.remove()
+        }
+        file = document.createElement('input')
+        file.setAttribute('type', 'file')
+        file.setAttribute('hidden', 'true')
+        file.setAttribute('accept', 'image/*')
+        file.setAttribute('capture', 'true')
+        element.append(file)
+        file.addEventListener('change', scanImageHandler)
+        codeReaderImage.file = file
+        return file
+    }
+
+    const scanImageHandler = () => {
+        const files = codeReaderImage.file.files
+        if (files.length === 0) {
+            return
+        }
+
+
+        const reader = new FileReader()
+        reader.onloadend = e => {
+            codeReaderImage.decodeFromImageUrl(e.target.result).then(result => {
+                if (result) {
+                    if (supportsVibrate) navigator.vibrate(1000);
+                    console.log(result.text);
+                    wrapper.invokeMethodAsync('GetResult', result.text)
+                }
+            }).catch((err) => {
+                if (err) {
+                    console.log(err)
+                    wrapper.invokeMethodAsync('GetError', err.message)
+                }
+            })
+        }
+        reader.readAsDataURL(files[0])
+    }
+
+    let file = resetFile()
+    file.click()
+     
+}
+
 export function destroy(elementid) {
     if (undefined !== codeReader && null !== codeReader && id == elementid) {
         codeReader.reset();
