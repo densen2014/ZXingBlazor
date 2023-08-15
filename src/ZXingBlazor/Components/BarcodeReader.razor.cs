@@ -15,6 +15,11 @@ namespace ZXingBlazor.Components;
 /// </summary>
 public partial class BarcodeReader: IAsyncDisposable
 {
+
+    private IJSObjectReference? module;
+
+    private DotNetObjectReference<BarcodeReader>? objRef;
+
     [Inject][NotNull] IJSRuntime? JS { get; set; }
 
     /// <summary>
@@ -41,7 +46,6 @@ public partial class BarcodeReader: IAsyncDisposable
     [Parameter]
     public string SelectDeviceBtnTitle { get; set; } = "选择设备";
 
-
     /// <summary>
     /// 扫码结果回调方法/Scan result callback method
     /// </summary>
@@ -61,22 +65,9 @@ public partial class BarcodeReader: IAsyncDisposable
     public Func<string, Task>? OnError { get; set; }
 
     /// <summary>
-    /// 扫码结果/Scan result
-    /// </summary>
-    [Parameter]
-    public string? Result { get; set; }
-
-    /// <summary>
     /// 使用内置DIV/Use builtin Div
     /// </summary>
     [Parameter] public bool UseBuiltinDiv { get; set; } = true;
-
-    /// <summary>
-    /// 显示扫码框/Show scan box
-    /// </summary>
-    [Parameter]
-    [Obsolete]
-    public bool ShowScanBarcode { get; set; }
 
     /// <summary>
     /// 只解码 Pdf417 格式 / decode only Pdf417 format
@@ -102,13 +93,10 @@ public partial class BarcodeReader: IAsyncDisposable
     [Parameter]
     public ZXingOptions? Options { get; set; }
 
-    private IJSObjectReference? module;
-    private DotNetObjectReference<BarcodeReader>? objRef;
-
     /// <summary>
     ///
     /// </summary>
-    public ElementReference barcodeScannerElement { get; set; }
+    public ElementReference Element { get; set; }
 
     // To prevent making JavaScript interop calls during prerendering
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -127,7 +115,7 @@ public partial class BarcodeReader: IAsyncDisposable
                     DecodeAllFormats = DecodeAllFormats
                 };
             }
-            await module.InvokeVoidAsync("init", objRef, barcodeScannerElement, barcodeScannerElement.Id, Options);
+            await module.InvokeVoidAsync("init", objRef, Element, Element.Id, Options);
         }
         catch (Exception e)
         {
@@ -152,7 +140,7 @@ public partial class BarcodeReader: IAsyncDisposable
     {
         if (module is not null)
         {
-            await module.InvokeVoidAsync("destroy", barcodeScannerElement.Id);
+            await module.InvokeVoidAsync("destroy", Element.Id);
             await module.DisposeAsync();
         }
         objRef?.Dispose();

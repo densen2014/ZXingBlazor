@@ -24,16 +24,16 @@ public partial class BarCodes : IAsyncDisposable
     /// <summary>
     ///
     /// </summary>
-    public ElementReference advElement { get; set; }
+    public ElementReference Element { get; set; }
 
     /// <summary>
-    /// 二维码数据流回调方法/ callback method
+    /// 二维码数据流回调方法/ Generate QRcode callback method
     /// </summary>
     [Parameter]
     public Func<string, Task>? OnQRCodeGen { get; set; }
 
     /// <summary>
-    /// 解码回调方法/ callback method
+    /// 解码回调方法/ Decode from image callback method
     /// </summary>
     [Parameter]
     public Func<string, Task>? OnDecodeFromImage { get; set; }
@@ -49,6 +49,12 @@ public partial class BarCodes : IAsyncDisposable
     /// </summary>
     [Parameter]
     public ZXingOptions? Options { get; set; }
+
+    /// <summary>
+    /// 二维码宽度/ QR Code width
+    /// </summary>
+    [Parameter]
+    public int QRCodeWidth { get; set; } = 300;
 
     /// <summary>
     /// 解码所有编码形式,性能较差, 开启后可用 options.formats 指定编码形式.默认为 false | Decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false
@@ -78,14 +84,24 @@ public partial class BarCodes : IAsyncDisposable
         if (OnError != null) await OnError.Invoke(err);
     }
 
+    /// <summary>
+    /// 生成SVG二维码 / Generate SVG QR code
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
     public async Task QRCodeGen(string input)
     {
-        await module!.InvokeVoidAsync("QRCodeSvg",  objRef, input,advElement, false);
+        await module!.InvokeVoidAsync("QRCodeSvg",  objRef, input,Element, false, QRCodeWidth);
     }
 
+    /// <summary>
+    /// 生成SVG二维码数据流文本 / Generate SVG QR code data flow text
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
     public async Task QRCodeGenSvg(string input)
     {
-        await module!.InvokeVoidAsync("QRCodeSvg",  objRef, input,advElement, true);
+        await module!.InvokeVoidAsync("QRCodeSvg",  objRef, input,Element, true, QRCodeWidth);
     }
 
     [JSInvokable]
@@ -94,6 +110,10 @@ public partial class BarCodes : IAsyncDisposable
         if (OnQRCodeGen != null) await OnQRCodeGen.Invoke(err);
     }
 
+    /// <summary>
+    /// 选择图片解码 / Select picture decoding
+    /// </summary>
+    /// <returns></returns>
     public async Task DecodeFromImage()
     {
         if (Options == null)
@@ -103,7 +123,7 @@ public partial class BarCodes : IAsyncDisposable
                 DecodeAllFormats = DecodeAllFormats
             };
         }
-        await module!.InvokeVoidAsync("DecodeFormImage", objRef, advElement, Options);
+        await module!.InvokeVoidAsync("DecodeFormImage", objRef, Element, Options);
     }
 
     [JSInvokable]

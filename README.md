@@ -1,4 +1,4 @@
-﻿# ZXing Blazor Component 0.2.6
+﻿# ZXing Blazor Component 1.0.3
 
 English | <a href="https://blazor.app1.es/"> Other Blazor components</a>
 
@@ -13,6 +13,8 @@ This project is a Blazor component library packaged with ZXing, Support barcode,
 https://zxingblazor.app1.es
 
 https://zxingblazorwasm.app1.es
+
+https://blazor.app1.es/barcodescanner
 
 ## Nuget
 
@@ -61,6 +63,9 @@ https://www.nuget.org/packages/ZXingBlazor/
 
     ```
 ## Updates
+2023.8.16
+
+1. Add BarCodes decode from image and Generate QRcode Components
 
 2022.11.23 Add optiones
 
@@ -143,6 +148,9 @@ https://www.nuget.org/packages/ZXingBlazor/
     ```
     
 ## 更新
+2023.8.16
+
+1. 添加 BarCodes 解码图片/QR码生成组件
 
 2022.11.23 添加选项
 
@@ -151,9 +159,13 @@ https://www.nuget.org/packages/ZXingBlazor/
 3. DecodeAllFormats: 解码所有编码形式,性能较差, 开启后可用 options.formats 指定编码形式.默认为 false | Decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false
 
 
-2022.3.6 升级为js隔离版本,添加图片浏览器 Viewer组件, 演示工程升级为net6格式
+2022.3.6 
 
-2021.5.13 BarcodeReader 支持定义按钮文本,支持多语言
+升级为js隔离版本,添加图片浏览器 Viewer组件, 演示工程升级为net6格式
+
+2021.5.13
+
+BarcodeReader 支持定义按钮文本,支持多语言
 
 
 ## 参与贡献

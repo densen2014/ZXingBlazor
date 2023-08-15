@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-        <Version>1.0.2</Version>
+        <Version>1.0.3</Version>
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>
@@ -13,8 +13,9 @@
             直接调用手机或者桌面电脑摄像头进行扫码
 
             1.ZXing Blazor 扫码组件
-            2.Handwritten 手写签名组件
-            3.Viewer 图片浏览器
+            2.BarCodes 解码图片/QR码生成组件
+            3.Handwritten 手写签名组件
+            4.Viewer 图片浏览器
 
             This project is a Blazor component library packaged with ZXing
             Directly call the mobile phone or desktop computer camera to scan the code
@@ -24,7 +25,7 @@
             ssr https://zxingblazor.app1.es
 
             wasm https://zxingblazorwasm.app1.es/
-            
+
             #### Blazor 组件
 
             [图片浏览器 Viewer](https://www.nuget.org/packages/BootstrapBlazor.Viewer#readme-body-tab)
