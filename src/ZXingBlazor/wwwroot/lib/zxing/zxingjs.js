@@ -155,7 +155,7 @@ export function DecodeFormImage(wrapper, element, options) {
         file.setAttribute('type', 'file')
         file.setAttribute('hidden', 'true')
         file.setAttribute('accept', 'image/*')
-        file.setAttribute('capture', 'true')
+        //file.setAttribute('capture', 'true')
         element.append(file)
         file.addEventListener('change', scanImageHandler)
         codeReaderImage.file = file
