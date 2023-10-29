@@ -13,14 +13,14 @@ namespace ZXingBlazor.Components;
 /// <summary>
 /// 条码扫描 BarcodeScanner
 /// </summary>
-public partial class BarcodeReader: IAsyncDisposable
+public partial class BarcodeReader : IAsyncDisposable
 {
 
     private IJSObjectReference? module;
 
     private DotNetObjectReference<BarcodeReader>? objRef;
 
-    [Inject][NotNull] IJSRuntime? JS { get; set; }
+    [Inject][NotNull] private IJSRuntime? JS { get; set; }
 
     /// <summary>
     /// 扫码按钮文本/Scan button title

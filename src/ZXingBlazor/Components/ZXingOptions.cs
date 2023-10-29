@@ -4,9 +4,6 @@
 // e-mail:zhouchuanglin@gmail.com 
 // **********************************
 
-using System.ComponentModel;
-
-
 namespace ZXingBlazor.Components;
 
 /// <summary>
@@ -34,7 +31,7 @@ public class ZXingOptions
     /// </summary>
     public bool DecodeAllFormats { get; set; }
 
-    public List<BarcodeFormat> formats { get; set; }= new List<BarcodeFormat>() {
+    public List<BarcodeFormat> formats { get; set; } = new List<BarcodeFormat>() {
         BarcodeFormat.AZTEC ,
         BarcodeFormat.CODABAR,
         BarcodeFormat.CODE_39,

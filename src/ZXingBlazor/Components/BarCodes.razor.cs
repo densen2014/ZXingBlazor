@@ -5,7 +5,6 @@
 // **********************************
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
 using System.Diagnostics.CodeAnalysis;
 
@@ -16,7 +15,7 @@ namespace ZXingBlazor.Components;
 /// </summary>
 public partial class BarCodes : IAsyncDisposable
 {
-    [Inject][NotNull] IJSRuntime? JS { get; set; } 
+    [Inject][NotNull] private IJSRuntime? JS { get; set; }
 
     private IJSObjectReference? module;
     private DotNetObjectReference<BarCodes>? objRef;
@@ -70,7 +69,7 @@ public partial class BarCodes : IAsyncDisposable
             if (!firstRender) return;
             objRef = DotNetObjectReference.Create(this);
             module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/lib/zxing/zxingjs.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
-         }
+        }
         catch (Exception e)
         {
             if (OnError != null) await OnError.Invoke(e.Message);
@@ -91,7 +90,7 @@ public partial class BarCodes : IAsyncDisposable
     /// <returns></returns>
     public async Task QRCodeGen(string input)
     {
-        await module!.InvokeVoidAsync("QRCodeSvg",  objRef, input,Element, false, QRCodeWidth);
+        await module!.InvokeVoidAsync("QRCodeSvg", objRef, input, Element, false, QRCodeWidth);
     }
 
     /// <summary>
@@ -101,7 +100,7 @@ public partial class BarCodes : IAsyncDisposable
     /// <returns></returns>
     public async Task QRCodeGenSvg(string input)
     {
-        await module!.InvokeVoidAsync("QRCodeSvg",  objRef, input,Element, true, QRCodeWidth);
+        await module!.InvokeVoidAsync("QRCodeSvg", objRef, input, Element, true, QRCodeWidth);
     }
 
     [JSInvokable]
