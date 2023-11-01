@@ -51,12 +51,12 @@ export function init(instance, element, elementid, options, deviceID) {
                         sourceOption.selected = true
                     } 
                     sourceSelect.appendChild(sourceOption)
-                    selectedDeviceId = device.deviceId;
+                    //selectedDeviceId = device.deviceId;
                 })
 
                 sourceSelect.onchange = () => {
                     selectedDeviceId = sourceSelect.value;
-                    instance.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.text);
+                    instance.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
                     codeReader.reset();
                     StartScan();
                 }
