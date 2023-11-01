@@ -2,7 +2,7 @@ import '/_content/ZXingBlazor/lib/zxing/zxing.min.js';
 var codeReader = null;
 var id = null;
 var supportsVibrate = false;
-export function init(wrapper, element, elementid, options) {
+export function init(instance, element, elementid, options, deviceID) {
     console.log('init' + elementid);
     id = elementid;
     let selectedDeviceId;
@@ -32,19 +32,31 @@ export function init(wrapper, element, elementid, options) {
 
     codeReader.listVideoInputDevices()
         .then((videoInputDevices) => {
-            selectedDeviceId = videoInputDevices[0].deviceId
+            if (deviceID != null) {
+                selectedDeviceId = deviceID
+            } else {
+                selectedDeviceId = videoInputDevices[0].deviceId
+            }
             console.log('videoInputDevices:' + videoInputDevices.length);
             if (videoInputDevices.length > 1) {
-                videoInputDevices.forEach((element) => {
+                videoInputDevices.forEach((device) => {
                     const sourceOption = document.createElement('option');
-                    sourceOption.text = element.label
-                    sourceOption.value = element.deviceId
+                    if (device.label === '') {
+                        sourceOption.text = 'Camera' + (sourceSelect.length + 1);
+                    } else {
+                        sourceOption.text = device.label
+                    }
+                    sourceOption.value = device.deviceId
+                    if (deviceID != null && device.deviceId == deviceID) {
+                        sourceOption.selected = true
+                    } 
                     sourceSelect.appendChild(sourceOption)
-                    selectedDeviceId = element.deviceId;
+                    selectedDeviceId = device.deviceId;
                 })
 
                 sourceSelect.onchange = () => {
                     selectedDeviceId = sourceSelect.value;
+                    instance.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.text);
                     codeReader.reset();
                     StartScan();
                 }
@@ -65,11 +77,11 @@ export function init(wrapper, element, elementid, options) {
                         if (supportsVibrate) navigator.vibrate(1000);
                         console.log('autostop');
                         codeReader.reset();
-                        return wrapper.invokeMethodAsync("GetResult", result.text);
+                        return instance.invokeMethodAsync("GetResult", result.text);
                     }).catch((err) => {
                         if (err && !(err instanceof ZXing.NotFoundException)) {
                             console.log(err)
-                            wrapper.invokeMethodAsync("GetError", err + '');
+                            instance.invokeMethodAsync("GetError", err + '');
                         }
                     })
                 } else {
@@ -78,11 +90,11 @@ export function init(wrapper, element, elementid, options) {
                             console.log(result)
                             if (supportsVibrate) navigator.vibrate(1000);
                             console.log('None-stop');
-                            wrapper.invokeMethodAsync("GetResult", result.text);
+                            instance.invokeMethodAsync("GetResult", result.text);
                         }
                         if (err && !(err instanceof ZXing.NotFoundException)) {
                             console.log(err)
-                            wrapper.invokeMethodAsync("GetError", err + '');
+                            instance.invokeMethodAsync("GetError", err + '');
                         }
                     })
                 }
@@ -100,18 +112,18 @@ export function init(wrapper, element, elementid, options) {
             closeButton.addEventListener('click', () => {
                 codeReader.reset();
                 console.log('closeButton.')
-                wrapper.invokeMethodAsync("CloseScan");
+                instance.invokeMethodAsync("CloseScan");
             })
 
         })
         .catch((err) => {
             console.log(err)
-            wrapper.invokeMethodAsync("GetError", err + '');
+            instance.invokeMethodAsync("GetError", err + '');
         })
 
 }
 
-export function QRCodeSvg(wrapper, input, element, tobase64,size=300) {
+export function QRCodeSvg(instance, input, element, tobase64,size=300) {
     const codeWriter = new ZXing.BrowserQRCodeSvgWriter()
 
     console.log('ZXing code writer initialized')
@@ -122,13 +134,13 @@ export function QRCodeSvg(wrapper, input, element, tobase64,size=300) {
         let svgElement = elementTemp.firstChild
         const svgData = (new XMLSerializer()).serializeToString(svgElement)
         //const blob = new Blob([svgData])
-        wrapper.invokeMethodAsync("GetQRCode", svgData);
+        instance.invokeMethodAsync("GetQRCode", svgData);
     } else {
         codeWriter.writeToDom(element.querySelector("[data-action=result]"), input, size, size)
     }
 }
 
-export function DecodeFormImage(wrapper, element, options) {
+export function DecodeFormImage(instance, element, options) {
     var codeReaderImage = null; 
     if (options.pdf417) {
         codeReaderImage = new ZXing.BrowserPDF417Reader();
@@ -175,12 +187,12 @@ export function DecodeFormImage(wrapper, element, options) {
                 if (result) {
                     if (supportsVibrate) navigator.vibrate(1000);
                     console.log(result.text);
-                    wrapper.invokeMethodAsync('GetResult', result.text)
+                    instance.invokeMethodAsync('GetResult', result.text)
                 }
             }).catch((err) => {
                 if (err) {
                     console.log(err)
-                    wrapper.invokeMethodAsync('GetError', err.message)
+                    instance.invokeMethodAsync('GetError', err.message)
                 }
             })
         }

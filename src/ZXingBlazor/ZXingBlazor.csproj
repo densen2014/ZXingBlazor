@@ -27,6 +27,8 @@
 
             wasm https://zxingblazorwasm.app1.es/
 
+            Libs https://blazor.app1.es/barcodescanner
+
             #### Blazor 组件
 
             [图片浏览器 Viewer](https://www.nuget.org/packages/BootstrapBlazor.Viewer#readme-body-tab)

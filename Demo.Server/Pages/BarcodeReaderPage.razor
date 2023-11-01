@@ -6,7 +6,7 @@
 
 <button class="btn btn-primary"
         type="button"
-        @onclick="(() => ShowScanBarcode = !ShowScanBarcode)">
+        @onclick="(() => { BarCode = string.Empty; ShowScanBarcode = !ShowScanBarcode; })">
     [扫码]
 </button>
 <br />
@@ -44,10 +44,9 @@ else
 @if (ShowScanBarcode)
 {
     <BarcodeReader ScanResult="ScanResult"
-                   ShowScanBarcode="ShowScanBarcode"
                    Close="(()=>ShowScanBarcode=!ShowScanBarcode)"
                    OnError="OnError"
-                   Pdf417="Pdf417"
+                   Pdf417Only="Pdf417"
                    Decodeonce="!DecodeContinuously"
                    DecodeAllFormats="DecodeAllFormats" />
 
@@ -108,7 +107,7 @@ else
                    UseBuiltinDiv="false"
                    @ref="barcodeReaderCustom" />
 
-    <div @ref="barcodeReaderCustom.barcodeScannerElement">
+    <div @ref="barcodeReaderCustom.Element">
         <div style="width: 480px; max-width: 100%">
             <button class="btn btn-outline-success p-2 m-1 w-25" data-action="startButton">扫描</button>
             <button class="btn btn-outline-success p-2 m-1 w-25" data-action="resetButton">重置</button>

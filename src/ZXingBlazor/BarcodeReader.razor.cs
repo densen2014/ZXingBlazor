@@ -6,6 +6,7 @@
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace ZXingBlazor.Components;
@@ -21,6 +22,9 @@ public partial class BarcodeReader : IAsyncDisposable
     private DotNetObjectReference<BarcodeReader>? objRef;
 
     [Inject][NotNull] private IJSRuntime? JS { get; set; }
+
+    [NotNull]
+    private StorageService? Storage { get; set; }
 
     /// <summary>
     /// 扫码按钮文本/Scan button title
@@ -98,14 +102,27 @@ public partial class BarcodeReader : IAsyncDisposable
     /// </summary>
     public ElementReference Element { get; set; }
 
+    /// <summary>
+    /// 指定摄像头设备ID
+    /// </summary>
+    [Parameter]
+    public string? DeviceID { get; set; }
+
+    /// <summary>
+    /// 保存最后使用设备ID下次自动调用
+    /// </summary>
+    [Parameter]
+    public bool SaveDeviceID { get; set; } = true;
+
     // To prevent making JavaScript interop calls during prerendering
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
         {
             if (!firstRender) return;
+            Storage= new StorageService(JS);
             objRef = DotNetObjectReference.Create(this);
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/lib/zxing/zxingjs.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
             if (Options == null)
             {
                 Options = new ZXingOptions()
@@ -115,7 +132,15 @@ public partial class BarcodeReader : IAsyncDisposable
                     DecodeAllFormats = DecodeAllFormats
                 };
             }
-            await module.InvokeVoidAsync("init", objRef, Element, Element.Id, Options);
+            try
+            {
+                if (SaveDeviceID) DeviceID = await Storage.GetValue("CamsDeviceID", DeviceID);
+            }
+            catch (Exception)
+            {
+
+            }
+            await module.InvokeVoidAsync("init", objRef, Element, Element.Id, Options, DeviceID);
         }
         catch (Exception e)
         {
@@ -144,6 +169,78 @@ public partial class BarcodeReader : IAsyncDisposable
             await module.DisposeAsync();
         }
         objRef?.Dispose();
+    }
+
+    /// <summary>
+    /// 选择摄像头回调方法
+    /// </summary>
+    /// <param name="base64encodedstring"></param>
+    /// <returns></returns>
+    [JSInvokable]
+    public async Task SelectDeviceID(string deviceID,string deviceName)
+    {
+        try
+        {
+            if (SaveDeviceID)
+            {
+                await Storage.SetValue("CamsDeviceID", deviceID);
+                await Storage.SetValue("CamsDeviceName", deviceName);
+            }
+        }
+        catch
+        {
+        }
+    }
+
+    private class StorageService
+    {
+        private readonly IJSRuntime JSRuntime;
+
+        public StorageService(IJSRuntime jsRuntime)
+        {
+            JSRuntime = jsRuntime;
+        }
+
+        public async Task SetValue<TValue>(string key, TValue value)
+        {
+            await JSRuntime.InvokeVoidAsync("eval", $"localStorage.setItem('{key}', '{value}')");
+        }
+
+        public async Task<TValue?> GetValue<TValue>(string key, TValue? def)
+        {
+            try
+            {
+                var cValue = await JSRuntime.InvokeAsync<TValue>("eval", $"localStorage.getItem('{key}');");
+                return cValue ?? def;
+            }
+            catch
+            {
+                var cValue = await JSRuntime.InvokeAsync<string>("eval", $"localStorage.getItem('{key}');");
+                if (cValue == null)
+                    return def;
+
+                var newValue = GetValueI<TValue>(cValue);
+                return newValue ?? def;
+
+            }
+        }
+        public static T? GetValueI<T>(string value)
+        {
+            TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
+            if (converter != null)
+            {
+                return (T?)converter.ConvertFrom(value);
+            }
+            return default;
+            //return (T)Convert.ChangeType(value, typeof(T));
+        }
+
+        public async Task RemoveValue(string key)
+        {
+            await JSRuntime.InvokeVoidAsync("eval", $"localStorage.removeItem('{key}')");
+        }
+
+
     }
 
 }

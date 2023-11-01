@@ -68,7 +68,7 @@ public partial class BarCodes : IAsyncDisposable
         {
             if (!firstRender) return;
             objRef = DotNetObjectReference.Create(this);
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/lib/zxing/zxingjs.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
         }
         catch (Exception e)
         {

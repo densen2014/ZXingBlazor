@@ -148,24 +148,27 @@ https://www.nuget.org/packages/ZXingBlazor/
     ```
     
 ## 更新
+2023.11.1
+- 添加 1.保存最后使用设备ID下次自动调用, 2.指定摄像头设备ID
+
 2023.8.16
 
-1. 添加 BarCodes 解码图片/QR码生成组件
+- 1. 添加 BarCodes 解码图片/QR码生成组件
 
 2022.11.23 添加选项
 
-1. Pdf417Only: 只解码 Pdf417 格式 / decode only Pdf417 format
-2. Decodeonce: 单次|连续解码,默认单次 / Decode Once or Decode Continuously, default is Once
-3. DecodeAllFormats: 解码所有编码形式,性能较差, 开启后可用 options.formats 指定编码形式.默认为 false | Decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false
+- 1. Pdf417Only: 只解码 Pdf417 格式 / decode only Pdf417 format
+- 2. Decodeonce: 单次|连续解码,默认单次 / Decode Once or Decode Continuously, default is Once
+- 3. DecodeAllFormats: 解码所有编码形式,性能较差, 开启后可用 options.formats 指定编码形式.默认为 false | Decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false
 
 
 2022.3.6 
 
-升级为js隔离版本,添加图片浏览器 Viewer组件, 演示工程升级为net6格式
+- 升级为js隔离版本,添加图片浏览器 Viewer组件, 演示工程升级为net6格式
 
 2021.5.13
 
-BarcodeReader 支持定义按钮文本,支持多语言
+- BarcodeReader 支持定义按钮文本,支持多语言
 
 
 ## 参与贡献
