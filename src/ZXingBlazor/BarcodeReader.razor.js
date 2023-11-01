@@ -13,8 +13,6 @@ export function init(instance, element, elementid, options, deviceID) {
     let closeButton = element.querySelector("[data-action=closeButton]");
     supportsVibrate = "vibrate" in navigator;
 
-    console.log('init' + startButton.innerHTML);
-
     if (options.pdf417) {
         codeReader = new ZXing.BrowserPDF417Reader();
         console.log('ZXing code PDF417 reader initialized')
@@ -66,7 +64,7 @@ export function init(instance, element, elementid, options, deviceID) {
 
             StartScan();
 
-            startButton.addEventListener('click', () => {
+            if (startButton) startButton.addEventListener('click', () => {
                 StartScan();
             })
 
@@ -104,12 +102,12 @@ export function init(instance, element, elementid, options, deviceID) {
                 console.log(`Started ` + x + ` decode from camera with id ${selectedDeviceId}`)
             }
 
-            resetButton.addEventListener('click', () => {
+            if (resetButton) resetButton.addEventListener('click', () => {
                 codeReader.reset();
                 console.log('Reset.')
             })
 
-            closeButton.addEventListener('click', () => {
+            if (closeButton) closeButton.addEventListener('click', () => {
                 codeReader.reset();
                 console.log('closeButton.')
                 instance.invokeMethodAsync("CloseScan");
