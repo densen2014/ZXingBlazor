@@ -63,19 +63,25 @@ https://www.nuget.org/packages/ZXingBlazor/
 
     ```
 ## Updates
-2023.8.16
 
-1. Add BarCodes decode from image and Generate QRcode Components
+2023.11.1
+- Add 1. Save the last used device ID and call it automatically next time. 2. Specify the camera device ID.
+- Add Start,Stop,Reload , DecodeFromImage(dataUrl)
+
+2023.8.16
+- 1. Add BarCodes decode from image and Generate QRcode Components
 
 2022.11.23 Add optiones
 
-1. Pdf417Only: decode only Pdf417 format
-2. Decodeonce: decode Once or Decode Continuously, default is Once
-3. DecodeAllFormats: decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false
+- 1. Pdf417Only: decode only Pdf417 format
+- 2. Decodeonce: decode Once or Decode Continuously, default is Once
+- 3. DecodeAllFormats: decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false
 
-2022.3.6 Upgrade to js isolated version, add image browser Viewer component, and upgrade demo project to net6 format
+2022.3.6 
+- Upgrade to js isolated version, add image browser Viewer component, and upgrade demo project to net6 format
 
-2021.5.13 BarcodeReader supports defining button text and supports multiple languages
+2021.5.13 
+- BarcodeReader supports defining button text and supports multiple languages
 
 ## Participate in contribution
 
@@ -148,8 +154,10 @@ https://www.nuget.org/packages/ZXingBlazor/
     ```
     
 ## 更新
+
 2023.11.1
 - 添加 1.保存最后使用设备ID下次自动调用, 2.指定摄像头设备ID
+- 添加 Start,Stop,Reload , DecodeFromImage(dataUrl)
 
 2023.8.16
 
