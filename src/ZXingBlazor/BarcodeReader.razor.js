@@ -8,8 +8,7 @@ let selectedDeviceId = null;
 let deviceID = null;
 let element = null;
 
-export function vibrate()
-{
+export function vibrate() {
     if (supportsVibrate) navigator.vibrate(1000);
 }
 export function init(instance, ele, elementid, options, deviceid) {
@@ -68,48 +67,59 @@ export function load(elementid) {
         codeReader.timeBetweenDecodingAttempts = opt.timeBetweenDecodingAttempts;
 
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            codeReader.listVideoInputDevices()
-                .then((videoInputDevices) => {
-                    if (deviceID != null) {
-                        selectedDeviceId = deviceID
-                    } else if (videoInputDevices.length > 1) {
-                        selectedDeviceId = videoInputDevices[1].deviceId
-                    } else {
-                        selectedDeviceId = videoInputDevices[0].deviceId
-                    }
-                    console.log('videoInputDevices:' + videoInputDevices.length);
-                    if (videoInputDevices.length > 1) {
-                        videoInputDevices.forEach((device) => {
-                            const sourceOption = document.createElement('option');
-                            if (device.label === '') {
-                                sourceOption.text = 'Camera' + (sourceSelect.length + 1);
+            navigator.mediaDevices
+                .getUserMedia({ audio: false, video: true })
+                .then(() => {
+
+                    codeReader.listVideoInputDevices()
+                        .then((videoInputDevices) => {
+                            if (deviceID != null) {
+                                selectedDeviceId = deviceID
+                            } else if (videoInputDevices.length > 1) {
+                                selectedDeviceId = videoInputDevices[1].deviceId
                             } else {
-                                sourceOption.text = device.label
+                                selectedDeviceId = videoInputDevices[0].deviceId
                             }
-                            sourceOption.value = device.deviceId
-                            if (selectedDeviceId != null && device.deviceId == selectedDeviceId) {
-                                sourceOption.selected = true
+                            console.log('videoInputDevices:' + videoInputDevices.length);
+                            if (videoInputDevices.length > 1) {
+                                videoInputDevices.forEach((device) => {
+                                    const sourceOption = document.createElement('option');
+                                    if (device.label === '') {
+                                        sourceOption.text = 'Camera' + (sourceSelect.length + 1);
+                                    } else {
+                                        sourceOption.text = device.label
+                                    }
+                                    sourceOption.value = device.deviceId
+                                    if (selectedDeviceId != null && device.deviceId == selectedDeviceId) {
+                                        sourceOption.selected = true
+                                    }
+                                    sourceSelect.appendChild(sourceOption)
+                                })
+
+                                sourceSelect.onchange = () => {
+                                    selectedDeviceId = sourceSelect.value;
+                                    instance.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
+                                    codeReader.reset();
+                                    StartScan();
+                                }
+
+                                sourceSelectPanel.style.display = 'block'
                             }
-                            sourceSelect.appendChild(sourceOption)
+
+                            start(elementid);
+
                         })
-
-                        sourceSelect.onchange = () => {
-                            selectedDeviceId = sourceSelect.value;
-                            instance.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
-                            codeReader.reset();
-                            StartScan();
-                        }
-
-                        sourceSelectPanel.style.display = 'block'
-                    }
-
-                    start(elementid);
+                        .catch((err) => {
+                            console.log(err)
+                            instance.invokeMethodAsync("GetError", err + '');
+                        })
 
                 })
                 .catch((err) => {
-                    console.log(err)
-                    instance.invokeMethodAsync("GetError", err + '');
-                })
+                    console.error(`An error occurred: ${err}`);
+                    instance.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+                });
+
         }
     }
 }
@@ -118,7 +128,7 @@ export function start(elementid) {
     if (undefined !== codeReader && null !== codeReader && id == elementid) {
         if (opt.decodeonce) {
             codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
-                console.log(result) 
+                console.log(result)
                 vibrate();
                 console.log('autostop');
                 codeReader.reset();
@@ -158,7 +168,7 @@ export function stop(elementid) {
     }
 }
 
-export function QRCodeSvg(instance, input, element, tobase64,size=300) {
+export function QRCodeSvg(instance, input, element, tobase64, size = 300) {
     const codeWriter = new ZXing.BrowserQRCodeSvgWriter()
 
     console.log('ZXing code writer initialized')
@@ -175,8 +185,8 @@ export function QRCodeSvg(instance, input, element, tobase64,size=300) {
     }
 }
 
-export function DecodeFormImage(instance, element, options,data) {
-    var codeReaderImage = null; 
+export function DecodeFormImage(instance, element, options, data) {
+    var codeReaderImage = null;
     if (options.pdf417) {
         codeReaderImage = new ZXing.BrowserPDF417Reader();
         console.log('ZXing code PDF417 reader initialized')
@@ -192,8 +202,7 @@ export function DecodeFormImage(instance, element, options,data) {
     }
     console.log('ZXing code reader initialized')
 
-    if (data != null)
-    {
+    if (data != null) {
         codeReaderImage.decodeFromImageUrl(data).then(result => {
             if (result) {
                 vibrate();
@@ -208,8 +217,7 @@ export function DecodeFormImage(instance, element, options,data) {
         })
 
     }
-    else
-    {
+    else {
         const resetFile = () => {
             let file = element.querySelector('[type="file"]')
             if (file) {
@@ -237,7 +245,7 @@ export function DecodeFormImage(instance, element, options,data) {
             const reader = new FileReader()
             reader.onloadend = e => {
                 codeReaderImage.decodeFromImageUrl(e.target.result).then(result => {
-                    if (result) { 
+                    if (result) {
                         vibrate();
                         console.log(result.text);
                         instance.invokeMethodAsync('GetResult', result.text)
@@ -256,7 +264,7 @@ export function DecodeFormImage(instance, element, options,data) {
         file.click()
 
     }
-     
+
 }
 
 export function destroy(elementid) {
