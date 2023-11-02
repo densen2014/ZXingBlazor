@@ -149,6 +149,21 @@ public partial class BarcodeReader : IAsyncDisposable
 
     }
 
+    public async Task Start()
+    {
+        await module!.InvokeVoidAsync("start", Element.Id);
+    }
+
+    public async Task Stop ()
+    {
+        await module!.InvokeVoidAsync("stop", Element.Id);
+    }
+
+    public async Task Reload ()
+    {
+        await module!.InvokeVoidAsync("reload", Element.Id);
+    }
+
     [JSInvokable]
     public async Task GetResult(string val) => await ScanResult.InvokeAsync(val);
 
@@ -192,6 +207,7 @@ public partial class BarcodeReader : IAsyncDisposable
         }
     }
 
+    #region StorageService
     private class StorageService
     {
         private readonly IJSRuntime JSRuntime;
@@ -224,6 +240,7 @@ public partial class BarcodeReader : IAsyncDisposable
 
             }
         }
+
         public static T? GetValueI<T>(string value)
         {
             TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
@@ -242,5 +259,5 @@ public partial class BarcodeReader : IAsyncDisposable
 
 
     }
-
+    #endregion
 }

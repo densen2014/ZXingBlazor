@@ -112,8 +112,9 @@ public partial class BarCodes : IAsyncDisposable
     /// <summary>
     /// 选择图片解码 / Select picture decoding
     /// </summary>
+    /// <param name="dataUrl">可选直接解码 Base64, DataUrl 格式</param>
     /// <returns></returns>
-    public async Task DecodeFromImage()
+    public async Task DecodeFromImage(string? dataUrl=null)
     {
         if (Options == null)
         {
@@ -122,7 +123,11 @@ public partial class BarCodes : IAsyncDisposable
                 DecodeAllFormats = DecodeAllFormats
             };
         }
-        await module!.InvokeVoidAsync("DecodeFormImage", objRef, Element, Options);
+        if (dataUrl!=null && !dataUrl.StartsWith("data:image"))
+        {
+            dataUrl = "data:image/jpeg;base64," + dataUrl;
+        }
+        await module!.InvokeVoidAsync("DecodeFormImage", objRef, Element, Options, dataUrl);
     }
 
     [JSInvokable]
