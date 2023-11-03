@@ -46,8 +46,7 @@ else
 @if (ShowScanBarcode)
 {
 
-    <BarcodeReader ScanResult="ScanResult"
-                   ShowScanBarcode="ShowScanBarcode"
+    <BarcodeReader ScanResult="ScanResult" 
                    Close="(()=>ShowScanBarcode=!ShowScanBarcode)"
                    ScanBtnTitle="Scan"
                    ResetBtnTitle="Reset"
@@ -113,7 +112,7 @@ else
                    UseBuiltinDiv="false"
                    @ref="barcodeReaderCustom" />
 
-    <div @ref="barcodeReaderCustom.barcodeScannerElement">
+    <div @ref="barcodeReaderCustom.Element">
         <div style="width: 480px; max-width: 100%">
             <button class="btn btn-outline-success p-2 m-1 w-25" data-action="startButton">Scan</button>
             <button class="btn btn-outline-success p-2 m-1 w-25" data-action="resetButton">Reset</button>
@@ -313,6 +312,7 @@ else
         }
         else
         {
+            if (BarCode.Length >60) BarCode = "";
             BarCode += e + Environment.NewLine;
         }
     }

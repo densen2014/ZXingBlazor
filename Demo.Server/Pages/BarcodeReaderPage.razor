@@ -308,6 +308,7 @@ else
         }
         else
         {
+            if (BarCode.Length > 60) BarCode = "";
             BarCode += e + Environment.NewLine;
         }
     }
