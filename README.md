@@ -1,4 +1,4 @@
-﻿# ZXing Blazor Component 1.0.3
+﻿# ZXing Blazor Component 1.0.8
 
 English | <a href="https://blazor.app1.es/"> Other Blazor components</a>
 
@@ -98,7 +98,7 @@ v1.0.8
 
 ----
 
-# ZXing Blazor 扫码组件 0.2.6
+# ZXing Blazor 扫码组件 1.0.8
 
  <a href="https://blazor.app1.es/"> 其他 Blazor 组件</a>
 
