@@ -51,6 +51,8 @@ public class ZXingOptions
         BarcodeFormat.UPC_EAN_EXTENSION,
     };
 
+    public bool Debug { get; set; }
+
 }
 
 

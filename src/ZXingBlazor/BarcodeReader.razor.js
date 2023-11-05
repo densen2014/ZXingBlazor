@@ -7,7 +7,7 @@ let inst = null;
 let selectedDeviceId = null;
 let deviceID = null;
 let element = null;
-
+let debug = false;
 export function vibrate() {
     if (supportsVibrate) navigator.vibrate(1000);
 }
@@ -18,6 +18,7 @@ export function init(instance, ele, elementid, options, deviceid) {
     id = elementid;
     deviceID = deviceid;
     element = ele;
+    debug = options.debug;
     supportsVibrate = "vibrate" in navigator;
     let startButton = element.querySelector("[data-action=startButton]");
     let resetButton = element.querySelector("[data-action=resetButton]");
@@ -29,12 +30,12 @@ export function init(instance, ele, elementid, options, deviceid) {
 
     if (resetButton) resetButton.addEventListener('click', () => {
         stop(elementid);
-        console.log('Reset.')
+        if (debug) console.log('Reset.')
     })
 
     if (closeButton) closeButton.addEventListener('click', () => {
         stop(elementid);
-        console.log('closeButton.')
+        if (debug) console.log('closeButton.')
         instance.invokeMethodAsync("CloseScan");
     })
 
@@ -53,16 +54,16 @@ export function load(elementid) {
 
         if (opt.pdf417) {
             codeReader = new ZXing.BrowserPDF417Reader();
-            console.log('ZXing code PDF417 reader initialized')
+            if (debug) console.log('ZXing code PDF417 reader initialized')
         } else if (opt.decodeAllFormats) {
             const hints = new Map();
             const formats = opt.formats;
             hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
             codeReader = new ZXing.BrowserMultiFormatReader(hints)
-            console.log('ZXing code reader initialized with all formats')
+            if (debug) console.log('ZXing code reader initialized with all formats')
         } else {
             codeReader = new ZXing.BrowserMultiFormatReader()
-            console.log('ZXing code reader initialized')
+            if (debug) console.log('ZXing code reader initialized')
         }
         codeReader.timeBetweenDecodingAttempts = opt.timeBetweenDecodingAttempts;
 
@@ -80,7 +81,7 @@ export function load(elementid) {
                             } else {
                                 selectedDeviceId = videoInputDevices[0].deviceId
                             }
-                            console.log('videoInputDevices:' + videoInputDevices.length);
+                            if (debug) console.log('videoInputDevices:' + videoInputDevices.length);
                             if (videoInputDevices.length > 1) {
                                 videoInputDevices.forEach((device) => {
                                     const sourceOption = document.createElement('option');
@@ -98,9 +99,9 @@ export function load(elementid) {
 
                                 sourceSelect.onchange = () => {
                                     selectedDeviceId = sourceSelect.value;
-                                    instance.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
+                                    inst.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
                                     codeReader.reset();
-                                    StartScan();
+                                    start(elementid);
                                 }
 
                                 sourceSelectPanel.style.display = 'block'
@@ -111,13 +112,13 @@ export function load(elementid) {
                         })
                         .catch((err) => {
                             console.log(err)
-                            instance.invokeMethodAsync("GetError", err + '');
+                            inst.invokeMethodAsync("GetError", err + '');
                         })
 
                 })
                 .catch((err) => {
                     console.error(`An error occurred: ${err}`);
-                    instance.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+                    inst.invokeMethodAsync('GetError', `An error occurred: ${err}`);
                 });
 
         }
@@ -128,9 +129,9 @@ export function start(elementid) {
     if (undefined !== codeReader && null !== codeReader && id == elementid) {
         if (opt.decodeonce) {
             codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
-                console.log(result)
+                if (debug) console.log(result)
                 vibrate();
-                console.log('autostop');
+                if (debug) console.log('autostop');
                 codeReader.reset();
                 return inst.invokeMethodAsync("GetResult", result.text);
             }).catch((err) => {
@@ -142,9 +143,9 @@ export function start(elementid) {
         } else {
             codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
                 if (result) {
-                    console.log(result)
+                    if (debug) console.log(result)
                     vibrate();
-                    console.log('None-stop');
+                    if (debug) console.log('None-stop');
                     inst.invokeMethodAsync("GetResult", result.text);
                 }
                 if (err && !(err instanceof ZXing.NotFoundException)) {
@@ -156,22 +157,22 @@ export function start(elementid) {
 
         var x = `decodeContinuously`;
         if (opt.decodeonce) x = `decodeOnce`;
-        console.log(`Started ` + x + ` decode from camera with id ${selectedDeviceId}`)
-        console.log(id, 'start');
+        if (debug) console.log(`Started ` + x + ` decode from camera with id ${selectedDeviceId}`)
+        if (debug) console.log(id, 'start');
     }
 }
 
 export function stop(elementid) {
     if (undefined !== codeReader && null !== codeReader && id == elementid) {
         codeReader.reset();
-        console.log(id, 'stop');
+        if (debug) console.log(id, 'stop');
     }
 }
 
 export function QRCodeSvg(instance, input, element, tobase64, size = 300) {
     const codeWriter = new ZXing.BrowserQRCodeSvgWriter()
 
-    console.log('ZXing code writer initialized')
+    if (debug) console.log('ZXing code writer initialized')
 
     if (tobase64) {
         const elementTemp = document.createElement('elementTemp');
@@ -189,24 +190,24 @@ export function DecodeFormImage(instance, element, options, data) {
     var codeReaderImage = null;
     if (options.pdf417) {
         codeReaderImage = new ZXing.BrowserPDF417Reader();
-        console.log('ZXing code PDF417 reader initialized')
+        if (debug) console.log('ZXing code PDF417 reader initialized')
     } else if (options.decodeAllFormats) {
         const hints = new Map();
         const formats = options.formats;
         hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
         codeReaderImage = new ZXing.BrowserMultiFormatReader(hints)
-        console.log('ZXing code reader initialized with all formats')
+        if (debug) console.log('ZXing code reader initialized with all formats')
     } else {
         codeReaderImage = new ZXing.BrowserMultiFormatReader()
-        console.log('ZXing code reader initialized')
+        if (debug) console.log('ZXing code reader initialized')
     }
-    console.log('ZXing code reader initialized')
+    if (debug) console.log('ZXing code reader initialized')
 
     if (data != null) {
         codeReaderImage.decodeFromImageUrl(data).then(result => {
             if (result) {
                 vibrate();
-                console.log(result.text);
+                if (debug) console.log(result.text);
                 instance.invokeMethodAsync('GetResult', result.text)
             }
         }).catch((err) => {
@@ -247,7 +248,7 @@ export function DecodeFormImage(instance, element, options, data) {
                 codeReaderImage.decodeFromImageUrl(e.target.result).then(result => {
                     if (result) {
                         vibrate();
-                        console.log(result.text);
+                        if (debug) console.log(result.text);
                         instance.invokeMethodAsync('GetResult', result.text)
                     }
                 }).catch((err) => {
@@ -272,6 +273,6 @@ export function destroy(elementid) {
         codeReader.reset();
         codeReader = null;
         //id = null;
-        console.log(id, 'destroy');
+        if (debug) console.log(id, 'destroy');
     }
 }

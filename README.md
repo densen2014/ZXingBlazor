@@ -64,6 +64,11 @@ https://www.nuget.org/packages/ZXingBlazor/
     ```
 ## Updates
 
+2023.11.5
+v1.0.8
+- fix issue 
+- hide debug info, manual open debug info, add options.Debug=true
+
 2023.11.1
 - Add 1. Save the last used device ID and call it automatically next time. 2. Specify the camera device ID.
 - Add Start,Stop,Reload , DecodeFromImage(dataUrl)
@@ -155,6 +160,11 @@ https://www.nuget.org/packages/ZXingBlazor/
     
 ## 更新
 
+2023.11.5
+v1.0.8
+- 修复问题
+- 隐藏调试信息，手动打开调试信息，添加options.Debug=true
+- 
 2023.11.1
 - 添加 1.保存最后使用设备ID下次自动调用, 2.指定摄像头设备ID
 - 添加 Start,Stop,Reload , DecodeFromImage(dataUrl)
