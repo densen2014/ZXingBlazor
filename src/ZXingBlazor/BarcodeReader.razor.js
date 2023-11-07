@@ -83,6 +83,7 @@ export function load(elementid) {
                             }
                             if (debug) console.log('videoInputDevices:' + videoInputDevices.length);
                             if (videoInputDevices.length > 1) {
+                                sourceSelect.innerHTML = '';
                                 videoInputDevices.forEach((device) => {
                                     const sourceOption = document.createElement('option');
                                     if (device.label === '') {

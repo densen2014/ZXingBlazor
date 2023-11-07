@@ -114,9 +114,10 @@ else
 
     <div @ref="barcodeReaderCustom.Element">
         <div style="width: 480px; max-width: 100%">
-            <button class="btn btn-outline-success p-2 m-1 w-25" data-action="startButton">Scan</button>
-            <button class="btn btn-outline-success p-2 m-1 w-25" data-action="resetButton">Reset</button>
-            <button type="button" class="btn btn-outline-success p-2 m-1 w-25" data-action="closeButton">Close</button>
+            <button class="btn btn-outline-success p-2 m-1 w-20" data-action="startButton">Scan</button>
+            <button class="btn btn-outline-success p-2 m-1 w-20" data-action="resetButton">Reset</button>
+            <button class="btn btn-outline-success p-2 m-1 w-20" @onclick="(async ()=>await barcodeReaderCustom.Reload())">Reload</button>
+            <button type="button" class="btn btn-outline-success p-2 m-1 w-20" data-action="closeButton">Close</button>
 
             <div data-action="sourceSelectPanel" style="display:none">
                 <label for="sourceSelect">SelectDevice:</label><span class="text-dark" data-action="result"></span>
@@ -348,4 +349,5 @@ else
         build = "Build:" + File.GetLastWriteTime(Path.Combine(Directory.GetCurrentDirectory(), "Demo.Server.dll")).ToLocalTime().ToString("yyyy-MM-dd HH:mm");
 
     }
+     
 }
