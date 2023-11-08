@@ -17,11 +17,13 @@ namespace ZXingBlazor.Components;
 public partial class BarcodeReader : IAsyncDisposable
 {
 
+    [Inject]
+    [NotNull]
+    private IJSRuntime? JS { get; set; }
+
     private IJSObjectReference? module;
 
-    private DotNetObjectReference<BarcodeReader>? objRef;
-
-    [Inject][NotNull] private IJSRuntime? JS { get; set; }
+    private DotNetObjectReference<BarcodeReader>? Instance { get; set; }
 
     [NotNull]
     private StorageService? Storage { get; set; }
@@ -121,8 +123,8 @@ public partial class BarcodeReader : IAsyncDisposable
         {
             if (!firstRender) return;
             Storage= new StorageService(JS);
-            objRef = DotNetObjectReference.Create(this);
             module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+            Instance = DotNetObjectReference.Create(this);
             if (Options == null)
             {
                 Options = new ZXingOptions()
@@ -140,7 +142,7 @@ public partial class BarcodeReader : IAsyncDisposable
             {
 
             }
-            await module.InvokeVoidAsync("init", objRef, Element, Element.Id, Options, DeviceID);
+            await module.InvokeVoidAsync("init", Instance, Element, Element.Id, Options, DeviceID);
         }
         catch (Exception e)
         {
@@ -178,12 +180,12 @@ public partial class BarcodeReader : IAsyncDisposable
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        await module!.InvokeVoidAsync("destroy", Element.Id);
+        Instance?.Dispose();
         if (module is not null)
         {
-            await module.InvokeVoidAsync("destroy", Element.Id);
             await module.DisposeAsync();
         }
-        objRef?.Dispose();
     }
 
     /// <summary>

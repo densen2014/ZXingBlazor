@@ -274,6 +274,12 @@ export function destroy(elementid) {
         codeReader.reset();
         codeReader = null;
         //id = null;
-        if (debug) console.log(id, 'destroy');
+        id = null;
+        opt = null;
+        inst = null;
+        selectedDeviceId = null;
+        deviceID = null;
+        element = null;
+       if (debug) console.log(id, 'destroy');
     }
 }
