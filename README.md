@@ -1,4 +1,4 @@
-﻿# ZXing Blazor Component 1.0.8
+﻿# ZXing Blazor Component 1.0.10
 
 English | <a href="https://blazor.app1.es/"> Other Blazor components</a>
 
