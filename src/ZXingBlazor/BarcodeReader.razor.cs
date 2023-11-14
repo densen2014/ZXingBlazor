@@ -131,7 +131,8 @@ public partial class BarcodeReader : IAsyncDisposable
                 {
                     Pdf417 = Pdf417Only,
                     Decodeonce = Decodeonce,
-                    DecodeAllFormats = DecodeAllFormats
+                    DecodeAllFormats = DecodeAllFormats,
+                    //TRY_HARDER = true
                 };
             }
             try

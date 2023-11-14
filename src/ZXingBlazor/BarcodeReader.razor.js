@@ -46,23 +46,52 @@ export function reload(elementid) {
     load(elementid);
 }
 
+function genHints(opt) {
+    const hints = new Map();
+    if (opt.TRY_HARDER) {
+        hints.set(ZXing.DecodeHintType.TRY_HARDER, opt.TRY_HARDER);
+    }
+    if (opt.ASSUME_CODE_39_CHECK_DIGIT) {
+        hints.set(ZXing.DecodeHintType.ASSUME_CODE_39_CHECK_DIGIT, opt.ASSUME_CODE_39_CHECK_DIGIT);
+    }
+    if (opt.ASSUME_GS1) {
+        hints.set(ZXing.DecodeHintType.ASSUME_GS1, opt.ASSUME_GS1);
+    }
+    if (opt.CHARACTER_SET) {
+        hints.set(ZXing.DecodeHintType.CHARACTER_SET, opt.CHARACTER_SET);
+    }
+    if (opt.OTHER) {
+        hints.set(ZXing.DecodeHintType.OTHER, opt.OTHER);
+    }
+    if (opt.PURE_BARCODE) {
+        hints.set(ZXing.DecodeHintType.PURE_BARCODE, opt.PURE_BARCODE);
+    }
+    if (opt.RETURN_CODABAR_START_END) {
+        hints.set(ZXing.DecodeHintType.RETURN_CODABAR_START_END, opt.RETURN_CODABAR_START_END);
+    }
+    if (opt.TRY_HARDER) {
+        hints.set(ZXing.DecodeHintType.TRY_HARDER, opt.TRY_HARDER);
+    }
+    return hints;
+}
+
 export function load(elementid) {
     if (id == elementid) {
 
         const sourceSelect = element.querySelector("[data-action=sourceSelect]");
         const sourceSelectPanel = element.querySelector("[data-action=sourceSelectPanel]");
+        const hints = genHints(opt);
 
         if (opt.pdf417) {
-            codeReader = new ZXing.BrowserPDF417Reader();
+            codeReader = new ZXing.BrowserPDF417Reader(hints);
             if (debug) console.log('ZXing code PDF417 reader initialized')
         } else if (opt.decodeAllFormats) {
-            const hints = new Map();
             const formats = opt.formats;
             hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
             codeReader = new ZXing.BrowserMultiFormatReader(hints)
             if (debug) console.log('ZXing code reader initialized with all formats')
         } else {
-            codeReader = new ZXing.BrowserMultiFormatReader()
+            codeReader = new ZXing.BrowserMultiFormatReader(hints)
             if (debug) console.log('ZXing code reader initialized')
         }
         codeReader.timeBetweenDecodingAttempts = opt.timeBetweenDecodingAttempts;
@@ -189,17 +218,17 @@ export function QRCodeSvg(instance, input, element, tobase64, size = 300) {
 
 export function DecodeFormImage(instance, element, options, data) {
     var codeReaderImage = null;
+    const hints = genHints(options);
     if (options.pdf417) {
-        codeReaderImage = new ZXing.BrowserPDF417Reader();
+        codeReaderImage = new ZXing.BrowserPDF417Reader(hints);
         if (debug) console.log('ZXing code PDF417 reader initialized')
     } else if (options.decodeAllFormats) {
-        const hints = new Map();
         const formats = options.formats;
         hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
         codeReaderImage = new ZXing.BrowserMultiFormatReader(hints)
         if (debug) console.log('ZXing code reader initialized with all formats')
     } else {
-        codeReaderImage = new ZXing.BrowserMultiFormatReader()
+        codeReaderImage = new ZXing.BrowserMultiFormatReader(hints)
         if (debug) console.log('ZXing code reader initialized')
     }
     if (debug) console.log('ZXing code reader initialized')
@@ -245,12 +274,15 @@ export function DecodeFormImage(instance, element, options, data) {
 
 
             const reader = new FileReader()
-            reader.onloadend = e => {
+            reader.onloadend = e => { 
+
                 codeReaderImage.decodeFromImageUrl(e.target.result).then(result => {
                     if (result) {
                         vibrate();
                         if (debug) console.log(result.text);
                         instance.invokeMethodAsync('GetResult', result.text)
+                    } else {
+                        instance.invokeMethodAsync('GetError', "no valid barcode detected")
                     }
                 }).catch((err) => {
                     if (err) {

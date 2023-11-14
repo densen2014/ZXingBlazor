@@ -64,6 +64,11 @@ https://www.nuget.org/packages/ZXingBlazor/
     ```
 ## Updates
 
+2023.11.14
+v1.0.11
+- Add hints options in ZXingOptions
+<a href="https://github.com/densen2014/ZXingBlazor/blob/master/src/ZXingBlazor/ZXingOptions.cs"> more...</a>
+
 2023.11.5
 v1.0.8
 - fix issue 
@@ -108,11 +113,10 @@ v1.0.8
 本项目是利用 ZXing 进行封装的 Blazor 组件库, 支持条码,二维码,PDF417格式.
 
 ## 演示地址  
-ssr
-https://zxingblazor.app1.es
 
-wasm
+https://zxingblazor.app1.es
 https://zxingblazorwasm.app1.es
+https://blazor.app1.es/barcodescanner
 
 
 ## Nuget 包安装
@@ -159,6 +163,11 @@ https://www.nuget.org/packages/ZXingBlazor/
     ```
     
 ## 更新
+
+2023.11.14
+v1.0.11
+- Add hints options in ZXingOptions
+<a href="https://github.com/densen2014/ZXingBlazor/blob/master/src/ZXingBlazor/ZXingOptions.cs"> more...</a>
 
 2023.11.5
 v1.0.8

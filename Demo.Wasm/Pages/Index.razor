@@ -93,6 +93,15 @@ else
     </code>
 </pre>
 }
+<p style="color:red">@message</p>
+<hr />
+<BarCodes @ref="barCodes" OnQRCodeGen="OnResult" OnDecodeFromImage="OnResult" OnError="OnError" QRCodeWidth="200"
+          Options="options" />
+<button class="btn btn-primary"
+        type="button" @onclick="DecodeFromImage">
+    Decode from image
+</button>
+
 <hr />
 
 <button class="btn btn-primary"
@@ -113,26 +122,25 @@ else
                    @ref="barcodeReaderCustom" />
 
     <div @ref="barcodeReaderCustom.Element">
-        <div style="width: 480px; max-width: 100%">
-            <button class="btn btn-outline-success p-2 m-1 w-20" data-action="startButton">Scan</button>
-            <button class="btn btn-outline-success p-2 m-1 w-20" data-action="resetButton">Reset</button>
-            <button class="btn btn-outline-success p-2 m-1 w-20" @onclick="(async ()=>await barcodeReaderCustom.Reload())">Reload</button>
-            <button type="button" class="btn btn-outline-success p-2 m-1 w-20" data-action="closeButton">Close</button>
-
+        <div style="width: 75vw; max-width: 260px;">
+            <div>
+                <video id="video" playsinline autoplay style="width:70vw;max-width:250px;height:200px;border: 1px solid red"></video>
+            </div>
             <div data-action="sourceSelectPanel" style="display:none">
                 <label for="sourceSelect">SelectDevice:</label><span class="text-dark" data-action="result"></span>
                 <select data-action="sourceSelect" style="max-width:100%" class="form-control">
                 </select>
             </div>
-            <div>
-                <video id="video" playsinline autoplay style="height:480px;width: 640px;border: 1px solid red"></video>
-            </div>
+            <button class="btn btn-outline-success p-2 m-1 w-20" data-action="startButton">Scan</button>
+            <button class="btn btn-outline-success p-2 m-1 w-20" data-action="resetButton">Reset</button>
+            <button class="btn btn-outline-success p-2 m-1 w-20" @onclick="(async ()=>await barcodeReaderCustom.Reload())">Reload</button>
+            <button type="button" class="btn btn-outline-success p-2 m-1 w-20" data-action="closeButton">Close</button>
+
         </div>
     </div>
 
 
 }
-<p>@message</p>
 <br />
 <br />
 <br />
@@ -188,7 +196,13 @@ else
                     </tr>
                     <tr>
                         <td><div class="table-cell">options</div></td>
-                        <td><div class="table-cell">ZXingOptions: Pdf417 | Decodeonce | TimeBetweenDecodingAttempts | DecodeAllFormats | formats</div></td>
+                        <td>
+                            <div class="table-cell">
+                                ZXingOptions: Pdf417 | Decodeonce | TimeBetweenDecodingAttempts | DecodeAllFormats | formats,<br />
+                                <a href="https://github.com/densen2014/ZXingBlazor/blob/master/src/ZXingBlazor/ZXingOptions.cs"> more...</a>
+                            </div>
+                        </td>
+                        <td><div class="table-cell">Parameter</div></td>
                         <td><div class="table-cell">Parameter</div></td>
                     </tr>
                     <tr>
@@ -278,6 +292,7 @@ else
 <h6 style="color:lightskyblue;">@build</h6>
 
 @code{
+    BarCodes barCodes;
 
     /// <summary>
     /// Display the scan code interface
@@ -313,7 +328,7 @@ else
         }
         else
         {
-            if (BarCode.Length > 60) BarCode = "";
+            if (BarCode.Length > 200) BarCode = "";
             BarCode += e + Environment.NewLine;
         }
     }
@@ -349,4 +364,19 @@ else
 
     }
 
+    private ZXingOptions options = new ZXingOptions() { TRY_HARDER = true };
+
+    private Task OnResult(string message)
+    {
+        this.BarCode = message;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private async Task DecodeFromImage()
+    {
+        this.BarCode = "";
+        this.message = "";
+        await barCodes!.DecodeFromImage();
+    }
 }
