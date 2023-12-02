@@ -56,6 +56,15 @@ public partial class BarCodes : IAsyncDisposable
     public int QRCodeWidth { get; set; } = 300;
 
     /// <summary>
+    /// 显示从图片解码按钮 / Display decode from the image button
+    /// </summary>
+    [Parameter]
+    public bool ShowSelectFile { get; set; }
+
+    [Parameter]
+    public string SelectFileTitle { get; set; }="图片解码";
+
+    /// <summary>
     /// 解码所有编码形式,性能较差, 开启后可用 options.formats 指定编码形式.默认为 false | Decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false
     /// </summary>
     [Parameter]
@@ -68,8 +77,8 @@ public partial class BarCodes : IAsyncDisposable
         {
             if (!firstRender) return;
             objRef = DotNetObjectReference.Create(this);
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
-        }
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version); 
+         }
         catch (Exception e)
         {
             if (OnError != null) await OnError.Invoke(e.Message);
@@ -120,7 +129,8 @@ public partial class BarCodes : IAsyncDisposable
         {
             Options = new ZXingOptions()
             {
-                DecodeAllFormats = DecodeAllFormats
+                DecodeAllFormats = DecodeAllFormats,
+                ShowSelectFile=ShowSelectFile,
             };
         }
         if (dataUrl!=null && !dataUrl.StartsWith("data:image"))

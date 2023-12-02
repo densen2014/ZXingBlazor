@@ -2,4 +2,8 @@
 
 <div @ref="Element">
     <pre><code data-action="result"></code></pre>
+    <div style="@(ShowSelectFile?"":"visibility:hidden;")">
+        <label for="selectFile" class="input-label">@SelectFileTitle</label>
+        <input id="selectFile" class="sr-only" accept="image/*" capture type="file">
+    </div>
 </div>

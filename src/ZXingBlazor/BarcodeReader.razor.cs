@@ -116,6 +116,18 @@ public partial class BarcodeReader : IAsyncDisposable
     [Parameter]
     public bool SaveDeviceID { get; set; } = true;
 
+    /// <summary>
+    /// 录屏解码 (手机不支持)
+    /// </summary>
+    [Parameter]
+    public bool Screenshot { get; set; }
+
+    /// <summary>
+    /// 使用zxing内置视频流打开方式,默认 false
+    /// </summary>
+    [Parameter]
+    public bool StreamFromZxing { get; set; }
+
     // To prevent making JavaScript interop calls during prerendering
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -125,16 +137,6 @@ public partial class BarcodeReader : IAsyncDisposable
             Storage= new StorageService(JS);
             module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
             Instance = DotNetObjectReference.Create(this);
-            if (Options == null)
-            {
-                Options = new ZXingOptions()
-                {
-                    Pdf417 = Pdf417Only,
-                    Decodeonce = Decodeonce,
-                    DecodeAllFormats = DecodeAllFormats,
-                    //TRY_HARDER = true
-                };
-            }
             try
             {
                 if (SaveDeviceID) DeviceID = await Storage.GetValue("CamsDeviceID", DeviceID);
@@ -142,6 +144,19 @@ public partial class BarcodeReader : IAsyncDisposable
             catch (Exception)
             {
 
+            }
+            if (Options == null)
+            {
+                Options = new ZXingOptions()
+                {
+                    Pdf417 = Pdf417Only,
+                    Decodeonce = Decodeonce,
+                    DecodeAllFormats = DecodeAllFormats,
+                    Screenshot = Screenshot,
+                    StreamFromZxing = StreamFromZxing,
+                    DeviceID= DeviceID,
+                    //TRY_HARDER = true
+                };
             }
             await module.InvokeVoidAsync("init", Instance, Element, Element.Id, Options, DeviceID);
         }

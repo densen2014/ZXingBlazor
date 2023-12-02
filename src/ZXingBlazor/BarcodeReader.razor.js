@@ -8,6 +8,9 @@ let selectedDeviceId = null;
 let deviceID = null;
 let element = null;
 let debug = false;
+let width = 640;
+let height = 0;
+
 export function vibrate() {
     if (supportsVibrate) navigator.vibrate(1000);
 }
@@ -80,23 +83,146 @@ export function load(elementid) {
 
         const sourceSelect = element.querySelector("[data-action=sourceSelect]");
         const sourceSelectPanel = element.querySelector("[data-action=sourceSelectPanel]");
-        const hints = genHints(opt);
-
-        if (opt.pdf417) {
-            codeReader = new ZXing.BrowserPDF417Reader(hints);
-            if (debug) console.log('ZXing code PDF417 reader initialized')
-        } else if (opt.decodeAllFormats) {
-            const formats = opt.formats;
-            hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
-            codeReader = new ZXing.BrowserMultiFormatReader(hints)
-            if (debug) console.log('ZXing code reader initialized with all formats')
-        } else {
-            codeReader = new ZXing.BrowserMultiFormatReader(hints)
-            if (debug) console.log('ZXing code reader initialized')
-        }
+        const video = element.querySelector("[data-action=video]");
+        codeReader = genCodeReaderImage(opt);
         codeReader.timeBetweenDecodingAttempts = opt.timeBetweenDecodingAttempts;
 
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        if (opt.screenshot && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+            navigator.mediaDevices
+                .getDisplayMedia({ video: true, audio: false })
+                .then((stream) => {
+                    //video.srcObject = stream;
+                    //video.play();
+
+                    codeReader.decodeFromStream(stream, video, (result, err) => {
+                        if (result) {
+                            if (debug) console.log(result)
+                            vibrate();
+                            if (debug) console.log('None-stop');
+                            inst.invokeMethodAsync("GetResult", result.text);
+                        }
+                        if (err && !(err instanceof ZXing.NotFoundException)) {
+                            console.log(err)
+                            inst.invokeMethodAsync("GetError", err + '');
+                        }
+                    })
+
+                })
+                .catch((err) => {
+                    console.error(`An error occurred: ${err}`);
+                    inst.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+                });
+        } else if (!opt.streamFromZxing && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+
+            if (!navigator.mediaDevices?.enumerateDevices) {
+                console.log("enumerateDevices() not supported.");
+            } else {
+                if (!opt.width) opt.width = 640;
+                if (!opt.height) opt.height = 480;
+                width = opt.width;
+                if (debug) console.log(`Set: ${selectedDeviceId} video ${opt.width} x ${opt.height}`);
+                var constraints = {
+                    video: {
+                        width: { ideal: opt.width },
+                        height: { ideal: opt.height },
+                        facingMode: "environment",
+                        focusMode: "continuous",
+                    }, audio: false
+                };
+
+                if (selectedDeviceId != null || opt.deviceID != null) {
+                    let deviceId = selectedDeviceId;
+                    if (deviceId == null) deviceId = opt.deviceID;
+                    constraints = {
+                        video: {
+                            deviceId: deviceId ? { exact: deviceId } : undefined,
+                            width: { ideal: opt.width },
+                            height: { ideal: opt.height },
+                            facingMode: "environment",
+                            focusMode: "continuous",
+                        },
+                        audio: false
+                    }
+                    if (debug) console.log(constraints.video.deviceId);
+                }
+                navigator.mediaDevices
+                    .getUserMedia(constraints)
+                    .then((stream) => {
+
+                        try {
+                            video.srcObject = null;
+                        }
+                        catch (err) {
+                            video.src = '';
+                        }
+                        if (video) {
+                            video.removeAttribute('src');
+                        }
+
+                        //video.srcObject = stream;
+                        //video.play();
+
+                        if (selectedDeviceId == null) {
+                            navigator.mediaDevices.enumerateDevices()
+                                .then((devices) => {
+                                    let videoInputDevices=[];
+                                    devices.forEach((device) => {
+                                        if (device.kind === 'videoinput') {
+                                            videoInputDevices.push(device);
+                                        }
+                                    });
+                                    if (deviceID != null) {
+                                        selectedDeviceId = deviceID
+                                    } else if (videoInputDevices.length > 1) {
+                                        selectedDeviceId = videoInputDevices[1].deviceId
+                                    } else {
+                                        selectedDeviceId = videoInputDevices[0].deviceId
+                                    }
+                                    if (debug) console.log('videoInputDevices:' + videoInputDevices.length);
+                                    if (videoInputDevices.length > 1) {
+                                        sourceSelect.innerHTML = '';
+                                        videoInputDevices.forEach((device) => {
+                                            const sourceOption = document.createElement('option');
+                                            if (device.label === '') {
+                                                sourceOption.text = 'Camera' + (sourceSelect.length + 1);
+                                            } else {
+                                                sourceOption.text = device.label
+                                            }
+                                            sourceOption.value = device.deviceId
+                                            if (opt.deviceID != null && device.deviceId == opt.deviceID) {
+                                                sourceOption.selected = true
+                                            }
+                                            sourceSelect.appendChild(sourceOption)
+                                        });
+
+                                        sourceSelect.onchange = () => {
+                                            selectedDeviceId = sourceSelect.value;
+                                            inst.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
+                                            codeReader.reset();
+                                            start(elementid);
+                                        }
+
+                                        sourceSelectPanel.style.display = 'block'
+
+                                    }
+
+                                    start(elementid);
+
+                                })
+                                .catch((err) => {
+                                    console.error(`${err.name}: ${err.message}`);
+                                });
+                        }
+                    })
+                    .catch((err) => {
+                        console.error(`An error occurred: ${err}`);
+                        inst.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+                    });
+
+            }
+
+
+        } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices
                 .getUserMedia({ audio: false, video: true })
                 .then(() => {
@@ -216,7 +342,7 @@ export function QRCodeSvg(instance, input, element, tobase64, size = 300) {
     }
 }
 
-export function DecodeFormImage(instance, element, options, data) {
+function genCodeReaderImage(options) {
     var codeReaderImage = null;
     const hints = genHints(options);
     if (options.pdf417) {
@@ -232,6 +358,11 @@ export function DecodeFormImage(instance, element, options, data) {
         if (debug) console.log('ZXing code reader initialized')
     }
     if (debug) console.log('ZXing code reader initialized')
+    return codeReaderImage;
+}
+
+export function DecodeFormImage(instance, element, options, data) {
+    var codeReaderImage = genCodeReaderImage(options);
 
     if (data != null) {
         codeReaderImage.decodeFromImageUrl(data).then(result => {
@@ -274,7 +405,7 @@ export function DecodeFormImage(instance, element, options, data) {
 
 
             const reader = new FileReader()
-            reader.onloadend = e => { 
+            reader.onloadend = e => {
 
                 codeReaderImage.decodeFromImageUrl(e.target.result).then(result => {
                     if (result) {
@@ -312,6 +443,6 @@ export function destroy(elementid) {
         selectedDeviceId = null;
         deviceID = null;
         element = null;
-       if (debug) console.log(id, 'destroy');
+        if (debug) console.log(id, 'destroy');
     }
 }

@@ -4,6 +4,7 @@
 // e-mail:zhouchuanglin@gmail.com 
 // **********************************
 
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace ZXingBlazor.Components;
@@ -35,6 +36,51 @@ public class ZXingOptions
     public bool DecodeAllFormats { get; set; }
 
     /// <summary>
+    /// 显示从图片解码按钮 / Display decode from the image button
+    /// </summary>
+    public bool ShowSelectFile { get; set; }
+
+    /// <summary>
+    /// 录屏解码
+    /// </summary>
+    public bool Screenshot { get; set; }
+
+    /// <summary>
+    /// 使用zxing内置视频流打开方式,默认 false
+    /// </summary>
+    public bool StreamFromZxing { get; set; }
+
+    /// <summary>
+    /// 显示log
+    /// </summary>
+    [DisplayName("显示log")]
+    public bool Debug { get; set; }
+
+    /// <summary>
+    /// 图像质量,默认为 0.9
+    /// </summary>
+    [DisplayName("图像质量")]
+    public double Quality { get; set; } = 0.9d;
+
+    /// <summary>
+    /// 图像宽度,默认为 640
+    /// </summary>
+    [DisplayName("图像宽度")]
+    public int? Width { get; set; }
+
+    /// <summary>
+    /// 图像高度,默认为 480
+    /// </summary>
+    [DisplayName("图像高度")]
+    public int? Height { get; set; }
+
+    /// <summary>
+    /// 指定摄像头设备ID
+    /// </summary>
+    [DisplayName("指定摄像头设备ID")]
+    public string? DeviceID { get; set; }
+
+    /// <summary>
     /// 已知图像是几种可能的格式之一。
     /// </summary>
     public List<BarcodeFormat> formats { get; set; } = new List<BarcodeFormat>() {
@@ -56,8 +102,6 @@ public class ZXingOptions
         BarcodeFormat.UPC_E,
         BarcodeFormat.UPC_EAN_EXTENSION,
     };
-
-    public bool Debug { get; set; }
 
     ///// <summary>
     ///// 如果为 true，尝试解码为倒置图像。所有配置的解码器都被简单地用倒置图像第二次调用
