@@ -66,7 +66,7 @@ https://www.nuget.org/packages/ZXingBlazor/
 ## Updates
 
 2023.12.2
-v1.1.1
+v1.1.2
 - Add parameters: screen recording decoding
 - Add parameters: use zxing built-in video stream opening method, default false
 - ZXingOptions adds new version of video stream parameters

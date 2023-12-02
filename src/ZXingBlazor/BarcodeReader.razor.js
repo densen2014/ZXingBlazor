@@ -149,15 +149,15 @@ export function load(elementid) {
                     .getUserMedia(constraints)
                     .then((stream) => {
 
-                        try {
-                            video.srcObject = null;
-                        }
-                        catch (err) {
-                            video.src = '';
-                        }
-                        if (video) {
-                            video.removeAttribute('src');
-                        }
+                        //try {
+                        //    video.srcObject = null;
+                        //}
+                        //catch (err) {
+                        //    video.src = '';
+                        //}
+                        //if (video) {
+                        //    video.removeAttribute('src');
+                        //}
 
                         //video.srcObject = stream;
                         //video.play();
