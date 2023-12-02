@@ -189,7 +189,7 @@ export function load(elementid) {
                                                 sourceOption.text = device.label
                                             }
                                             sourceOption.value = device.deviceId
-                                            if (opt.deviceID != null && device.deviceId == opt.deviceID) {
+                                            if (selectedDeviceId != null && device.deviceId == selectedDeviceId) {
                                                 sourceOption.selected = true
                                             }
                                             sourceSelect.appendChild(sourceOption)
