@@ -69,7 +69,11 @@ https://www.nuget.org/packages/ZXingBlazor/
 v1.1.1
 - Add parameters: screen recording decoding
 - Add parameters: use zxing built-in video stream opening method, default false
-
+- ZXingOptions adds new version of video stream parameters
+   a. Quality image quality, default is 0.9
+   a. Width image width, default is 640
+   a. Height image height, default is 480
+   
 2023.11.14
 v1.0.11
 - Add hints options in ZXingOptions
@@ -175,9 +179,9 @@ v1.1.1
 - 添加参数:录屏解码
 - 添加参数:使用zxing内置视频流打开方式,默认 false
 - ZXingOptions 添加新版视频流参数
-  1. Quality 图像质量,默认为 0.9
-  2. Width 图像宽度,默认为 640
-  3. Height 图像高度,默认为 480
+  a. Quality 图像质量,默认为 0.9
+  a. Width 图像宽度,默认为 640
+  a. Height 图像高度,默认为 480
 
 2023.11.14
 v1.0.11
