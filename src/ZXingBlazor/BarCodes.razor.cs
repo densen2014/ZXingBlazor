@@ -17,7 +17,7 @@ public partial class BarCodes : IAsyncDisposable
 {
     [Inject][NotNull] private IJSRuntime? JS { get; set; }
 
-    private IJSObjectReference? module;
+    private IJSObjectReference? Module { get; set; }
     private DotNetObjectReference<BarCodes>? objRef;
 
     /// <summary>
@@ -77,7 +77,7 @@ public partial class BarCodes : IAsyncDisposable
         {
             if (!firstRender) return;
             objRef = DotNetObjectReference.Create(this);
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version); 
+            Module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version); 
          }
         catch (Exception e)
         {
@@ -99,7 +99,7 @@ public partial class BarCodes : IAsyncDisposable
     /// <returns></returns>
     public async Task QRCodeGen(string input)
     {
-        await module!.InvokeVoidAsync("QRCodeSvg", objRef, input, Element, false, QRCodeWidth);
+        await Module!.InvokeVoidAsync("QRCodeSvg", objRef, input, Element, false, QRCodeWidth);
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ public partial class BarCodes : IAsyncDisposable
     /// <returns></returns>
     public async Task QRCodeGenSvg(string input)
     {
-        await module!.InvokeVoidAsync("QRCodeSvg", objRef, input, Element, true, QRCodeWidth);
+        await Module!.InvokeVoidAsync("QRCodeSvg", objRef, input, Element, true, QRCodeWidth);
     }
 
     [JSInvokable]
@@ -137,7 +137,7 @@ public partial class BarCodes : IAsyncDisposable
         {
             dataUrl = "data:image/jpeg;base64," + dataUrl;
         }
-        await module!.InvokeVoidAsync("DecodeFormImage", objRef, Element, Options, dataUrl);
+        await Module!.InvokeVoidAsync("DecodeFormImage", objRef, Element, Options, dataUrl);
     }
 
     [JSInvokable]
@@ -148,9 +148,9 @@ public partial class BarCodes : IAsyncDisposable
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        if (module is not null)
+        if (Module is not null)
         {
-            await module.DisposeAsync();
+            await Module.DisposeAsync();
         }
         objRef?.Dispose();
     }

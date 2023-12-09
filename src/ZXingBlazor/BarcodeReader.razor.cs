@@ -21,7 +21,7 @@ public partial class BarcodeReader : IAsyncDisposable
     [NotNull]
     private IJSRuntime? JS { get; set; }
 
-    private IJSObjectReference? module;
+    private IJSObjectReference? Module { get; set; }
 
     private DotNetObjectReference<BarcodeReader>? Instance { get; set; }
 
@@ -135,7 +135,7 @@ public partial class BarcodeReader : IAsyncDisposable
         {
             if (!firstRender) return;
             Storage= new StorageService(JS);
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+            Module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
             Instance = DotNetObjectReference.Create(this);
             try
             {
@@ -158,7 +158,7 @@ public partial class BarcodeReader : IAsyncDisposable
                     //TRY_HARDER = true
                 };
             }
-            await module.InvokeVoidAsync("init", Instance, Element, Element.Id, Options, DeviceID);
+            await Module.InvokeVoidAsync("init", Instance, Element, Element.Id, Options, DeviceID);
         }
         catch (Exception e)
         {
@@ -169,17 +169,17 @@ public partial class BarcodeReader : IAsyncDisposable
 
     public async Task Start()
     {
-        await module!.InvokeVoidAsync("start", Element.Id);
+        await Module!.InvokeVoidAsync("start", Element.Id);
     }
 
     public async Task Stop ()
     {
-        await module!.InvokeVoidAsync("stop", Element.Id);
+        await Module!.InvokeVoidAsync("stop", Element.Id);
     }
 
     public async Task Reload ()
     {
-        await module!.InvokeVoidAsync("reload", Element.Id);
+        await Module!.InvokeVoidAsync("reload", Element.Id);
     }
 
     [JSInvokable]
@@ -196,11 +196,11 @@ public partial class BarcodeReader : IAsyncDisposable
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        await module!.InvokeVoidAsync("destroy", Element.Id);
+        await Module!.InvokeVoidAsync("destroy", Element.Id);
         Instance?.Dispose();
-        if (module is not null)
+        if (Module is not null)
         {
-            await module.DisposeAsync();
+            await Module.DisposeAsync();
         }
     }
 

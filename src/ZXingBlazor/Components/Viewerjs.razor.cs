@@ -62,7 +62,7 @@ public partial class Viewerjs : IAsyncDisposable
     /// </summary>
     [Parameter] public string? ID { get; set; }
 
-    private IJSObjectReference? module;
+    private IJSObjectReference? Module { get; set; }
 
     protected override void OnInitialized()
     {
@@ -85,19 +85,19 @@ public partial class Viewerjs : IAsyncDisposable
     {
         if (firstRender)
         {
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/lib/viewerjs/viewerjs.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
-            await module.InvokeVoidAsync("initOptions", Options);
+            Module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/lib/viewerjs/viewerjs.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+            await Module.InvokeVoidAsync("initOptions", Options);
         }
     }
 
-    public async Task OnOptionsChanged(ViewerOptions options) => await module!.InvokeVoidAsync("initOptions", options);
+    public async Task OnOptionsChanged(ViewerOptions options) => await Module!.InvokeVoidAsync("initOptions", options);
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        if (module is not null)
+        if (Module is not null)
         {
-            await module.InvokeVoidAsync("destroy", Options);
-            await module.DisposeAsync();
+            await Module.InvokeVoidAsync("destroy", Options);
+            await Module.DisposeAsync();
         }
     }
 }

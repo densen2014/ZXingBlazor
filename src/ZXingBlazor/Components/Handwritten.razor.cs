@@ -42,14 +42,14 @@ public partial class Handwritten : IAsyncDisposable
     [Parameter]
     public bool ShowHandwritten { get; set; }
 
-    private IJSObjectReference? module;
+    private IJSObjectReference? Module { get; set; }
 
     // To prevent making JavaScript interop calls during prerendering
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-        module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/lib/handwritten/handwritten.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
-        await module.InvokeVoidAsync("init", DotNetObjectReference.Create(this), null);
+        Module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/lib/handwritten/handwritten.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+        await Module.InvokeVoidAsync("init", DotNetObjectReference.Create(this), null);
     }
 
     [JSInvokable("invokeFromJS")]
@@ -64,10 +64,10 @@ public partial class Handwritten : IAsyncDisposable
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        if (module is not null)
+        if (Module is not null)
         {
-            //await module.InvokeVoidAsync("destroy",null);
-            await module.DisposeAsync();
+            //await Module.InvokeVoidAsync("destroy",null);
+            await Module.DisposeAsync();
         }
     }
 }
