@@ -19,7 +19,7 @@ public partial class BarcodeReader : IAsyncDisposable
 
     [Inject]
     [NotNull]
-    private IJSRuntime? JS { get; set; }
+    private IJSRuntime? JSRuntime { get; set; }
 
     private IJSObjectReference? Module { get; set; }
 
@@ -134,8 +134,8 @@ public partial class BarcodeReader : IAsyncDisposable
         try
         {
             if (!firstRender) return;
-            Storage= new StorageService(JS);
-            Module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+            Storage= new StorageService(JSRuntime);
+            Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
             Instance = DotNetObjectReference.Create(this);
             try
             {
