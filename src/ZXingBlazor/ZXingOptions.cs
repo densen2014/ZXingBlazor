@@ -167,7 +167,13 @@ public class ZXingOptions
     /// 花更多的时间尝试寻找条形码；优化准确性，而不是速度
     /// </summary>
     [JsonPropertyName("TRY_HARDER")]
-    public bool? TRY_HARDER { get; set; } 
+    public bool? TRY_HARDER { get; set; }
+
+    /// <summary>
+    /// 尝试解码反色条码 / Try decoding invert-colors barcode
+    /// </summary>
+    public bool? TryInvertColors { get; set; }
+
 }
 
 
