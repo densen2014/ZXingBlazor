@@ -15,13 +15,15 @@ namespace ZXingBlazor.Components;
 /// </summary>
 public partial class BarCodes : IAsyncDisposable
 {
-    [Inject][NotNull] private IJSRuntime? JSRuntime { get; set; }
+    [Inject]
+    [NotNull]
+    private IJSRuntime? JSRuntime { get; set; }
 
     private IJSObjectReference? Module { get; set; }
-    private DotNetObjectReference<BarCodes>? objRef;
+    private DotNetObjectReference<BarCodes>? Instance { get; set; }
 
     /// <summary>
-    ///
+    /// UI界面元素的引用对象
     /// </summary>
     public ElementReference Element { get; set; }
 
@@ -76,7 +78,7 @@ public partial class BarCodes : IAsyncDisposable
         try
         {
             if (!firstRender) return;
-            objRef = DotNetObjectReference.Create(this);
+            Instance = DotNetObjectReference.Create(this);
             Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version); 
          }
         catch (Exception e)
@@ -99,7 +101,7 @@ public partial class BarCodes : IAsyncDisposable
     /// <returns></returns>
     public async Task QRCodeGen(string input)
     {
-        await Module!.InvokeVoidAsync("QRCodeSvg", objRef, input, Element, false, QRCodeWidth);
+        await Module!.InvokeVoidAsync("QRCodeSvg", Instance, input, Element, false, QRCodeWidth);
     }
 
     /// <summary>
@@ -109,7 +111,7 @@ public partial class BarCodes : IAsyncDisposable
     /// <returns></returns>
     public async Task QRCodeGenSvg(string input)
     {
-        await Module!.InvokeVoidAsync("QRCodeSvg", objRef, input, Element, true, QRCodeWidth);
+        await Module!.InvokeVoidAsync("QRCodeSvg", Instance, input, Element, true, QRCodeWidth);
     }
 
     [JSInvokable]
@@ -137,7 +139,7 @@ public partial class BarCodes : IAsyncDisposable
         {
             dataUrl = "data:image/jpeg;base64," + dataUrl;
         }
-        await Module!.InvokeVoidAsync("DecodeFormImage", objRef, Element, Options, dataUrl);
+        await Module!.InvokeVoidAsync("DecodeFormImage", Instance, Element, Options, dataUrl);
     }
 
     [JSInvokable]
@@ -152,7 +154,7 @@ public partial class BarCodes : IAsyncDisposable
         {
             await Module.DisposeAsync();
         }
-        objRef?.Dispose();
+        Instance?.Dispose();
     }
 
 }

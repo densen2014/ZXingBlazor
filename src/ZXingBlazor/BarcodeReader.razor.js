@@ -49,7 +49,7 @@ export function reload(elementid) {
     load(elementid);
 }
 
-function genHints(opt) {
+export function genHints(opt) {
     const hints = new Map();
     if (opt.TRY_HARDER) {
         hints.set(ZXing.DecodeHintType.TRY_HARDER, opt.TRY_HARDER);
@@ -342,7 +342,7 @@ export function QRCodeSvg(instance, input, element, tobase64, size = 300) {
     }
 }
 
-function genCodeReaderImage(options) {
+export function genCodeReaderImage(options) {
     var codeReaderImage = null;
     const hints = genHints(options);
     if (options.pdf417) {
@@ -361,7 +361,7 @@ function genCodeReaderImage(options) {
     return codeReaderImage;
 }
 
-export function DecodeFormImage(instance, element, options, data) {
+export async function DecodeFormImage(instance, element, options, data) {
     var codeReaderImage = genCodeReaderImage(options);
 
     if (data != null) {
@@ -373,7 +373,7 @@ export function DecodeFormImage(instance, element, options, data) {
             }
         }).catch((err) => {
             if (err) {
-                console.log(err)
+                if (options.debug) console.log(err)
                 instance.invokeMethodAsync('GetError', err.message)
             }
         })

@@ -15,7 +15,9 @@ namespace ZXingBlazor.Components;
 /// </summary>
 public partial class Handwritten : IAsyncDisposable
 {
-    [Inject][NotNull] private IJSRuntime? JSRuntime { get; set; }
+    [Inject]
+    [NotNull]
+    private IJSRuntime? JSRuntime { get; set; }
 
     /// <summary>
     /// Handwritten 手写签名

@@ -100,7 +100,7 @@ public partial class BarcodeReader : IAsyncDisposable
     public ZXingOptions? Options { get; set; }
 
     /// <summary>
-    ///
+    /// UI界面元素的引用对象
     /// </summary>
     public ElementReference Element { get; set; }
 

@@ -15,7 +15,9 @@ namespace ZXingBlazor.Components;
 /// </summary>
 public partial class Viewerjs : IAsyncDisposable
 {
-    [Inject][NotNull] private IJSRuntime? JSRuntime { get; set; }
+    [Inject]
+    [NotNull]
+    private IJSRuntime? JSRuntime { get; set; }
 
     /// <summary>
     /// 使用内置图片DIV
