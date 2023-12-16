@@ -2,8 +2,8 @@ import '/_content/ZXingBlazor/lib/zxing/zxing.min.js';
 let codeReader = null;
 let id = null;
 let supportsVibrate = false;
-let opt = null;
-let inst = null;
+let options = null;
+let instance = null;
 let selectedDeviceId = null;
 let deviceID = null;
 let element = null;
@@ -14,35 +14,35 @@ let height = 0;
 export function vibrate() {
     if (supportsVibrate) navigator.vibrate(1000);
 }
-export function init(instance, ele, elementid, options, deviceid) {
-    console.log('init' + elementid);
-    inst = instance;
-    opt = options;
-    id = elementid;
-    deviceID = deviceid;
-    element = ele;
-    debug = options.debug;
+export function init(_instance, _element, _elementid, _options, _deviceid) {
+    console.log('init' + _elementid);
+    instance = _instance;
+    options = _options;
+    id = _elementid;
+    deviceID = _deviceid;
+    element = _element;
+    debug = _options.debug;
     supportsVibrate = "vibrate" in navigator;
     let startButton = element.querySelector("[data-action=startButton]");
     let resetButton = element.querySelector("[data-action=resetButton]");
     let closeButton = element.querySelector("[data-action=closeButton]");
 
     if (startButton) startButton.addEventListener('click', () => {
-        start(elementid);
+        start(_elementid);
     })
 
     if (resetButton) resetButton.addEventListener('click', () => {
-        stop(elementid);
+        stop(_elementid);
         if (debug) console.log('Reset.')
     })
 
     if (closeButton) closeButton.addEventListener('click', () => {
-        stop(elementid);
+        stop(_elementid);
         if (debug) console.log('closeButton.')
-        instance.invokeMethodAsync("CloseScan");
+        _instance.invokeMethodAsync("CloseScan");
     })
 
-    load(elementid);
+    load(_elementid);
 }
 
 export function reload(elementid) {
@@ -84,10 +84,10 @@ export function load(elementid) {
         const sourceSelect = element.querySelector("[data-action=sourceSelect]");
         const sourceSelectPanel = element.querySelector("[data-action=sourceSelectPanel]");
         const video = element.querySelector("[data-action=video]");
-        codeReader = genCodeReaderImage(opt);
-        codeReader.timeBetweenDecodingAttempts = opt.timeBetweenDecodingAttempts;
+        codeReader = genCodeReaderImage(options);
+        codeReader.timeBetweenDecodingAttempts = options.timeBetweenDecodingAttempts;
 
-        if (opt.screenshot && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        if (options.screenshot && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
             navigator.mediaDevices
                 .getDisplayMedia({ video: true, audio: false })
                 .then((stream) => {
@@ -99,45 +99,45 @@ export function load(elementid) {
                             if (debug) console.log(result)
                             vibrate();
                             if (debug) console.log('None-stop');
-                            inst.invokeMethodAsync("GetResult", result.text);
+                            instance.invokeMethodAsync("GetResult", result.text);
                         }
                         if (err && !(err instanceof ZXing.NotFoundException)) {
                             console.log(err)
-                            inst.invokeMethodAsync("GetError", err + '');
+                            instance.invokeMethodAsync("GetError", err + '');
                         }
                     })
 
                 })
                 .catch((err) => {
                     console.error(`An error occurred: ${err}`);
-                    inst.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+                    instance.invokeMethodAsync('GetError', `An error occurred: ${err}`);
                 });
-        } else if (!opt.streamFromZxing && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        } else if (!options.streamFromZxing && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 
             if (!navigator.mediaDevices?.enumerateDevices) {
                 console.log("enumerateDevices() not supported.");
             } else {
-                if (!opt.width) opt.width = 640;
-                if (!opt.height) opt.height = 480;
-                width = opt.width;
-                if (debug) console.log(`Set: ${selectedDeviceId} video ${opt.width} x ${opt.height}`);
+                if (!options.width) options.width = 640;
+                if (!options.height) options.height = 480;
+                width = options.width;
+                if (debug) console.log(`Set: ${selectedDeviceId} video ${options.width} x ${options.height}`);
                 var constraints = {
                     video: {
-                        width: { ideal: opt.width },
-                        height: { ideal: opt.height },
+                        width: { ideal: options.width },
+                        height: { ideal: options.height },
                         facingMode: "environment",
                         focusMode: "continuous",
                     }, audio: false
                 };
 
-                if (selectedDeviceId != null || opt.deviceID != null) {
+                if (selectedDeviceId != null || options.deviceID != null) {
                     let deviceId = selectedDeviceId;
-                    if (deviceId == null) deviceId = opt.deviceID;
+                    if (deviceId == null) deviceId = options.deviceID;
                     constraints = {
                         video: {
                             deviceId: deviceId ? { exact: deviceId } : undefined,
-                            width: { ideal: opt.width },
-                            height: { ideal: opt.height },
+                            width: { ideal: options.width },
+                            height: { ideal: options.height },
                             facingMode: "environment",
                             focusMode: "continuous",
                         },
@@ -197,7 +197,7 @@ export function load(elementid) {
 
                                         sourceSelect.onchange = () => {
                                             selectedDeviceId = sourceSelect.value;
-                                            inst.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
+                                            instance.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
                                             codeReader.reset();
                                             start(elementid);
                                         }
@@ -216,7 +216,7 @@ export function load(elementid) {
                     })
                     .catch((err) => {
                         console.error(`An error occurred: ${err}`);
-                        inst.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+                        instance.invokeMethodAsync('GetError', `An error occurred: ${err}`);
                     });
 
             }
@@ -255,7 +255,7 @@ export function load(elementid) {
 
                                 sourceSelect.onchange = () => {
                                     selectedDeviceId = sourceSelect.value;
-                                    inst.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
+                                    instance.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
                                     codeReader.reset();
                                     start(elementid);
                                 }
@@ -268,13 +268,13 @@ export function load(elementid) {
                         })
                         .catch((err) => {
                             console.log(err)
-                            inst.invokeMethodAsync("GetError", err + '');
+                            instance.invokeMethodAsync("GetError", err + '');
                         })
 
                 })
                 .catch((err) => {
                     console.error(`An error occurred: ${err}`);
-                    inst.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+                    instance.invokeMethodAsync('GetError', `An error occurred: ${err}`);
                 });
 
         }
@@ -283,17 +283,17 @@ export function load(elementid) {
 
 export function start(elementid) {
     if (undefined !== codeReader && null !== codeReader && id == elementid) {
-        if (opt.decodeonce) {
+        if (options.decodeonce) {
             codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
                 if (debug) console.log(result)
                 vibrate();
                 if (debug) console.log('autostop');
                 codeReader.reset();
-                return inst.invokeMethodAsync("GetResult", result.text);
+                return instance.invokeMethodAsync("GetResult", result.text);
             }).catch((err) => {
                 if (err && !(err instanceof ZXing.NotFoundException)) {
                     console.log(err)
-                    inst.invokeMethodAsync("GetError", err + '');
+                    instance.invokeMethodAsync("GetError", err + '');
                 }
             })
         } else {
@@ -302,17 +302,17 @@ export function start(elementid) {
                     if (debug) console.log(result)
                     vibrate();
                     if (debug) console.log('None-stop');
-                    inst.invokeMethodAsync("GetResult", result.text);
+                    instance.invokeMethodAsync("GetResult", result.text);
                 }
                 if (err && !(err instanceof ZXing.NotFoundException)) {
                     console.log(err)
-                    inst.invokeMethodAsync("GetError", err + '');
+                    instance.invokeMethodAsync("GetError", err + '');
                 }
             })
         }
 
         var x = `decodeContinuously`;
-        if (opt.decodeonce) x = `decodeOnce`;
+        if (options.decodeonce) x = `decodeOnce`;
         if (debug) console.log(`Started ` + x + ` decode from camera with id ${selectedDeviceId}`)
         if (debug) console.log(id, 'start');
     }
@@ -438,8 +438,8 @@ export function destroy(elementid) {
         codeReader = null;
         //id = null;
         id = null;
-        opt = null;
-        inst = null;
+        options = null;
+        instance = null;
         selectedDeviceId = null;
         deviceID = null;
         element = null;
