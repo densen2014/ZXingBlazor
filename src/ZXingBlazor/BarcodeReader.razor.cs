@@ -134,7 +134,7 @@ public partial class BarcodeReader : IAsyncDisposable
         try
         {
             if (!firstRender) return;
-            Storage??=new StorageService(JSRuntime);
+            Storage ??= new StorageService(JSRuntime);
             Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
             Instance = DotNetObjectReference.Create(this);
             try
@@ -145,19 +145,16 @@ public partial class BarcodeReader : IAsyncDisposable
             {
 
             }
-            if (Options == null)
+            Options ??= new()
             {
-                Options = new ZXingOptions()
-                {
-                    Pdf417 = Pdf417Only,
-                    Decodeonce = Decodeonce,
-                    DecodeAllFormats = DecodeAllFormats,
-                    Screenshot = Screenshot,
-                    StreamFromZxing = StreamFromZxing,
-                    DeviceID= DeviceID,
-                    //TRY_HARDER = true
-                };
-            }
+                Pdf417 = Pdf417Only,
+                Decodeonce = Decodeonce,
+                DecodeAllFormats = DecodeAllFormats,
+                Screenshot = Screenshot,
+                StreamFromZxing = StreamFromZxing,
+                DeviceID = DeviceID,
+                //TRY_HARDER = true
+            };
             await Module.InvokeVoidAsync("init", Instance, Element, Element.Id, Options, DeviceID);
         }
         catch (Exception e)
@@ -172,12 +169,12 @@ public partial class BarcodeReader : IAsyncDisposable
         await Module!.InvokeVoidAsync("start", Element.Id);
     }
 
-    public async Task Stop ()
+    public async Task Stop()
     {
         await Module!.InvokeVoidAsync("stop", Element.Id);
     }
 
-    public async Task Reload ()
+    public async Task Reload()
     {
         await Module!.InvokeVoidAsync("reload", Element.Id);
     }
@@ -210,7 +207,7 @@ public partial class BarcodeReader : IAsyncDisposable
     /// <param name="base64encodedstring"></param>
     /// <returns></returns>
     [JSInvokable]
-    public async Task SelectDeviceID(string deviceID,string deviceName)
+    public async Task SelectDeviceID(string deviceID, string deviceName)
     {
         try
         {
