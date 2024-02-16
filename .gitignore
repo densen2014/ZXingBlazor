@@ -355,3 +355,8 @@ src/**/*.xml
 coverage*.xml
 tools/
 nuget.config
+
+
+# JetBrains Rider
+.idea/
+*.sln.iml
