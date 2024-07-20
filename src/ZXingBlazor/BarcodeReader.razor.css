@@ -1,0 +1,23 @@
+﻿.barcode-reader-div{
+    background-color: #f8f9fa;
+}
+
+.barcode-reader {
+    max-width: 300px;
+    margin: 5px auto;
+}
+
+    .barcode-reader .source-select {
+        max-width: 100%;
+    }
+
+    .barcode-reader .video {
+        max-width: 300px;
+        height: 300px;
+        border: 1px solid #e4e6ef;
+        border-radius: 3px;
+    }
+
+.barcode-toolbar {
+    max-width: 400px
+}

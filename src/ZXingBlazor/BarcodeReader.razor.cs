@@ -7,7 +7,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis; 
 
 namespace ZXingBlazor.Components;
 
@@ -74,6 +74,11 @@ public partial class BarcodeReader : IAsyncDisposable
     /// 使用内置DIV/Use builtin Div
     /// </summary>
     [Parameter] public bool UseBuiltinDiv { get; set; } = true;
+
+    /// <summary>
+    /// 内置DIV 风格/builtin Div style
+    /// </summary>
+    [Parameter] public ZXingBlazorStyle Style { get; set; } = ZXingBlazorStyle.Modal;
 
     /// <summary>
     /// 只解码 Pdf417 格式 / decode only Pdf417 format

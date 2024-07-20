@@ -2,35 +2,56 @@
 
 @if (UseBuiltinDiv)
 {
-    <div class="modal alert-popup" tabindex="-1" style="display:block" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <!-- Edit form for the current item -->
-                <div class="modal-body" @ref="Element">
-
-                    <button class="btn btn-primary p-2 m-1 w-25" data-action="startButton">@ScanBtnTitle</button>
-                    <button class="btn btn-secondary p-2 m-1 w-25" data-action="resetButton">@ResetBtnTitle</button>
-                    <button type="button" class="btn btn-info p-2 m-1 w-25" data-action="closeButton">@CloseBtnTitle</button>
-
-                    <div data-action="sourceSelectPanel" style="display:none">
-                        <label for="sourceSelect">@SelectDeviceBtnTitle:</label>
-                        <select data-action="sourceSelect" style="max-width:100%" class="form-select form-control">
-                        </select>
-                    </div>
-                    <div>
-                        <video data-action="video"
-                               id="video"
-                               muted
-                               webkit-playsinline
-                               playsinline
-                               x-webkit-airplay="allow"
-                               x5-video-player-type="h5"
-                               x5-video-player-fullscreen="true"
-                               x5-video-orientation="portraint"
-                               style="min-height:150px;max-height:50%; max-width: 100%;border: 1px solid gray"></video>
+    switch (Style)
+    {
+        case ZXingBlazorStyle.Embedded:
+            <div class="barcode-reader-div"> 
+                <div @ref="Element">
+                    <div class="barcode-reader">
+                        <div data-action="sourceSelectPanel" style="display:none">
+                            <select data-action="sourceSelect" class="form-select form-select-sm source-select">
+                            </select>
+                        </div>
+                        <div>
+                            <video id="video" playsinline autoplay class="video"></video>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-} 
+            break;
+        default:
+            <div class="modal alert-popup" tabindex="-1" style="display:block" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <!-- Edit form for the current item -->
+                        <div class="modal-body" @ref="Element">
+
+                            <button class="btn btn-primary p-2 m-1 w-25" data-action="startButton">@ScanBtnTitle</button>
+                            <button class="btn btn-secondary p-2 m-1 w-25" data-action="resetButton">@ResetBtnTitle</button>
+                            <button type="button" class="btn btn-info p-2 m-1 w-25" data-action="closeButton">@CloseBtnTitle</button>
+
+                            <div data-action="sourceSelectPanel" style="display:none">
+                                <label for="sourceSelect">@SelectDeviceBtnTitle:</label>
+                                <select data-action="sourceSelect" style="max-width:100%" class="form-select form-control">
+                                </select>
+                            </div>
+                            <div>
+                                <video data-action="video"
+                                       id="video"
+                                       muted
+                                       webkit-playsinline
+                                       playsinline
+                                       x-webkit-airplay="allow"
+                                       x5-video-player-type="h5"
+                                       x5-video-player-fullscreen="true"
+                                       x5-video-orientation="portraint"
+                                       style="min-height:150px;max-height:50%; max-width: 100%;border: 1px solid gray"></video>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            break;
+    }
+
+}

@@ -12,7 +12,13 @@ let width = 640;
 let height = 0;
 
 export function vibrate() {
-    if (supportsVibrate) navigator.vibrate(1000);
+    try {
+        if (supportsVibrate)
+        {
+            navigator.vibrate(1000);
+        }
+    } catch {
+    }
 }
 export function init(_instance, _element, _elementid, _options, _deviceid) {
     console.log('init' + _elementid);
@@ -33,12 +39,10 @@ export function init(_instance, _element, _elementid, _options, _deviceid) {
 
     if (resetButton) resetButton.addEventListener('click', () => {
         stop(_elementid);
-        if (debug) console.log('Reset.')
     })
 
     if (closeButton) closeButton.addEventListener('click', () => {
         stop(_elementid);
-        if (debug) console.log('closeButton.')
         _instance.invokeMethodAsync("CloseScan");
     })
 
@@ -91,9 +95,6 @@ export function load(elementid) {
             navigator.mediaDevices
                 .getDisplayMedia({ video: true, audio: false })
                 .then((stream) => {
-                    //video.srcObject = stream;
-                    //video.play();
-
                     codeReader.decodeFromStream(stream, video, (result, err) => {
                         if (result) {
                             if (debug) console.log(result)
@@ -106,7 +107,6 @@ export function load(elementid) {
                             instance.invokeMethodAsync("GetError", err + '');
                         }
                     })
-
                 })
                 .catch((err) => {
                     console.error(`An error occurred: ${err}`);
@@ -148,19 +148,6 @@ export function load(elementid) {
                 navigator.mediaDevices
                     .getUserMedia(constraints)
                     .then((stream) => {
-
-                        //try {
-                        //    video.srcObject = null;
-                        //}
-                        //catch (err) {
-                        //    video.src = '';
-                        //}
-                        //if (video) {
-                        //    video.removeAttribute('src');
-                        //}
-
-                        //video.srcObject = stream;
-                        //video.play();
 
                         if (selectedDeviceId == null) {
                             navigator.mediaDevices.enumerateDevices()
@@ -436,13 +423,11 @@ export function destroy(elementid) {
     if (undefined !== codeReader && null !== codeReader && id == elementid) {
         codeReader.reset();
         codeReader = null;
-        //id = null;
         id = null;
         options = null;
         instance = null;
         selectedDeviceId = null;
         deviceID = null;
         element = null;
-        if (debug) console.log(id, 'destroy');
     }
 }
