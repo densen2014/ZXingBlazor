@@ -3,7 +3,7 @@
     <PropertyGroup>
         <Version>1.1.5</Version>
         <OutputPath>..\..\..\Bin</OutputPath>
-        <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+        <TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
         <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -75,6 +75,9 @@
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.0" />
     </ItemGroup>
     <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.*" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.*" />
     </ItemGroup>
 </Project>
