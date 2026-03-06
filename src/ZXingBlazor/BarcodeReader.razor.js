@@ -1,4 +1,4 @@
-import '/_content/ZXingBlazor/lib/zxing/zxing.min.js';
+﻿import '/_content/ZXingBlazor/lib/zxing/zxing.min.js';
 let codeReader = null;
 let id = null;
 let supportsVibrate = false;
@@ -75,10 +75,7 @@ export function genHints(opt) {
     }
     if (opt.RETURN_CODABAR_START_END) {
         hints.set(ZXing.DecodeHintType.RETURN_CODABAR_START_END, opt.RETURN_CODABAR_START_END);
-    }
-    if (opt.TRY_HARDER) {
-        hints.set(ZXing.DecodeHintType.TRY_HARDER, opt.TRY_HARDER);
-    }
+    } 
     return hints;
 }
 
