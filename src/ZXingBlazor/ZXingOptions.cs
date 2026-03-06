@@ -48,6 +48,7 @@ public class ZXingOptions
     /// <summary>
     /// 使用zxing内置视频流打开方式,默认 false
     /// </summary>
+    [Obsolete("This option is deprecated and will be removed in future versions. The library now uses the built-in video stream handling by default. 此选项已弃用，将在未来的版本中移除。库现在默认使用内置的视频流处理功能。")]
     public bool StreamFromZxing { get; set; }
 
     /// <summary>
@@ -103,11 +104,11 @@ public class ZXingOptions
         BarcodeFormat.UPC_EAN_EXTENSION,
     };
 
-    ///// <summary>
-    ///// 如果为 true，尝试解码为倒置图像。所有配置的解码器都被简单地用倒置图像第二次调用
-    ///// </summary>
-    //[JsonPropertyName("ALSO_INVERTED")]
-    //public bool ALSO_INVERTED { get; set; }
+    /// <summary>
+    /// 如果为 true，尝试解码为倒置图像（反色），适用于反色条形码/二维码。所有配置的解码器都被用倒置图像第二次调用
+    /// </summary>
+    [JsonPropertyName("ALSO_INVERTED")]
+    public bool? ALSO_INVERTED { get; set; } = true;
 
     /// <summary>
     /// EAN 或 UPC 条形码允许的扩展长度, 默认为 2.
@@ -170,9 +171,10 @@ public class ZXingOptions
     public bool? TRY_HARDER { get; set; }
 
     /// <summary>
-    /// 尝试解码反色条码 / Try decoding invert-colors barcode
+    /// 假设 MSI 条形码使用校验位
     /// </summary>
-    public bool? TryInvertColors { get; set; }
+    [JsonPropertyName("ASSUME_MSI_CHECK_DIGIT")]
+    public bool? ASSUME_MSI_CHECK_DIGIT { get; set; }
 
 }
 

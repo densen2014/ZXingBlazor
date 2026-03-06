@@ -130,21 +130,35 @@ public partial class BarcodeReader : IAsyncDisposable
     /// <summary>
     /// 使用zxing内置视频流打开方式,默认 false
     /// </summary>
+    [Obsolete("This option is deprecated and will be removed in future versions. The library now uses the built-in video stream handling by default. 此选项已弃用，将在未来的版本中移除。库现在默认使用内置的视频流处理功能。")]
     [Parameter]
     public bool StreamFromZxing { get; set; }
+
+    /// <summary>
+    /// 反色识别,启用后可识别反色条码/二维码（黑底白码） / Enable invert-colors recognition for inverted barcodes/QR codes (white on black)
+    /// </summary>
+    [Parameter]
+    public bool AlsoInverted { get; set; } = true;
 
     // To prevent making JavaScript interop calls during prerendering
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
         {
-            if (!firstRender) return;
+            if (!firstRender)
+            {
+                return;
+            }
+
             Storage ??= new StorageService(JSRuntime);
             Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
             Instance = DotNetObjectReference.Create(this);
             try
             {
-                if (SaveDeviceID) DeviceID = await Storage.GetValue("CamsDeviceID", DeviceID);
+                if (SaveDeviceID)
+                {
+                    DeviceID = await Storage.GetValue("CamsDeviceID", DeviceID);
+                }
             }
             catch (Exception)
             {
@@ -155,16 +169,20 @@ public partial class BarcodeReader : IAsyncDisposable
                 Pdf417 = Pdf417Only,
                 Decodeonce = Decodeonce,
                 DecodeAllFormats = DecodeAllFormats,
-                Screenshot = Screenshot,
-                StreamFromZxing = StreamFromZxing,
+                Screenshot = Screenshot, 
                 DeviceID = DeviceID,
+                ALSO_INVERTED = AlsoInverted,
                 //TRY_HARDER = true
+                Debug = true
             };
             await Module.InvokeVoidAsync("init", Instance, Element, Element.Id, Options, DeviceID);
         }
         catch (Exception e)
         {
-            if (OnError != null) await OnError.Invoke(e.Message);
+            if (OnError != null)
+            {
+                await OnError.Invoke(e.Message);
+            }
         }
 
     }
@@ -193,7 +211,10 @@ public partial class BarcodeReader : IAsyncDisposable
     [JSInvokable]
     public async Task GetError(string err)
     {
-        if (OnError != null) await OnError.Invoke(err);
+        if (OnError != null)
+        {
+            await OnError.Invoke(err);
+        }
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
@@ -253,7 +274,9 @@ public partial class BarcodeReader : IAsyncDisposable
             {
                 var cValue = await JSRuntime.InvokeAsync<string>("eval", $"localStorage.getItem('{key}');");
                 if (cValue == null)
+                {
                     return def;
+                }
 
                 var newValue = GetValueI<TValue>(cValue);
                 return newValue ?? def;
@@ -269,7 +292,6 @@ public partial class BarcodeReader : IAsyncDisposable
                 return (T?)converter.ConvertFrom(value);
             }
             return default;
-            //return (T)Convert.ChangeType(value, typeof(T));
         }
 
         public async Task RemoveValue(string key)

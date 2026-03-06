@@ -17,11 +17,19 @@ Pdf417 Only
 <br />
 
 <input type="checkbox" @bind-value="DecodeContinuously" />
-Decode continuously
+Decode continuously (连续解码)
 <br />
 
 <input type="checkbox" @bind-value="DecodeAllFormats" />
-Decodde all formats (+ PDF_417 / DATA_MATRIX...)
+Decodde all formats (+ PDF_417 / DATA_MATRIX...) (解码所有编码形式)
+<br />
+
+<input type="checkbox" @bind-value="AlsoInverted" checked />
+Also Inverted (反色识别 / Invert-colors QR)
+<br />
+
+<input type="checkbox" @bind-value="Screenshot" />
+Decode from Screenshot
 <br />
 
 @if (Pdf417 | DecodeAllFormats)
@@ -54,7 +62,9 @@ else
                    Pdf417Only="Pdf417"
                    Decodeonce="!DecodeContinuously"
                    DecodeAllFormats="DecodeAllFormats"
-                   SelectDeviceBtnTitle="Select Device" />
+                   SelectDeviceBtnTitle="Select Device" 
+                   AlsoInverted="AlsoInverted" 
+                   Screenshot="Screenshot" />
 
 }
 <hr />
@@ -302,6 +312,8 @@ else
     public bool Pdf417 { get; set; }
     public bool DecodeContinuously { get; set; }
     public bool DecodeAllFormats { get; set; }
+    public bool AlsoInverted { get; set; } = true;
+    public bool Screenshot { get; set; }  
 
     private string message;
 
@@ -323,7 +335,7 @@ else
         }
         else
         {
-            if (BarCode.Length > 200) BarCode = "";
+            if (BarCode?.Length > 200) BarCode = "";
             BarCode += e + Environment.NewLine;
         }
     }
@@ -354,10 +366,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-
         ver = $"Ver {version?.Major}.{version?.Minor}.{version?.Build}";
         build = "Build:" + File.GetLastWriteTime(Path.Combine(Directory.GetCurrentDirectory(), "Demo.Server.dll")).ToLocalTime().ToString("yyyy-MM-dd HH:mm");
-
     }
 
     private ZXingOptions options = new ZXingOptions() { TRY_HARDER = true };

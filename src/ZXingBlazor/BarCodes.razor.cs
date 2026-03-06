@@ -7,6 +7,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace ZXingBlazor.Components;
 
@@ -64,13 +65,25 @@ public partial class BarCodes : IAsyncDisposable
     public bool ShowSelectFile { get; set; }
 
     [Parameter]
-    public string SelectFileTitle { get; set; }="图片解码";
+    public string SelectFileTitle { get; set; } = "图片解码";
 
     /// <summary>
     /// 解码所有编码形式,性能较差, 开启后可用 options.formats 指定编码形式.默认为 false | Decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false
     /// </summary>
     [Parameter]
     public bool DecodeAllFormats { get; set; } = true;
+
+    /// <summary>
+    /// 只解码 Pdf417 格式 / decode only Pdf417 format
+    /// </summary>
+    [Parameter]
+    public bool Pdf417Only { get; set; }
+
+    /// <summary>
+    /// 反色识别,启用后可识别反色条码/二维码（黑底白码） / Enable invert-colors recognition for inverted barcodes/QR codes (white on black)
+    /// </summary>
+    [Parameter]
+    public bool AlsoInverted { get; set; } = true;
 
     // To prevent making JavaScript interop calls during prerendering
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -79,8 +92,8 @@ public partial class BarCodes : IAsyncDisposable
         {
             if (!firstRender) return;
             Instance = DotNetObjectReference.Create(this);
-            Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version); 
-         }
+            Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+        }
         catch (Exception e)
         {
             if (OnError != null) await OnError.Invoke(e.Message);
@@ -125,17 +138,16 @@ public partial class BarCodes : IAsyncDisposable
     /// </summary>
     /// <param name="dataUrl">可选直接解码 Base64, DataUrl 格式</param>
     /// <returns></returns>
-    public async Task DecodeFromImage(string? dataUrl=null)
+    public async Task DecodeFromImage(string? dataUrl = null)
     {
-        if (Options == null)
+        Options ??= new ZXingOptions()
         {
-            Options = new ZXingOptions()
-            {
-                DecodeAllFormats = DecodeAllFormats,
-                ShowSelectFile=ShowSelectFile,
-            };
-        }
-        if (dataUrl!=null && !dataUrl.StartsWith("data:image"))
+            DecodeAllFormats = DecodeAllFormats,
+            ShowSelectFile = ShowSelectFile,
+            Pdf417 = Pdf417Only,
+            ALSO_INVERTED = AlsoInverted,
+        };
+        if (dataUrl != null && !dataUrl.StartsWith("data:image"))
         {
             dataUrl = "data:image/jpeg;base64," + dataUrl;
         }
