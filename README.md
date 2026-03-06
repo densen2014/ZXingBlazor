@@ -65,6 +65,11 @@ https://www.nuget.org/packages/ZXingBlazor/
     ```
 ## Updates
 
+2026.3.7
+v1.1.6
+- New features: Enable invert-colors recognition for inverted barcodes/QR codes (white on black)
+- StreamFromZxing Obsolete
+
 2023.12.2
 v1.1.2
 - Add parameters: screen recording decoding
@@ -173,6 +178,11 @@ https://www.nuget.org/packages/ZXingBlazor/
     ```
     
 ## 更新
+
+2026.3.7
+v1.1.6
+- 反色识别,启用后可识别反色条码/二维码（黑底白码）
+- StreamFromZxing 弃用
 
 2023.12.2
 v1.1.1
