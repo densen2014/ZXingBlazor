@@ -1,4 +1,4 @@
-﻿import '/_content/ZXingBlazor/lib/viewerjs/viewer.min.js';
+﻿import './viewer.min.js';
 var viewer = null;
 export function initOptions(options) {
     options.title = function (image) {

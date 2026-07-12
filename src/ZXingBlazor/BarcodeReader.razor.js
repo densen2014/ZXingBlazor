@@ -1,4 +1,4 @@
-﻿import '/_content/ZXingBlazor/lib/zxing/zxing.min.js';
+﻿import './lib/zxing/zxing.min.js';
 let codeReader = null;
 let codeReaderFromImage = null;
 let id = null;
