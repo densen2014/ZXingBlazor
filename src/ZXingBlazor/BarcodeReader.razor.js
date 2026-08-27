@@ -1,4 +1,7 @@
-﻿import './lib/zxing/zxing.min.js';
+//https://github.com/densen2014/ZXingBlazor/issues/42
+//import '/_content/ZXingBlazor/lib/zxing/zxing.min.js';
+import './lib/zxing/zxing.min.js';
+
 let codeReader = null;
 let codeReaderFromImage = null;
 let id = null;
@@ -11,6 +14,81 @@ let element = null;
 let debug = false;
 let width = 640;
 let height = 0;
+
+function stopStream(stream) {
+    if (!stream) return;
+    try {
+        stream.getTracks().forEach(t => {
+            try { t.stop(); } catch { }
+        });
+    } catch { }
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function findVideoElement() {
+    if (!element) return null;
+    // prefer explicit data-action
+    let video = element.querySelector("[data-action=video]");
+    if (video) return video;
+    // fallback to any video element inside the container
+    video = element.querySelector("video");
+    if (video) return video;
+    // fallback to global video id if present
+    video = document.getElementById("video");
+    return video;
+}
+
+async function waitForVideoElement(timeoutMs = 2000) {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+        const v = findVideoElement();
+        if (v) return v;
+        await sleep(100);
+    }
+    return null;
+}
+
+async function ensureVideoPlaying(video, stream, timeoutMs = 2000) {
+    if (!video) return Promise.reject(new Error('No video element'));
+    video.srcObject = stream;
+    try {
+        await video.play();
+    } catch (err) {
+        // Some browsers require user gesture; still wait for ready state
+    }
+    const start = Date.now();
+    return new Promise((resolve, reject) => {
+        const check = () => {
+            if (video.readyState >= 2 || (video.videoWidth > 0 && video.videoHeight > 0)) {
+                return resolve();
+            }
+            if (Date.now() - start > timeoutMs) {
+                return reject(new Error('Video not ready'));
+            }
+            requestAnimationFrame(check);
+        };
+        check();
+    });
+}
+
+async function tryGetUserMediaWithRetries(constraintsList, maxAttempts = 3, baseDelay = 300) {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        for (const constraints of constraintsList) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                if (debug) console.log('getUserMedia success', { attempt, constraints });
+                return { stream, constraints };
+            } catch (err) {
+                if (debug) console.warn('getUserMedia failed', { attempt, constraints, err });
+            }
+        }
+        await sleep(baseDelay * Math.pow(2, attempt));
+    }
+    throw new Error('All getUserMedia attempts failed');
+}
 
 export function vibrate() {
     try {
@@ -90,200 +168,93 @@ export function genHints(opt) {
     return hints;
 }
 
-export function load(elementid) {
-    if (id == elementid) {
+async function populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPanel) {
+    let devices = await navigator.mediaDevices.enumerateDevices();
+    let videoInputDevices = devices.filter(d => d.kind === 'videoinput');
 
-        const sourceSelect = element.querySelector("[data-action=sourceSelect]");
-        const sourceSelectPanel = element.querySelector("[data-action=sourceSelectPanel]");
-        const video = element.querySelector("[data-action=video]");
-        codeReader = genCodeReaderImage(options);
-        codeReader.timeBetweenDecodingAttempts = options.timeBetweenDecodingAttempts;
-
-        if (options.screenshot && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-            navigator.mediaDevices
-                .getDisplayMedia({ video: true, audio: false })
-                .then((stream) => {
-                    if (options.ALSO_INVERTED) {
-                        codeReaderFromImage = genCodeReaderImage(options);
-                        const video = element.querySelector('[data-action=video]');
-                        if (video) {
-                            video.srcObject = stream;
-                            video.play();
-                            // 定时反色处理
-                            let timer = setInterval(() => {
-                                if (video.videoWidth > 0 && video.videoHeight > 0) {
-                                    let base64Data = videoToDataURL(video, 1200);
-                                    codeReaderFromImage.decodeFromImageUrl(base64Data)
-                                        .then(result => {
-                                            if (result && result.text) {
-                                                if (debug) console.log('[反色定时解码] 结果:', result.text);
-                                                vibrate();
-                                                instance.invokeMethodAsync("GetResult", result.text);
-                                                if (options.decodeonce) {
-                                                    if (debug) console.log('autostop');
-                                                    codeReaderFromImage.reset();
-                                                    codeReader.reset();
-                                                    clearInterval(timer);
-                                                    return;
-                                                }
-                                            }
-                                        })
-                                        .catch(err => {
-                                        });
-                                }
-                            }, 100);
-                            // 停止时清理
-                            video.addEventListener('ended', () => clearInterval(timer));
-                            video.addEventListener('pause', () => clearInterval(timer));
-                            element._invertedTimer = timer;
-                        }
-                    }
-
-                    codeReader.decodeFromStream(stream, video, (result, err) => {
-                        if (result) {
-                            if (debug) console.log(result)
-                            vibrate();
-                            if (debug) console.log('None-stop');
-                            instance.invokeMethodAsync("GetResult", result.text);
-                        }
-                        if (err && !(err instanceof ZXing.NotFoundException)) {
-                            console.log(err)
-                            instance.invokeMethodAsync("GetError", err + '');
-                        }
-                    })
-                })
-                .catch((err) => {
-                    console.error(`An error occurred: ${err}`);
-                    instance.invokeMethodAsync('GetError', `An error occurred: ${err}`);
-                });
-        } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-
-            if (!navigator.mediaDevices?.enumerateDevices) {
-                console.log("enumerateDevices() not supported.");
-            } else {
-                if (!options.width) options.width = 640;
-                if (!options.height) options.height = 480;
-                width = options.width;
-                if (debug) console.log(`Set: ${selectedDeviceId} video ${options.width} x ${options.height}`);
-                var constraints = {
-                    video: {
-                        width: { ideal: options.width },
-                        height: { ideal: options.height },
-                        facingMode: "environment",
-                        focusMode: "continuous",
-                    }, audio: false
-                };
-
-                if (selectedDeviceId != null || options.deviceID != null) {
-                    let deviceId = selectedDeviceId;
-                    if (deviceId == null) deviceId = options.deviceID;
-                    constraints = {
-                        video: {
-                            deviceId: deviceId ? { exact: deviceId } : undefined,
-                            width: { ideal: options.width },
-                            height: { ideal: options.height },
-                            facingMode: "environment",
-                            focusMode: "continuous",
-                        },
-                        audio: false
-                    }
-                    if (debug) console.log(constraints.video.deviceId);
-                }
-                navigator.mediaDevices
-                    .getUserMedia(constraints)
-                    .then((stream) => {
-                        if (selectedDeviceId == null) {
-                            navigator.mediaDevices.enumerateDevices()
-                                .then((devices) => {
-                                    let videoInputDevices = [];
-                                    devices.forEach((device) => {
-                                        if (device.kind === 'videoinput') {
-                                            videoInputDevices.push(device);
-                                        }
-                                    });
-                                    if (deviceID != null) {
-                                        selectedDeviceId = deviceID
-                                    } else if (videoInputDevices.length > 1) {
-                                        selectedDeviceId = videoInputDevices[1].deviceId
-                                    } else {
-                                        selectedDeviceId = videoInputDevices[0].deviceId
-                                    }
-                                    if (debug) console.log('videoInputDevices:' + videoInputDevices.length);
-                                    if (videoInputDevices.length > 1) {
-                                        sourceSelect.innerHTML = '';
-                                        videoInputDevices.forEach((device) => {
-                                            const sourceOption = document.createElement('option');
-                                            if (device.label === '') {
-                                                sourceOption.text = 'Camera' + (sourceSelect.length + 1);
-                                            } else {
-                                                sourceOption.text = device.label
-                                            }
-                                            sourceOption.value = device.deviceId
-                                            if (selectedDeviceId != null && device.deviceId == selectedDeviceId) {
-                                                sourceOption.selected = true
-                                            }
-                                            sourceSelect.appendChild(sourceOption)
-                                        });
-
-                                        sourceSelect.onchange = () => {
-                                            selectedDeviceId = sourceSelect.value;
-                                            instance.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
-                                            codeReader.reset();
-                                            start(elementid);
-                                        }
-
-                                        sourceSelectPanel.style.display = 'block'
-
-                                    }
-
-                                    start(elementid);
-
-                                })
-                                .catch((err) => {
-                                    console.error(`${err.name}: ${err.message}`);
-                                });
-                        }
-                    })
-                    .catch((err) => {
-                        if (err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError') {
-                            // 降级为最小约束重试
-                            console.warn('Camera constraints too strict, retrying with minimal constraints.');
-                            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-                                .then((stream) => {
-                                    // 这里可以直接调用 start(elementid) 或者你原有的流处理逻辑
-                                    start(elementid);
-                                })
-                                .catch((err2) => {
-                                    console.error(`An error occurred: ${err2}`);
-                                    instance.invokeMethodAsync('GetError', `An error occurred: ${err2}`);
-                                });
-                        } else {
-                            console.error(`An error occurred: ${err}`);
-                            instance.invokeMethodAsync('GetError', `An error occurred: ${err}`);
-                        }
-                    });
-
-            }
-
+    let needPermission = videoInputDevices.every(d => !d.label);
+    let tempStream;
+    if (needPermission) {
+        try {
+            tempStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            devices = await navigator.mediaDevices.enumerateDevices();
+            videoInputDevices = devices.filter(d => d.kind === 'videoinput');
+        } catch (err) {
+            if (debug) console.warn('Permission request for labels failed', err);
+        } finally {
+            stopStream(tempStream);
         }
     }
+
+    if (videoInputDevices.length === 0) return [];
+
+    if (deviceID != null) {
+        selectedDeviceId = deviceID;
+    } else {
+        const backDevice = videoInputDevices.find(d => /back|rear|environment|wide/i.test(d.label));
+        if (backDevice) selectedDeviceId = backDevice.deviceId;
+        else if (videoInputDevices.length > 1) selectedDeviceId = videoInputDevices[1].deviceId;
+        else selectedDeviceId = videoInputDevices[0].deviceId;
+    }
+
+    if (sourceSelect && videoInputDevices.length > 1) {
+        sourceSelect.innerHTML = '';
+
+        if (element._sourceSelectHandler) {
+            try { sourceSelect.removeEventListener('change', element._sourceSelectHandler); } catch { }
+            element._sourceSelectHandler = null;
+        }
+
+        videoInputDevices.forEach((device, idx) => {
+            const sourceOption = document.createElement('option');
+            sourceOption.text = device.label && device.label.length > 0 ? device.label : ('Camera' + (idx + 1));
+            sourceOption.value = device.deviceId;
+            if (selectedDeviceId && device.deviceId === selectedDeviceId) sourceOption.selected = true;
+            sourceSelect.appendChild(sourceOption);
+        });
+
+        element._sourceSelectHandler = () => {
+            selectedDeviceId = sourceSelect.value;
+            instance.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
+            if (element._activeStream) {
+                stopStream(element._activeStream);
+                element._activeStream = null;
+            }
+            if (element._invertedStream) {
+                stopStream(element._invertedStream);
+                element._invertedStream = null;
+            }
+            try { codeReader.reset(); } catch { }
+            start(id);
+        };
+        sourceSelect.addEventListener('change', element._sourceSelectHandler);
+        sourceSelectPanel.style.display = 'block';
+    }
+
+    return videoInputDevices;
 }
 
-export function start(elementid) {
-    if (undefined !== codeReader && null !== codeReader && id == elementid) {
+export function load(elementid) {
+    if (id != elementid) return;
 
-        if (options.ALSO_INVERTED) {
-            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-                .then((stream) => {
+    const sourceSelect = element.querySelector("[data-action=sourceSelect]") || element.querySelector("select[data-action=sourceSelect]");
+    const sourceSelectPanel = element.querySelector("[data-action=sourceSelectPanel]") || element.querySelector("[data-action=sourceSelectPanel]");
+    codeReader = genCodeReaderImage(options);
+    codeReader.timeBetweenDecodingAttempts = options.timeBetweenDecodingAttempts;
+
+    if (options.screenshot && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        navigator.mediaDevices
+            .getDisplayMedia({ video: true, audio: false })
+            .then((stream) => {
+                if (options.ALSO_INVERTED) {
                     codeReaderFromImage = genCodeReaderImage(options);
-                    const video = element.querySelector('[data-action=video]');
+                    const video = findVideoElement();
                     if (video) {
                         video.srcObject = stream;
                         video.play();
-                        // 定时反色处理
                         let timer = setInterval(() => {
                             if (video.videoWidth > 0 && video.videoHeight > 0) {
-                                let base64Data = videoToDataURL(video);
+                                let base64Data = videoToDataURL(video, 1200);
                                 codeReaderFromImage.decodeFromImageUrl(base64Data)
                                     .then(result => {
                                         if (result && result.text) {
@@ -299,14 +270,201 @@ export function start(elementid) {
                                             }
                                         }
                                     })
-                                    .catch(err => {
-                                    });
+                                    .catch(err => { });
                             }
                         }, 100);
-                        // 停止时清理
                         video.addEventListener('ended', () => clearInterval(timer));
                         video.addEventListener('pause', () => clearInterval(timer));
                         element._invertedTimer = timer;
+                        element._invertedStream = stream;
+                    } else {
+                        // No video element available, stop stream to avoid leak
+                        stopStream(stream);
+                    }
+                }
+
+                const videoElem = findVideoElement();
+                if (videoElem) {
+                    codeReader.decodeFromStream(stream, videoElem, (result, err) => {
+                        if (result) {
+                            if (debug) console.log(result)
+                            vibrate();
+                            instance.invokeMethodAsync("GetResult", result.text);
+                        }
+                        if (err && !(err instanceof ZXing.NotFoundException)) {
+                            console.log(err)
+                            instance.invokeMethodAsync("GetError", err + '');
+                        }
+                    })
+                } else {
+                    // no video -> stop stream to avoid camera staying on
+                    stopStream(stream);
+                    instance.invokeMethodAsync('GetError', 'No video element available for display');
+                }
+            })
+            .catch((err) => {
+                console.error(`An error occurred: ${err}`);
+                instance.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+            });
+        return;
+    }
+
+    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && navigator.mediaDevices.enumerateDevices)) {
+        console.log("Media devices API not fully supported.");
+        return;
+    }
+
+    if (!options.width) options.width = 640;
+    if (!options.height) options.height = 480;
+    width = options.width;
+
+    if (element._activeStream) {
+        stopStream(element._activeStream);
+        element._activeStream = null;
+    }
+    if (element._invertedStream) {
+        stopStream(element._invertedStream);
+        element._invertedStream = null;
+    }
+
+    populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPanel)
+        .then(videoInputDevices => {
+            const tryConstraints = [];
+
+            if (selectedDeviceId) {
+                tryConstraints.push({
+                    video: {
+                        deviceId: { exact: selectedDeviceId },
+                        width: { ideal: options.width },
+                        height: { ideal: options.height },
+                        facingMode: "environment",
+                        focusMode: "continuous"
+                    },
+                    audio: false
+                });
+            }
+
+            tryConstraints.push({
+                video: {
+                    facingMode: { ideal: "environment" },
+                    width: { ideal: options.width },
+                    height: { ideal: options.height },
+                    focusMode: "continuous"
+                },
+                audio: false
+            });
+
+            tryConstraints.push({
+                video: true,
+                audio: false
+            });
+
+            tryGetUserMediaWithRetries(tryConstraints, 3, 300)
+                .then(async ({ stream }) => {
+                    if (element._activeStream && element._activeStream !== stream) {
+                        stopStream(element._activeStream);
+                    }
+                    element._activeStream = stream;
+
+                    // wait for a video element if not present yet (custom layout)
+                    let videoElem = findVideoElement();
+                    if (!videoElem) {
+                        videoElem = await waitForVideoElement(1500);
+                    }
+
+                    if (videoElem) {
+                        try {
+                            await ensureVideoPlaying(videoElem, stream, 2500);
+                        } catch (err) {
+                            if (debug) console.warn('Video play/readiness failed, but continuing', err);
+                        }
+                    } else {
+                        if (debug) console.warn('No video element available after wait; stream kept but not attached');
+                    }
+
+                    try {
+                        const videoTrack = stream.getVideoTracks()[0];
+                        const settings = videoTrack.getSettings ? videoTrack.getSettings() : null;
+                        if (!selectedDeviceId && settings && settings.deviceId) {
+                            selectedDeviceId = settings.deviceId;
+                        }
+                    } catch { }
+
+                    // set up DOM/visibility watcher to auto-stop if element removed or hidden
+                    if (!element._domWatcher) {
+                        element._domWatcher = setInterval(() => {
+                            try {
+                                if (!document.body.contains(element)) {
+                                    try { destroy(id); } catch { }
+                                    return;
+                                }
+                                // check visibility: if element not visible -> stop streams (but keep state)
+                                const style = window.getComputedStyle(element);
+                                const isVisible = element.getClientRects().length > 0 && style.display !== 'none' && style.visibility !== 'hidden' && element.offsetWidth > 0 && element.offsetHeight > 0;
+                                if (!isVisible) {
+                                    if (debug) console.log('Element hidden; stopping streams');
+                                    try { stop(id); } catch { }
+                                }
+                            } catch { }
+                        }, 1000);
+                    }
+
+                    start(elementid);
+                })
+                .catch(err => {
+                    console.error('Failed to getUserMedia after retries', err);
+                    instance.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+                });
+        })
+        .catch(err => {
+            console.error('Device enumeration failed', err);
+            instance.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+        });
+}
+
+export function start(elementid) {
+    if (undefined !== codeReader && null !== codeReader && id == elementid) {
+
+        if (options?.ALSO_INVERTED) {
+            if (element._invertedStream) {
+                stopStream(element._invertedStream);
+                element._invertedStream = null;
+            }
+            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+                .then((stream) => {
+                    codeReaderFromImage = genCodeReaderImage(options);
+                    const video = findVideoElement();
+                    if (video) {
+                        video.srcObject = stream;
+                        video.play();
+                        let timer = setInterval(() => {
+                            if (video.videoWidth > 0 && video.videoHeight > 0) {
+                                let base64Data = videoToDataURL(video);
+                                codeReaderFromImage.decodeFromImageUrl(base64Data)
+                                    .then(result => {
+                                        if (result && result.text) {
+                                            if (debug) console.log('[反色定时解码] 结果:', result.text);
+                                            vibrate();
+                                            instance.invokeMethodAsync("GetResult", result.text);
+                                            if (options.decodeonce) {
+                                                if (debug) console.log('autostop');
+                                                codeReaderFromImage.reset();
+                                                codeReader.reset();
+                                                clearInterval(timer);
+                                                stopStream(stream);
+                                                return;
+                                            }
+                                        }
+                                    })
+                                    .catch(err => { });
+                            }
+                        }, 100);
+                        video.addEventListener('ended', () => clearInterval(timer));
+                        video.addEventListener('pause', () => clearInterval(timer));
+                        element._invertedTimer = timer;
+                        element._invertedStream = stream;
+                    } else {
+                        stopStream(stream);
                     }
                 })
                 .catch((err) => {
@@ -314,32 +472,66 @@ export function start(elementid) {
                 });
         }
 
-        if (options.decodeonce) {
-            codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
+        const callback = (result, err) => {
+            if (result) {
                 if (debug) console.log(result)
                 vibrate();
-                if (debug) console.log('autostop');
-                codeReader.reset();
-                return instance.invokeMethodAsync("GetResult", result.text);
-            }).catch((err) => {
-                if (err && !(err instanceof ZXing.NotFoundException)) {
-                    console.log(err)
-                    instance.invokeMethodAsync("GetError", err + '');
-                }
-            })
+                instance.invokeMethodAsync("GetResult", result.text);
+            }
+            if (err && !(err instanceof ZXing.NotFoundException)) {
+                console.log(err)
+                instance.invokeMethodAsync("GetError", err + '');
+            }
+        };
+
+        // Try to attach to controlled stream if present
+        const videoElem = findVideoElement();
+        if (element._activeStream) {
+            if (!videoElem) {
+                // try briefly to wait for a video element before attaching
+                waitForVideoElement(1500).then(v => {
+                    if (v) {
+                        try { codeReader.reset(); } catch { }
+                        codeReader.decodeFromStream(element._activeStream, v, callback);
+                        if (debug) console.log('decodeFromStream used with controlled stream (delayed attach)');
+                    } else {
+                        if (debug) console.warn('No video element to attach controlled stream');
+                        // still call decodeFromVideoDevice fallback so ZXing handles stream creation
+                        if (options.decodeonce) {
+                            codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then(r => {
+                                if (r) {
+                                    vibrate();
+                                    instance.invokeMethodAsync("GetResult", r.text);
+                                }
+                            }).catch(e => { if (e && !(e instanceof ZXing.NotFoundException)) instance.invokeMethodAsync("GetError", e + ''); });
+                        } else {
+                            codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', callback);
+                        }
+                    }
+                });
+            } else {
+                try { codeReader.reset(); } catch { }
+                codeReader.decodeFromStream(element._activeStream, videoElem, callback);
+                if (debug) console.log('decodeFromStream used with controlled stream');
+            }
         } else {
-            codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
-                if (result) {
+            // fallback to ZXing device helpers
+            if (options.decodeonce) {
+                codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
                     if (debug) console.log(result)
                     vibrate();
-                    if (debug) console.log('None-stop');
-                    instance.invokeMethodAsync("GetResult", result.text);
-                }
-                if (err && !(err instanceof ZXing.NotFoundException)) {
-                    console.log(err)
-                    instance.invokeMethodAsync("GetError", err + '');
-                }
-            })
+                    if (debug) console.log('autostop');
+                    codeReader.reset();
+                    return instance.invokeMethodAsync("GetResult", result.text);
+                }).catch((err) => {
+                    if (err && !(err instanceof ZXing.NotFoundException)) {
+                        console.log(err)
+                        instance.invokeMethodAsync("GetError", err + '');
+                    }
+                })
+            } else {
+                codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', callback)
+            }
         }
 
         var x = `decodeContinuously`;
@@ -351,12 +543,24 @@ export function start(elementid) {
 
 export function stop(elementid) {
     if (undefined !== codeReader && null !== codeReader && id == elementid) {
-        codeReader.reset();
+        try { codeReader.reset(); } catch { }
+        if (element && element._activeStream) {
+            stopStream(element._activeStream);
+            element._activeStream = null;
+        }
+        if (element && element._invertedStream) {
+            stopStream(element._invertedStream);
+            element._invertedStream = null;
+        }
+        if (element && element._invertedTimer) {
+            try { clearInterval(element._invertedTimer); } catch { }
+            element._invertedTimer = null;
+        }
         if (debug) console.log(id, 'stop');
     }
 }
 
-export function QRCodeSvg(instance, input, element, tobase64, size = 300) {
+export function QRCodeSvg(instance, input, elementRef, tobase64, size = 300) {
     const codeWriter = new ZXing.BrowserQRCodeSvgWriter()
 
     if (debug) console.log('ZXing code writer initialized')
@@ -366,10 +570,9 @@ export function QRCodeSvg(instance, input, element, tobase64, size = 300) {
         codeWriter.writeToDom(elementTemp, input, size, size)
         let svgElement = elementTemp.firstChild
         const svgData = (new XMLSerializer()).serializeToString(svgElement)
-        //const blob = new Blob([svgData])
         instance.invokeMethodAsync("GetQRCode", svgData);
     } else {
-        codeWriter.writeToDom(element.querySelector("[data-action=result]"), input, size, size)
+        codeWriter.writeToDom(elementRef.querySelector("[data-action=result]"), input, size, size)
     }
 }
 
@@ -392,17 +595,17 @@ export function genCodeReaderImage(options) {
     return _codeReaderImage;
 }
 
-export async function DecodeFormImage(instance, element, options, dataUrl) {
-    codeReaderFromImage = genCodeReaderImage(options);
+export async function DecodeFormImage(instance, elementRef, optionsRef, dataUrl) {
+    codeReaderFromImage = genCodeReaderImage(optionsRef);
 
     if (dataUrl != null) {
-        decodeImageWithFallback(codeReaderFromImage, dataUrl, instance, options).then(res => {
+        decodeImageWithFallback(codeReaderFromImage, dataUrl, instance, optionsRef).then(res => {
             return;
         });
     }
     else {
         const resetFile = () => {
-            let file = element.querySelector('[type="file"]')
+            let file = elementRef.querySelector('[type="file"]')
             if (file) {
                 file.removeEventListener('change', scanImageHandler)
                 file.remove()
@@ -411,8 +614,7 @@ export async function DecodeFormImage(instance, element, options, dataUrl) {
             file.setAttribute('type', 'file')
             file.setAttribute('hidden', 'true')
             file.setAttribute('accept', 'image/*')
-            //file.setAttribute('capture', 'true')
-            element.append(file)
+            elementRef.append(file)
             file.addEventListener('change', scanImageHandler)
             codeReaderFromImage.file = file
             return file
@@ -426,7 +628,7 @@ export async function DecodeFormImage(instance, element, options, dataUrl) {
 
             const reader = new FileReader()
             reader.onloadend = e => {
-                decodeImageWithFallback(codeReaderFromImage, e.target.result, instance, options).then(res => {
+                decodeImageWithFallback(codeReaderFromImage, e.target.result, instance, optionsRef).then(res => {
                     return;
                 });
             }
@@ -441,64 +643,92 @@ export async function DecodeFormImage(instance, element, options, dataUrl) {
 }
 
 export function destroy(elementid) {
-    if (undefined !== codeReader && null !== codeReader && id == elementid) {
-        codeReader.reset();
+    if (id == elementid) {
+        try { codeReader.reset(); } catch { }
+        try { codeReaderFromImage?.reset(); } catch { }
+
+        if (element) {
+            if (element._activeStream) {
+                stopStream(element._activeStream);
+                element._activeStream = null;
+            }
+            if (element._invertedStream) {
+                stopStream(element._invertedStream);
+                element._invertedStream = null;
+            }
+            if (element._invertedTimer) {
+                try { clearInterval(element._invertedTimer); } catch { }
+                element._invertedTimer = null;
+            }
+            if (element._domWatcher) {
+                try { clearInterval(element._domWatcher); } catch { }
+                element._domWatcher = null;
+            }
+            const sourceSelect = element.querySelector("[data-action=sourceSelect]");
+            if (sourceSelect && element._sourceSelectHandler) {
+                try { sourceSelect.removeEventListener('change', element._sourceSelectHandler); } catch { }
+                element._sourceSelectHandler = null;
+            }
+            const video = findVideoElement();
+            if (video) {
+                try {
+                    video.pause();
+                    video.srcObject = null;
+                } catch { }
+            }
+        }
+
         codeReader = null;
+        codeReaderFromImage = null;
         id = null;
         options = null;
         instance = null;
         selectedDeviceId = null;
         deviceID = null;
         element = null;
-    }
-    if (undefined !== codeReaderFromImage && null !== codeReaderFromImage && id == elementid) {
-        codeReaderFromImage.reset();
-        codeReaderFromImage = null;
+        debug = false;
     }
 }
 
 // 图片解码并支持反色识别的复用过程
-function decodeImageWithFallback(codeReaderImage, dataUrl, instance, options) {
+function decodeImageWithFallback(codeReaderImage, dataUrl, instanceRef, optionsRef) {
     return codeReaderImage.decodeFromImageUrl(dataUrl).then(result => {
         if (result) {
             vibrate();
             if (debug) console.log(result.text);
-            instance.invokeMethodAsync('GetResult', result.text);
+            instanceRef.invokeMethodAsync('GetResult', result.text);
         }
     }).catch(err => {
-        if (options?.debug) console.log(err);
-        if (options?.ALSO_INVERTED) {
-            if (options.debug) console.log('尝试反色解码图片...');
-            tryInvertedDecodeFromImage(codeReaderImage, dataUrl, instance, options);
+        if (optionsRef?.debug) console.log(err);
+        if (optionsRef?.ALSO_INVERTED) {
+            if (optionsRef.debug) console.log('尝试反色解码图片...');
+            tryInvertedDecodeFromImage(codeReaderImage, dataUrl, instanceRef, optionsRef);
         } else {
-            instance.invokeMethodAsync('GetError', (err && err.message) || '解码失败');
+            instanceRef.invokeMethodAsync('GetError', (err && err.message) || '解码失败');
         }
     });
 }
 
-// 反色解码图片（灰度反色）
-function tryInvertedDecodeFromImage(codeReaderImage, imageUrl, instance, options) {
+function tryInvertedDecodeFromImage(codeReaderImage, imageUrl, instanceRef, optionsRef) {
     const img = new Image();
     img.onload = () => {
         let base64Data = videoToDataURL(img);
         codeReaderImage.decodeFromImageUrl(base64Data).then(result => {
-            if (options.debug) console.log('反色解码成功:', result);
-            instance.invokeMethodAsync('GetResult', result.text);
+            if (optionsRef.debug) console.log('反色解码成功:', result);
+            instanceRef.invokeMethodAsync('GetResult', result.text);
             vibrate();
         }).catch(invertErr => {
-            if (options.debug) console.log('反色解码也失败:', invertErr);
-            instance.invokeMethodAsync('GetError', invertErr?.message || '反色解码失败');
+            if (optionsRef.debug) console.log('反色解码也失败:', invertErr);
+            instanceRef.invokeMethodAsync('GetError', invertErr?.message || '反色解码失败');
         });
     };
     img.onerror = () => {
-        if (options.debug) console.error('图片加载失败');
-        instance.invokeMethodAsync('GetError', '图片加载失败');
+        if (optionsRef.debug) console.error('图片加载失败');
+        instanceRef.invokeMethodAsync('GetError', '图片加载失败');
     };
     img.src = imageUrl;
 }
 
-
-// maxWidth: 缩放到最大宽度,默认800px
 function videoToDataURL(video, maxWidth = 800) {
     let targetWidth = video.videoWidth || video.width;
     let targetHeight = video.videoHeight || video.height;
@@ -507,7 +737,6 @@ function videoToDataURL(video, maxWidth = 800) {
         targetWidth = maxWidth;
         targetHeight = Math.round(targetHeight * scale);
     }
-    // 内存canvas
     const canvas = document.createElement('canvas');
     canvas.width = targetWidth;
     canvas.height = targetHeight;
@@ -516,7 +745,6 @@ function videoToDataURL(video, maxWidth = 800) {
     const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
     const data = imageData.data;
     for (let i = 0; i < data.length; i += 4) {
-        // 灰度
         const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
         const inv = 255 - gray;
         data[i] = data[i + 1] = data[i + 2] = inv;
