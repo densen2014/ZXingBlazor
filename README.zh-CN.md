@@ -1,132 +1,142 @@
-﻿# ZXing Blazor 扫码组件 0.2.5
+# ZXingBlazor
 
- <a href="README.md">English</a> |中文  | <a href="https://blazor.app1.es/"> 其他 Blazor 组件</a>
+[English](README.md) · [在线体验](https://densen2014.github.io/ZXingBlazor/) · [NuGet](https://www.nuget.org/packages/ZXingBlazor/) · [GitHub](https://github.com/densen2014/ZXingBlazor)
 
----
+ZXingBlazor 是适用于 Blazor 的摄像头扫码组件，支持 Blazor WebAssembly、Blazor Server，以及 .NET 6 至 .NET 10。
 
-## 项目介绍
-本项目是利用 ZXing 进行封装的 Blazor 组件库, 支持条码,二维码,PDF417格式.
+## 主要功能
 
-## 演示地址  
-ssr
-https://zxingblazor.app1.es
+- 识别 QR Code、Data Matrix、PDF417 和常见一维码。
+- 调用手机或桌面摄像头，支持设备选择和保存上次使用的设备。
+- 支持单次解码和连续解码。
+- 使用同一摄像头流识别普通条码和黑底白码等反色条码。
+- 扫码成功时捕获当前视频画面。
+- 可直接使用内置扫码界面，也可通过 `data-action` 自定义界面。
+- 通过 `BarCodes` 组件从图片解码条码并生成二维码。
+- 使用 JavaScript 隔离，无需在页面中手动添加脚本。
 
-wasm
-https://zxingblazorwasm.app1.es
+## 在线示例
 
+.NET 10 WebAssembly 示例已经部署到 GitHub Pages：
 
-## Nuget 包安装
-https://www.nuget.org/packages/ZXingBlazor/
+**https://densen2014.github.io/ZXingBlazor/**
 
-## 使用 
+页面源码：[`Demo.Wasm/Pages/Index.razor`](Demo.Wasm/Pages/Index.razor)
 
-_Imports.razor 
+GitHub Pages 只能托管静态文件，因此线上示例使用独立 Blazor WebAssembly。Blazor Interactive Auto 首次交互需要 ASP.NET Core 服务端，不能作为纯静态 Pages 站点运行。
 
-    @using ZXingBlazor.Components
+## 快速上手
 
+### 1. 安装 NuGet 包
 
-## [破坏性升级] 文件Pages/_Host.cshtml,  wasm项目对应文件是 wwwroot/index.html 都无需添加引用!!!!
-## 如果是旧版升级上来,请移除zxing.js引用
->  !!移除!!   <script src="_content/ZXingBlazor/lib/barcodereader/zxing.js"></script>
->  
->  !!移除!!   <script src="_content/ZXingBlazor/lib/barcodereader/barcode.js"></script>
-
-> 新版使用了[JavaScript 模块中的 JavaScript 隔离](https://docs.microsoft.com/zh-cn/aspnet/core/blazor/javascript-interoperability/?view=aspnetcore-6.0#javascript-isolation-in-javascript-modules)
-> 
-> Blazor 在标准 Blazor（JS）中启用 JavaScript (JS) 隔离。
-> 
-> JS 隔离具有以下优势：
-> 
-> - 导入的 JS 不再污染全局命名空间。
-> - 库和组件的使用者不需要导入相关的 JS。
-> 有关详细信息，请参阅 Call JavaScript functions from .NET methods in ASP.NET Core Blazor。
-
-
-在Blazor页面添加代码
-![QQ图片20200926035359](https://user-images.githubusercontent.com/8428709/94327539-fd287900-ffab-11ea-8783-a26cd5f29f9a.png)
-
-
-## 项目截图
-![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif)
-
-## 新加模块
-手写签名 Handwritten 组件 2020.10.05
-![Sign](https://user-images.githubusercontent.com/8428709/95032378-96e1db80-06ba-11eb-8291-c00c3c2ea9fb.gif)
-
-图片浏览器Viewer 组件 2022.3.6
-    
-## 更新
-
-2022.3.6 升级为js隔离版本,添加图片浏览器 Viewer组件, 演示工程升级为net6格式
-
-2021.5.13 BarcodeReader 支持定义按钮文本,支持多语言
-
-----
-定义按钮文本:
-code
-https://github.com/densen2014/ZXingBlazor/blob/master/Demo.Server/Pages/IndexEN.razor
-demo
-https://zxingblazor.app1.es/
-
-```
-    <BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
-                   ShowScanBarcode="ShowScanBarcode"
-                   Close="(()=>ShowScanBarcode=!ShowScanBarcode)" 
-                   ScanBtnTitle="Scan"
-                   ResetBtnTitle="Reset"
-                   CloseBtnTitle="Close"
-                   SelectDeviceBtnTitle="Select Device"
-                   />
+```bash
+dotnet add package ZXingBlazor
 ```
 
-![barcode](https://user-images.githubusercontent.com/8428709/118119633-f6416000-b3ee-11eb-8537-ec356242f63b.jpg)
+### 2. 导入命名空间
 
+在 `_Imports.razor` 或使用扫码器的 Razor 组件中添加：
 
+```razor
+@using ZXingBlazor.Components
+```
+
+### 3. 添加扫码组件
+
+```razor
+<button class="btn btn-primary" @onclick="(() => scannerVisible = true)">
+    扫码
+</button>
+
+@if (scannerVisible)
+{
+    <BarcodeReader ScanResult="OnScanResult"
+                   Close="(() => scannerVisible = false)"
+                   OnError="OnError" />
+}
+
+@if (!string.IsNullOrWhiteSpace(result))
+{
+    <p>扫码结果：@result</p>
+}
+
+@code {
+    private bool scannerVisible;
+    private string? result;
+    private string? error;
+
+    private void OnScanResult(string text)
+    {
+        result = text;
+        scannerVisible = false;
+    }
+
+    private Task OnError(string message)
+    {
+        error = message;
+        return Task.CompletedTask;
+    }
+}
+```
+
+生产环境必须使用 HTTPS 才能访问摄像头；本地开发可使用 `localhost`。
+
+## 获取扫码截图
+
+启用 `CaptureStillOnScan` 并处理 `ScanCaptured`，即可同时取得扫码文本和 JPEG Data URL：
+
+```razor
+<BarcodeReader ScanResult="OnScanResult"
+               ScanCaptured="OnScanCaptured"
+               CaptureStillOnScan="true"
+               CaptureStillAutoResumeDelay="3000" />
+
+@code {
+    private string? imageDataUrl;
+
+    private void OnScanResult(string text)
+    {
+    }
+
+    private void OnScanCaptured(ScanCapturedEventArgs args)
+    {
+        imageDataUrl = args.ImageDataUrl;
+    }
+}
+```
+
+图片使用流式 JavaScript 互操作传输，可避免 Blazor Server 默认消息大小对大图片的限制。
+
+## 主要参数与回调
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| `ScanResult` | `EventCallback<string>` | 返回解码后的文本。 |
+| `ScanCaptured` | `EventCallback<ScanCapturedEventArgs>` | 返回解码文本和捕获的 JPEG Data URL。 |
+| `Close` | `EventCallback` | 扫码界面关闭时触发。 |
+| `OnError` | `Func<string, Task>` | 返回摄像头、解码器和互操作错误。 |
+| `Decodeonce` | `bool` | 选择单次或连续解码。 |
+| `DecodeAllFormats` | `bool` | 启用所有支持的格式，可通过 `Options.formats` 缩小范围。 |
+| `AlsoInverted` | `bool` | 启用反色条码识别。 |
+| `DeviceID` | `string?` | 指定首选摄像头。 |
+| `SaveDeviceID` | `bool` | 保存最后使用且仍可用的摄像头。 |
+| `UseBuiltinDiv` | `bool` | 使用内置界面或自定义 `data-action` 控件。 |
+| `Options` | `ZXingOptions?` | 配置格式、图像质量、尺寸和高级解码提示。 |
+
+更多配置请查看 [`ZXingOptions.cs`](src/ZXingBlazor/ZXingOptions.cs) 和[在线示例](https://densen2014.github.io/ZXingBlazor/)。
+
+## 运行示例工程
+
+两个示例工程均已升级到 .NET 10：
+
+```bash
+dotnet run --project Demo.Wasm/Demo.Wasm.csproj
+dotnet run --project Demo.Server/Demo.Server.csproj
+```
 
 ## 参与贡献
 
-1. Fork 本项目
-2. 新建 Feat_xxx 分支
-3. 提交代码
-4. 新建 Pull Request 
-
-
----
-#### Blazor 组件
-
-[条码扫描 ZXingBlazor](https://www.nuget.org/packages/ZXingBlazor#readme-body-tab)
-[![nuget](https://img.shields.io/nuget/v/ZXingBlazor.svg?style=flat-square)](https://www.nuget.org/packages/ZXingBlazor) 
-[![stats](https://img.shields.io/nuget/dt/ZXingBlazor.svg?style=flat-square)](https://www.nuget.org/stats/packages/ZXingBlazor?groupby=Version)
-
-[图片浏览器 Viewer](https://www.nuget.org/packages/BootstrapBlazor.Viewer#readme-body-tab)
-  
-[条码扫描 BarcodeScanner](Densen.Component.Blazor/BarcodeScanner.md)
-   
-[手写签名 Handwritten](Densen.Component.Blazor/Handwritten.md)
-
-[手写签名 SignaturePad](https://www.nuget.org/packages/BootstrapBlazor.SignaturePad#readme-body-tab)
-
-[定位/持续定位 Geolocation](https://www.nuget.org/packages/BootstrapBlazor.Geolocation#readme-body-tab)
-
-[屏幕键盘 OnScreenKeyboard](https://www.nuget.org/packages/BootstrapBlazor.OnScreenKeyboard#readme-body-tab)
-
-[百度地图 BaiduMap](https://www.nuget.org/packages/BootstrapBlazor.BaiduMap#readme-body-tab)
-
-[谷歌地图 GoogleMap](https://www.nuget.org/packages/BootstrapBlazor.Maps#readme-body-tab)
-
-[蓝牙和打印 Bluetooth](https://www.nuget.org/packages/BootstrapBlazor.Bluetooth#readme-body-tab)
-
-[PDF阅读器 PdfReader](https://www.nuget.org/packages/BootstrapBlazor.PdfReader#readme-body-tab)
-
-[文件系统访问 FileSystem](https://www.nuget.org/packages/BootstrapBlazor.FileSystem#readme-body-tab)
-
-[光学字符识别 OCR](https://www.nuget.org/packages/BootstrapBlazor.OCR#readme-body-tab)
-
-[电池信息/网络信息 WebAPI](https://www.nuget.org/packages/BootstrapBlazor.WebAPI#readme-body-tab)
-
-#### AlexChow
-
-[今日头条](https://www.toutiao.com/c/user/token/MS4wLjABAAAAGMBzlmgJx0rytwH08AEEY8F0wIVXB2soJXXdUP3ohAE/?) | [博客园](https://www.cnblogs.com/densen2014) | [知乎](https://www.zhihu.com/people/alex-chow-54) | [Gitee](https://gitee.com/densen2014) | [GitHub](https://github.com/densen2014)
-
-
-![ChuanglinZhou](https://user-images.githubusercontent.com/8428709/205942253-8ff5f9ca-a033-4707-9c36-b8c9950e50d6.png)
+1. Fork 本仓库。
+2. 创建功能分支。
+3. 完成并验证修改。
+4. 提交 Pull Request。

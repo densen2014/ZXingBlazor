@@ -1,81 +1,85 @@
-.page {
-    position: relative;
+.site-shell {
+    background:
+        radial-gradient(circle at 10% 0%, rgba(45, 125, 210, 0.08), transparent 28rem),
+        #fbfcfe;
+    color: #142033;
+    min-height: 100vh;
+}
+
+.site-header {
+    align-items: center;
+    backdrop-filter: blur(18px);
+    background: rgba(251, 252, 254, 0.86);
+    border-bottom: 1px solid rgba(20, 32, 51, 0.08);
     display: flex;
-    flex-direction: column;
+    height: 4.5rem;
+    justify-content: space-between;
+    padding: 0 max(1.25rem, calc((100vw - 1120px) / 2));
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.brand {
+    align-items: center;
+    color: #142033;
+    display: inline-flex;
+    font-size: 1.1rem;
+    font-weight: 750;
+    gap: 0.65rem;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+}
+
+.brand-mark {
+    background: linear-gradient(135deg, #1774d1, #21a179);
+    border-radius: 0.35rem;
+    box-shadow: 0 5px 14px rgba(23, 116, 209, 0.22);
+    height: 1.5rem;
+    position: relative;
+    width: 1.5rem;
+}
+
+.brand-mark::after {
+    border: 2px solid white;
+    border-radius: 0.2rem;
+    content: "";
+    inset: 0.35rem;
+    position: absolute;
+}
+
+nav {
+    align-items: center;
+    display: flex;
+    gap: 0.4rem;
+}
+
+nav a {
+    border-radius: 999px;
+    color: #526175;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.55rem 0.85rem;
+    text-decoration: none;
+}
+
+nav a:hover {
+    background: #edf3f9;
+    color: #145fa8;
+}
+
+.github-link {
+    background: #142033;
+    color: white;
+}
+
+.github-link:hover {
+    background: #26364e;
+    color: white;
 }
 
 main {
-    flex: 1;
-}
-
-.sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
-}
-
-.top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
-    height: 3.5rem;
-    display: flex;
-    align-items: center;
-}
-
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-    }
-
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
-
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-@media (max-width: 640.98px) {
-    .top-row:not(.auth) {
-        display: none;
-    }
-
-    .top-row.auth {
-        justify-content: space-between;
-    }
-
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
-    }
-}
-
-@media (min-width: 641px) {
-    .page {
-        flex-direction: row;
-    }
-
-    .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
-    }
-
-    .top-row {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
-
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
-    }
-
-    .top-row, article {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
-    }
+    margin: 0 auto;
+    max-width: 1120px;
+    padding: 0 1.25rem;
 }
