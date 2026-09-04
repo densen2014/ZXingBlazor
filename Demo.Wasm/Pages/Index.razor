@@ -311,7 +311,7 @@
     protected override void OnInitialized()
     {
         IsEnglish = string.Equals(
-            NavigationManager.ToBaseRelativePath(NavigationManager.Uri).Trim('/'),
+            NavigationManager.ToBaseRelativePath(NavigationManager.Uri).Split('?', '#')[0].Trim('/'),
             "en",
             StringComparison.OrdinalIgnoreCase);
     }
