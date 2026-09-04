@@ -215,7 +215,7 @@ async function populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPane
 
         element._sourceSelectHandler = () => {
             selectedDeviceId = sourceSelect.value;
-            instance.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
+            instance?.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
             if (element._activeStream) {
                 stopStream(element._activeStream);
                 element._activeStream = null;
@@ -260,7 +260,7 @@ export function load(elementid) {
                                         if (result && result.text) {
                                             if (debug) console.log('[反色定时解码] 结果:', result.text);
                                             vibrate();
-                                            instance.invokeMethodAsync("GetResult", result.text);
+                                            instance?.invokeMethodAsync("GetResult", result.text);
                                             if (options.decodeonce) {
                                                 if (debug) console.log('autostop');
                                                 codeReaderFromImage.reset();
@@ -289,22 +289,22 @@ export function load(elementid) {
                         if (result) {
                             if (debug) console.log(result)
                             vibrate();
-                            instance.invokeMethodAsync("GetResult", result.text);
+                            instance?.invokeMethodAsync("GetResult", result.text);
                         }
                         if (err && !(err instanceof ZXing.NotFoundException)) {
                             console.log(err)
-                            instance.invokeMethodAsync("GetError", err + '');
+                            instance?.invokeMethodAsync("GetError", err + '');
                         }
                     })
                 } else {
                     // no video -> stop stream to avoid camera staying on
                     stopStream(stream);
-                    instance.invokeMethodAsync('GetError', 'No video element available for display');
+                    instance?.invokeMethodAsync('GetError', 'No video element available for display');
                 }
             })
             .catch((err) => {
                 console.error(`An error occurred: ${err}`);
-                instance.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+                instance?.invokeMethodAsync('GetError', `An error occurred: ${err}`);
             });
         return;
     }
@@ -413,12 +413,12 @@ export function load(elementid) {
                 })
                 .catch(err => {
                     console.error('Failed to getUserMedia after retries', err);
-                    instance.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+                    instance?.invokeMethodAsync('GetError', `An error occurred: ${err}`);
                 });
         })
         .catch(err => {
             console.error('Device enumeration failed', err);
-            instance.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+            instance?.invokeMethodAsync('GetError', `An error occurred: ${err}`);
         });
 }
 
@@ -445,7 +445,7 @@ export function start(elementid) {
                                         if (result && result.text) {
                                             if (debug) console.log('[反色定时解码] 结果:', result.text);
                                             vibrate();
-                                            instance.invokeMethodAsync("GetResult", result.text);
+                                            instance?.invokeMethodAsync("GetResult", result.text);
                                             if (options.decodeonce) {
                                                 if (debug) console.log('autostop');
                                                 codeReaderFromImage.reset();
@@ -476,11 +476,11 @@ export function start(elementid) {
             if (result) {
                 if (debug) console.log(result)
                 vibrate();
-                instance.invokeMethodAsync("GetResult", result.text);
+                instance?.invokeMethodAsync("GetResult", result.text);
             }
             if (err && !(err instanceof ZXing.NotFoundException)) {
                 console.log(err)
-                instance.invokeMethodAsync("GetError", err + '');
+                instance?.invokeMethodAsync("GetError", err + '');
             }
         };
 
@@ -501,9 +501,9 @@ export function start(elementid) {
                             codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then(r => {
                                 if (r) {
                                     vibrate();
-                                    instance.invokeMethodAsync("GetResult", r.text);
+                                    instance?.invokeMethodAsync("GetResult", r.text);
                                 }
-                            }).catch(e => { if (e && !(e instanceof ZXing.NotFoundException)) instance.invokeMethodAsync("GetError", e + ''); });
+                            }).catch(e => { if (e && !(e instanceof ZXing.NotFoundException)) instance?.invokeMethodAsync("GetError", e + ''); });
                         } else {
                             codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', callback);
                         }
@@ -522,11 +522,11 @@ export function start(elementid) {
                     vibrate();
                     if (debug) console.log('autostop');
                     codeReader.reset();
-                    return instance.invokeMethodAsync("GetResult", result.text);
+                    return instance?.invokeMethodAsync("GetResult", result.text);
                 }).catch((err) => {
                     if (err && !(err instanceof ZXing.NotFoundException)) {
                         console.log(err)
-                        instance.invokeMethodAsync("GetError", err + '');
+                        instance?.invokeMethodAsync("GetError", err + '');
                     }
                 })
             } else {
@@ -570,7 +570,7 @@ export function QRCodeSvg(instance, input, elementRef, tobase64, size = 300) {
         codeWriter.writeToDom(elementTemp, input, size, size)
         let svgElement = elementTemp.firstChild
         const svgData = (new XMLSerializer()).serializeToString(svgElement)
-        instance.invokeMethodAsync("GetQRCode", svgData);
+        instance?.invokeMethodAsync("GetQRCode", svgData);
     } else {
         codeWriter.writeToDom(elementRef.querySelector("[data-action=result]"), input, size, size)
     }
@@ -696,7 +696,7 @@ function decodeImageWithFallback(codeReaderImage, dataUrl, instanceRef, optionsR
         if (result) {
             vibrate();
             if (debug) console.log(result.text);
-            instanceRef.invokeMethodAsync('GetResult', result.text);
+            instanceRef?.invokeMethodAsync('GetResult', result.text);
         }
     }).catch(err => {
         if (optionsRef?.debug) console.log(err);
@@ -704,7 +704,7 @@ function decodeImageWithFallback(codeReaderImage, dataUrl, instanceRef, optionsR
             if (optionsRef.debug) console.log('尝试反色解码图片...');
             tryInvertedDecodeFromImage(codeReaderImage, dataUrl, instanceRef, optionsRef);
         } else {
-            instanceRef.invokeMethodAsync('GetError', (err && err.message) || '解码失败');
+            instanceRef?.invokeMethodAsync('GetError', (err && err.message) || '解码失败');
         }
     });
 }
@@ -715,16 +715,16 @@ function tryInvertedDecodeFromImage(codeReaderImage, imageUrl, instanceRef, opti
         let base64Data = videoToDataURL(img);
         codeReaderImage.decodeFromImageUrl(base64Data).then(result => {
             if (optionsRef.debug) console.log('反色解码成功:', result);
-            instanceRef.invokeMethodAsync('GetResult', result.text);
+            instanceRef?.invokeMethodAsync('GetResult', result.text);
             vibrate();
         }).catch(invertErr => {
             if (optionsRef.debug) console.log('反色解码也失败:', invertErr);
-            instanceRef.invokeMethodAsync('GetError', invertErr?.message || '反色解码失败');
+            instanceRef?.invokeMethodAsync('GetError', invertErr?.message || '反色解码失败');
         });
     };
     img.onerror = () => {
         if (optionsRef.debug) console.error('图片加载失败');
-        instanceRef.invokeMethodAsync('GetError', '图片加载失败');
+        instanceRef?.invokeMethodAsync('GetError', '图片加载失败');
     };
     img.src = imageUrl;
 }

@@ -219,12 +219,27 @@ public partial class BarcodeReader : IAsyncDisposable
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        await Module!.InvokeVoidAsync("destroy", Element.Id);
-        Instance?.Dispose();
+        // Module is only assigned once the "import" call in OnAfterRenderAsync completes. If
+        // this component is disposed before that happens (e.g. the caller toggles it back off
+        // quickly), Module is still null here - guard against it instead of relying on the
+        // null-forgiving operator, which throws ArgumentNullException("jsObjectReference") from
+        // JSObjectReferenceExtensions.InvokeVoidAsync.
         if (Module is not null)
         {
+            try
+            {
+                await Module.InvokeVoidAsync("destroy", Element.Id);
+            }
+            catch (JSDisconnectedException)
+            {
+                // The circuit/runtime is already gone (e.g. page navigated away) - nothing to
+                // clean up JS-side.
+            }
+
             await Module.DisposeAsync();
         }
+
+        Instance?.Dispose();
     }
 
     /// <summary>
