@@ -25,6 +25,8 @@ public partial class BarcodeReader : IAsyncDisposable
 
     private DotNetObjectReference<BarcodeReader>? Instance { get; set; }
 
+    private bool _disposed;
+
     [NotNull]
     private StorageService? Storage { get; set; }
 
@@ -145,13 +147,20 @@ public partial class BarcodeReader : IAsyncDisposable
     {
         try
         {
-            if (!firstRender)
+            if (!firstRender || _disposed)
             {
                 return;
             }
 
             Storage ??= new StorageService(JSRuntime);
-            Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+            var module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/ZXingBlazor/BarcodeReader.razor.js" + "?v=" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+            if (_disposed)
+            {
+                await module.DisposeAsync();
+                return;
+            }
+
+            Module = module;
             Instance = DotNetObjectReference.Create(this);
             try
             {
@@ -164,6 +173,11 @@ public partial class BarcodeReader : IAsyncDisposable
             {
 
             }
+            if (_disposed)
+            {
+                return;
+            }
+
             Options ??= new()
             {
                 Pdf417 = Pdf417Only,
@@ -175,11 +189,11 @@ public partial class BarcodeReader : IAsyncDisposable
                 //TRY_HARDER = true
                 Debug = true
             };
-            await Module.InvokeVoidAsync("init", Instance, Element, Element.Id, Options, DeviceID);
+            await module.InvokeVoidAsync("init", Instance, Element, Element.Id, Options, DeviceID);
         }
         catch (Exception e)
         {
-            if (OnError != null)
+            if (!_disposed && OnError != null)
             {
                 await OnError.Invoke(e.Message);
             }
@@ -219,27 +233,32 @@ public partial class BarcodeReader : IAsyncDisposable
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        // Module is only assigned once the "import" call in OnAfterRenderAsync completes. If
-        // this component is disposed before that happens (e.g. the caller toggles it back off
-        // quickly), Module is still null here - guard against it instead of relying on the
-        // null-forgiving operator, which throws ArgumentNullException("jsObjectReference") from
-        // JSObjectReferenceExtensions.InvokeVoidAsync.
-        if (Module is not null)
+        _disposed = true;
+        var module = Module;
+        Module = null;
+        var instance = Instance;
+        Instance = null;
+
+        try
         {
-            try
+            if (module is not null)
             {
-                await Module.InvokeVoidAsync("destroy", Element.Id);
-            }
-            catch (JSDisconnectedException)
-            {
-                // The circuit/runtime is already gone (e.g. page navigated away) - nothing to
-                // clean up JS-side.
-            }
+                try
+                {
+                    await module.InvokeVoidAsync("destroy", Element.Id);
+                }
+                catch (JSDisconnectedException)
+                {
+                    // The circuit/runtime is already gone, so there is no JS-side state to clean up.
+                }
 
-            await Module.DisposeAsync();
+                await module.DisposeAsync();
+            }
         }
-
-        Instance?.Dispose();
+        finally
+        {
+            instance?.Dispose();
+        }
     }
 
     /// <summary>

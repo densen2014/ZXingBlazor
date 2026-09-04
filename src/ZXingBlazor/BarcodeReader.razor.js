@@ -14,6 +14,7 @@ let element = null;
 let debug = false;
 let width = 640;
 let height = 0;
+let lifecycleVersion = 0;
 
 function stopStream(stream) {
     if (!stream) return;
@@ -28,27 +29,31 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function findVideoElement() {
-    if (!element) return null;
+function findVideoElement(container = element) {
+    if (!container) return null;
     // prefer explicit data-action
-    let video = element.querySelector("[data-action=video]");
+    let video = container.querySelector("[data-action=video]");
     if (video) return video;
     // fallback to any video element inside the container
-    video = element.querySelector("video");
+    video = container.querySelector("video");
     if (video) return video;
     // fallback to global video id if present
     video = document.getElementById("video");
     return video;
 }
 
-async function waitForVideoElement(timeoutMs = 2000) {
+async function waitForVideoElement(timeoutMs = 2000, container = element) {
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
-        const v = findVideoElement();
+        const v = findVideoElement(container);
         if (v) return v;
         await sleep(100);
     }
     return null;
+}
+
+function isActiveLifecycle(version, elementid, elementRef) {
+    return lifecycleVersion === version && id === elementid && element === elementRef;
 }
 
 async function ensureVideoPlaying(video, stream, timeoutMs = 2000) {
@@ -168,7 +173,7 @@ export function genHints(opt) {
     return hints;
 }
 
-async function populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPanel) {
+async function populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPanel, version, elementid, elementRef) {
     let devices = await navigator.mediaDevices.enumerateDevices();
     let videoInputDevices = devices.filter(d => d.kind === 'videoinput');
 
@@ -186,6 +191,7 @@ async function populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPane
         }
     }
 
+    if (!isActiveLifecycle(version, elementid, elementRef)) return [];
     if (videoInputDevices.length === 0) return [];
 
     if (deviceID != null) {
@@ -200,9 +206,9 @@ async function populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPane
     if (sourceSelect && videoInputDevices.length > 1) {
         sourceSelect.innerHTML = '';
 
-        if (element._sourceSelectHandler) {
-            try { sourceSelect.removeEventListener('change', element._sourceSelectHandler); } catch { }
-            element._sourceSelectHandler = null;
+        if (elementRef._sourceSelectHandler) {
+            try { sourceSelect.removeEventListener('change', elementRef._sourceSelectHandler); } catch { }
+            elementRef._sourceSelectHandler = null;
         }
 
         videoInputDevices.forEach((device, idx) => {
@@ -213,21 +219,22 @@ async function populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPane
             sourceSelect.appendChild(sourceOption);
         });
 
-        element._sourceSelectHandler = () => {
+        elementRef._sourceSelectHandler = () => {
+            if (!isActiveLifecycle(version, elementid, elementRef)) return;
             selectedDeviceId = sourceSelect.value;
             instance?.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
-            if (element._activeStream) {
-                stopStream(element._activeStream);
-                element._activeStream = null;
+            if (elementRef._activeStream) {
+                stopStream(elementRef._activeStream);
+                elementRef._activeStream = null;
             }
-            if (element._invertedStream) {
-                stopStream(element._invertedStream);
-                element._invertedStream = null;
+            if (elementRef._invertedStream) {
+                stopStream(elementRef._invertedStream);
+                elementRef._invertedStream = null;
             }
             try { codeReader.reset(); } catch { }
             start(id);
         };
-        sourceSelect.addEventListener('change', element._sourceSelectHandler);
+        sourceSelect.addEventListener('change', elementRef._sourceSelectHandler);
         sourceSelectPanel.style.display = 'block';
     }
 
@@ -237,8 +244,14 @@ async function populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPane
 export function load(elementid) {
     if (id != elementid) return;
 
-    const sourceSelect = element.querySelector("[data-action=sourceSelect]") || element.querySelector("select[data-action=sourceSelect]");
-    const sourceSelectPanel = element.querySelector("[data-action=sourceSelectPanel]") || element.querySelector("[data-action=sourceSelectPanel]");
+    const elementRef = element;
+    const version = ++lifecycleVersion;
+    if (elementRef._domWatcher) {
+        try { clearInterval(elementRef._domWatcher); } catch { }
+        elementRef._domWatcher = null;
+    }
+    const sourceSelect = elementRef.querySelector("[data-action=sourceSelect]") || elementRef.querySelector("select[data-action=sourceSelect]");
+    const sourceSelectPanel = elementRef.querySelector("[data-action=sourceSelectPanel]") || elementRef.querySelector("[data-action=sourceSelectPanel]");
     codeReader = genCodeReaderImage(options);
     codeReader.timeBetweenDecodingAttempts = options.timeBetweenDecodingAttempts;
 
@@ -246,17 +259,27 @@ export function load(elementid) {
         navigator.mediaDevices
             .getDisplayMedia({ video: true, audio: false })
             .then((stream) => {
+                if (!isActiveLifecycle(version, elementid, elementRef)) {
+                    stopStream(stream);
+                    return;
+                }
                 if (options.ALSO_INVERTED) {
                     codeReaderFromImage = genCodeReaderImage(options);
-                    const video = findVideoElement();
+                    const video = findVideoElement(elementRef);
                     if (video) {
                         video.srcObject = stream;
                         video.play();
                         let timer = setInterval(() => {
+                            if (!isActiveLifecycle(version, elementid, elementRef)) {
+                                clearInterval(timer);
+                                stopStream(stream);
+                                return;
+                            }
                             if (video.videoWidth > 0 && video.videoHeight > 0) {
                                 let base64Data = videoToDataURL(video, 1200);
                                 codeReaderFromImage.decodeFromImageUrl(base64Data)
                                     .then(result => {
+                                        if (!isActiveLifecycle(version, elementid, elementRef)) return;
                                         if (result && result.text) {
                                             if (debug) console.log('[反色定时解码] 结果:', result.text);
                                             vibrate();
@@ -275,17 +298,18 @@ export function load(elementid) {
                         }, 100);
                         video.addEventListener('ended', () => clearInterval(timer));
                         video.addEventListener('pause', () => clearInterval(timer));
-                        element._invertedTimer = timer;
-                        element._invertedStream = stream;
+                        elementRef._invertedTimer = timer;
+                        elementRef._invertedStream = stream;
                     } else {
                         // No video element available, stop stream to avoid leak
                         stopStream(stream);
                     }
                 }
 
-                const videoElem = findVideoElement();
+                const videoElem = findVideoElement(elementRef);
                 if (videoElem) {
                     codeReader.decodeFromStream(stream, videoElem, (result, err) => {
+                        if (!isActiveLifecycle(version, elementid, elementRef)) return;
                         if (result) {
                             if (debug) console.log(result)
                             vibrate();
@@ -318,17 +342,18 @@ export function load(elementid) {
     if (!options.height) options.height = 480;
     width = options.width;
 
-    if (element._activeStream) {
-        stopStream(element._activeStream);
-        element._activeStream = null;
+    if (elementRef._activeStream) {
+        stopStream(elementRef._activeStream);
+        elementRef._activeStream = null;
     }
-    if (element._invertedStream) {
-        stopStream(element._invertedStream);
-        element._invertedStream = null;
+    if (elementRef._invertedStream) {
+        stopStream(elementRef._invertedStream);
+        elementRef._invertedStream = null;
     }
 
-    populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPanel)
+    populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPanel, version, elementid, elementRef)
         .then(videoInputDevices => {
+            if (!isActiveLifecycle(version, elementid, elementRef)) return;
             const tryConstraints = [];
 
             if (selectedDeviceId) {
@@ -361,15 +386,23 @@ export function load(elementid) {
 
             tryGetUserMediaWithRetries(tryConstraints, 3, 300)
                 .then(async ({ stream }) => {
-                    if (element._activeStream && element._activeStream !== stream) {
-                        stopStream(element._activeStream);
+                    if (!isActiveLifecycle(version, elementid, elementRef)) {
+                        stopStream(stream);
+                        return;
                     }
-                    element._activeStream = stream;
+                    if (elementRef._activeStream && elementRef._activeStream !== stream) {
+                        stopStream(elementRef._activeStream);
+                    }
+                    elementRef._activeStream = stream;
 
                     // wait for a video element if not present yet (custom layout)
-                    let videoElem = findVideoElement();
+                    let videoElem = findVideoElement(elementRef);
                     if (!videoElem) {
-                        videoElem = await waitForVideoElement(1500);
+                        videoElem = await waitForVideoElement(1500, elementRef);
+                    }
+                    if (!isActiveLifecycle(version, elementid, elementRef)) {
+                        stopStream(stream);
+                        return;
                     }
 
                     if (videoElem) {
@@ -391,57 +424,77 @@ export function load(elementid) {
                     } catch { }
 
                     // set up DOM/visibility watcher to auto-stop if element removed or hidden
-                    if (!element._domWatcher) {
-                        element._domWatcher = setInterval(() => {
+                    if (!elementRef._domWatcher) {
+                        elementRef._domWatcher = setInterval(() => {
                             try {
-                                if (!document.body.contains(element)) {
-                                    try { destroy(id); } catch { }
+                                if (!document.body.contains(elementRef)) {
+                                    if (isActiveLifecycle(version, elementid, elementRef)) {
+                                        try { destroy(elementid); } catch { }
+                                    }
                                     return;
                                 }
                                 // check visibility: if element not visible -> stop streams (but keep state)
-                                const style = window.getComputedStyle(element);
-                                const isVisible = element.getClientRects().length > 0 && style.display !== 'none' && style.visibility !== 'hidden' && element.offsetWidth > 0 && element.offsetHeight > 0;
+                                const style = window.getComputedStyle(elementRef);
+                                const isVisible = elementRef.getClientRects().length > 0 && style.display !== 'none' && style.visibility !== 'hidden' && elementRef.offsetWidth > 0 && elementRef.offsetHeight > 0;
                                 if (!isVisible) {
                                     if (debug) console.log('Element hidden; stopping streams');
-                                    try { stop(id); } catch { }
+                                    try { stop(elementid); } catch { }
                                 }
                             } catch { }
                         }, 1000);
                     }
 
-                    start(elementid);
+                    if (isActiveLifecycle(version, elementid, elementRef)) {
+                        start(elementid);
+                    }
                 })
                 .catch(err => {
-                    console.error('Failed to getUserMedia after retries', err);
-                    instance?.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+                    if (isActiveLifecycle(version, elementid, elementRef)) {
+                        console.error('Failed to getUserMedia after retries', err);
+                        instance?.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+                    }
                 });
         })
         .catch(err => {
-            console.error('Device enumeration failed', err);
-            instance?.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+            if (isActiveLifecycle(version, elementid, elementRef)) {
+                console.error('Device enumeration failed', err);
+                instance?.invokeMethodAsync('GetError', `An error occurred: ${err}`);
+            }
         });
 }
 
 export function start(elementid) {
     if (undefined !== codeReader && null !== codeReader && id == elementid) {
+        const version = lifecycleVersion;
+        const elementRef = element;
 
         if (options?.ALSO_INVERTED) {
-            if (element._invertedStream) {
-                stopStream(element._invertedStream);
-                element._invertedStream = null;
+            if (elementRef._invertedStream) {
+                stopStream(elementRef._invertedStream);
+                elementRef._invertedStream = null;
             }
             navigator.mediaDevices.getUserMedia({ video: true, audio: false })
                 .then((stream) => {
+                    if (!isActiveLifecycle(version, elementid, elementRef)) {
+                        stopStream(stream);
+                        return;
+                    }
                     codeReaderFromImage = genCodeReaderImage(options);
-                    const video = findVideoElement();
+                    const video = findVideoElement(elementRef);
                     if (video) {
                         video.srcObject = stream;
                         video.play();
                         let timer = setInterval(() => {
+                            if (!isActiveLifecycle(version, elementid, elementRef)) {
+                                clearInterval(timer);
+                                stopStream(stream);
+                                return;
+                            }
                             if (video.videoWidth > 0 && video.videoHeight > 0) {
                                 let base64Data = videoToDataURL(video);
                                 codeReaderFromImage.decodeFromImageUrl(base64Data)
                                     .then(result => {
+                                        if (!isActiveLifecycle(version, elementid, elementRef)) return;
                                         if (result && result.text) {
                                             if (debug) console.log('[反色定时解码] 结果:', result.text);
                                             vibrate();
@@ -461,18 +514,21 @@ export function start(elementid) {
                         }, 100);
                         video.addEventListener('ended', () => clearInterval(timer));
                         video.addEventListener('pause', () => clearInterval(timer));
-                        element._invertedTimer = timer;
-                        element._invertedStream = stream;
+                        elementRef._invertedTimer = timer;
+                        elementRef._invertedStream = stream;
                     } else {
                         stopStream(stream);
                     }
                 })
                 .catch((err) => {
-                    if (debug) console.error('摄像头测试模式错误:', err);
+                    if (isActiveLifecycle(version, elementid, elementRef) && debug) {
+                        console.error('摄像头测试模式错误:', err);
+                    }
                 });
         }
 
         const callback = (result, err) => {
+            if (!isActiveLifecycle(version, elementid, elementRef)) return;
             if (result) {
                 if (debug) console.log(result)
                 vibrate();
@@ -485,25 +541,30 @@ export function start(elementid) {
         };
 
         // Try to attach to controlled stream if present
-        const videoElem = findVideoElement();
-        if (element._activeStream) {
+        const videoElem = findVideoElement(elementRef);
+        if (elementRef._activeStream) {
             if (!videoElem) {
                 // try briefly to wait for a video element before attaching
-                waitForVideoElement(1500).then(v => {
+                waitForVideoElement(1500, elementRef).then(v => {
+                    if (!isActiveLifecycle(version, elementid, elementRef)) return;
                     if (v) {
                         try { codeReader.reset(); } catch { }
-                        codeReader.decodeFromStream(element._activeStream, v, callback);
+                        codeReader.decodeFromStream(elementRef._activeStream, v, callback);
                         if (debug) console.log('decodeFromStream used with controlled stream (delayed attach)');
                     } else {
                         if (debug) console.warn('No video element to attach controlled stream');
                         // still call decodeFromVideoDevice fallback so ZXing handles stream creation
                         if (options.decodeonce) {
                             codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then(r => {
-                                if (r) {
+                                if (r && isActiveLifecycle(version, elementid, elementRef)) {
                                     vibrate();
                                     instance?.invokeMethodAsync("GetResult", r.text);
                                 }
-                            }).catch(e => { if (e && !(e instanceof ZXing.NotFoundException)) instance?.invokeMethodAsync("GetError", e + ''); });
+                            }).catch(e => {
+                                if (isActiveLifecycle(version, elementid, elementRef) && e && !(e instanceof ZXing.NotFoundException)) {
+                                    instance?.invokeMethodAsync("GetError", e + '');
+                                }
+                            });
                         } else {
                             codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', callback);
                         }
@@ -511,20 +572,21 @@ export function start(elementid) {
                 });
             } else {
                 try { codeReader.reset(); } catch { }
-                codeReader.decodeFromStream(element._activeStream, videoElem, callback);
+                codeReader.decodeFromStream(elementRef._activeStream, videoElem, callback);
                 if (debug) console.log('decodeFromStream used with controlled stream');
             }
         } else {
             // fallback to ZXing device helpers
             if (options.decodeonce) {
                 codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
+                    if (!isActiveLifecycle(version, elementid, elementRef)) return;
                     if (debug) console.log(result)
                     vibrate();
                     if (debug) console.log('autostop');
                     codeReader.reset();
                     return instance?.invokeMethodAsync("GetResult", result.text);
                 }).catch((err) => {
-                    if (err && !(err instanceof ZXing.NotFoundException)) {
+                    if (isActiveLifecycle(version, elementid, elementRef) && err && !(err instanceof ZXing.NotFoundException)) {
                         console.log(err)
                         instance?.invokeMethodAsync("GetError", err + '');
                     }
@@ -644,6 +706,7 @@ export async function DecodeFormImage(instance, elementRef, optionsRef, dataUrl)
 
 export function destroy(elementid) {
     if (id == elementid) {
+        lifecycleVersion++;
         try { codeReader.reset(); } catch { }
         try { codeReaderFromImage?.reset(); } catch { }
 
