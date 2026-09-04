@@ -1,382 +1,378 @@
-﻿@page "/"
+@page "/"
 @page "/en"
+@page "/barcodereader"
+@inject NavigationManager NavigationManager
 
-<h3>BarcodeReader</h3>
+<div class="demo-header">
+    <div>
+        <span class="eyebrow">ZXingBlazor</span>
+        <h1>BarcodeReader</h1>
+        <p>@L("在 Blazor WebAssembly 中扫描一维码、二维码、Data Matrix 和 PDF417。", "Scan 1D barcodes, QR codes, Data Matrix, and PDF417 in Blazor WebAssembly.")</p>
+    </div>
+    <button class="btn btn-outline-primary language-button" type="button" @onclick="ToggleLanguage"
+            aria-label="@L("Switch to English", "切换到中文")">
+        <span class="oi oi-globe" aria-hidden="true"></span>
+        @(IsEnglish ? "中文" : "English")
+    </button>
+</div>
 
-<h5>1D/2D barcode, QR code, Pdf417</h5>
+<section class="demo-section">
+    <div class="section-heading">
+        <div>
+            <h2>@L("在线扫码", "Live scanner")</h2>
+            <p>@L("允许浏览器访问摄像头后即可开始扫码。", "Allow camera access in your browser to start scanning.")</p>
+        </div>
+        <button class="btn btn-primary" type="button" @onclick="ToggleScanner">
+            <span class="oi oi-camera-slr" aria-hidden="true"></span>
+            @(ShowScanBarcode ? L("关闭扫码", "Close scanner") : L("开始扫码", "Start scanning"))
+        </button>
+    </div>
 
-<button class="btn btn-primary"
-        type="button"
-        @onclick="(() => ShowScanBarcode = !ShowScanBarcode)">
-    Scan
-</button>
+    <div class="option-grid">
+        <label class="form-check">
+            <input class="form-check-input" type="checkbox" @bind="Pdf417Only" />
+            <span class="form-check-label">@L("仅解码 PDF417", "PDF417 only")</span>
+        </label>
+        <label class="form-check">
+            <input class="form-check-input" type="checkbox" @bind="DecodeContinuously" />
+            <span class="form-check-label">@L("连续解码", "Decode continuously")</span>
+        </label>
+        <label class="form-check">
+            <input class="form-check-input" type="checkbox" @bind="DecodeAllFormats" />
+            <span class="form-check-label">@L("尝试所有格式", "Try all formats")</span>
+        </label>
+        <label class="form-check">
+            <input class="form-check-input" type="checkbox" @bind="CaptureStillOnScan" />
+            <span class="form-check-label">@L("扫码成功时截图", "Capture frame on scan")</span>
+        </label>
+    </div>
 
-<br />
-<input type="checkbox" @bind-value="Pdf417" />
-Pdf417 Only
-<br />
+    @if (CaptureStillOnScan)
+    {
+        <div class="delay-setting">
+            <label for="capture-delay">@L("恢复预览延迟（毫秒）", "Preview resume delay (ms)")</label>
+            <input id="capture-delay" class="form-control" type="number" min="0" step="100"
+                   @bind="CaptureStillAutoResumeDelay" />
+        </div>
+    }
 
-<input type="checkbox" @bind-value="DecodeContinuously" />
-Decode continuously
-<br />
+    @if (ShowScanBarcode)
+    {
+        <BarcodeReader ScanResult="OnScanResult"
+                       ScanCaptured="OnScanCaptured"
+                       Close="CloseScanner"
+                       OnError="OnError"
+                       ScanBtnTitle="@L("扫码", "Scan")"
+                       ResetBtnTitle="@L("重置", "Reset")"
+                       CloseBtnTitle="@L("关闭", "Close")"
+                       SelectDeviceBtnTitle="@L("选择设备", "Select device")"
+                       Pdf417Only="Pdf417Only"
+                       Decodeonce="!DecodeContinuously"
+                       DecodeAllFormats="DecodeAllFormats"
+                       CaptureStillOnScan="CaptureStillOnScan"
+                       CaptureStillAutoResumeDelay="CaptureStillAutoResumeDelay" />
+    }
 
-<input type="checkbox" @bind-value="DecodeAllFormats" />
-Decodde all formats (+ PDF_417 / DATA_MATRIX...)
-<br />
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="alert alert-danger mt-3" role="alert">@ErrorMessage</div>
+    }
 
-@if (Pdf417 | DecodeAllFormats)
-{
-    <b>Result:</b>
-    <br />
-    <pre>@BarCode</pre>
-}
-else if (DecodeContinuously)
-{
-    <b>DecodeContinuously:</b>
-    <br />
-    <pre>@BarCode</pre>
-}
-else
-{
-    <input type="text" class="form-control" style="min-width: 100px;"
-           @bind-value="BarCode"
-           placeholder="BarCode" />
-}
-
-@if (ShowScanBarcode)
-{
-
-    <BarcodeReader ScanResult="ScanResult"
-                   Close="(()=>ShowScanBarcode=!ShowScanBarcode)"
-                   ScanBtnTitle="Scan"
-                   ResetBtnTitle="Reset"
-                   CloseBtnTitle="Close"
-                   Pdf417Only="Pdf417"
-                   Decodeonce="!DecodeContinuously"
-                   DecodeAllFormats="DecodeAllFormats"
-                   SelectDeviceBtnTitle="Select Device" />
-
-}
-<hr />
-<button class="btn btn-sm btn-outline-secondary"
-        type="button"
-        @onclick="(() => ShowCodes = !ShowCodes)">
-    Code
-</button>
-
-@if (ShowCodes)
-{
-<pre>
-    <code>
-        @@if (ShowScanBarcode)
+    <div class="result-grid">
+        <div>
+            <label for="scan-result" class="form-label">@L("扫码结果", "Scan result")</label>
+            <textarea id="scan-result" class="form-control result-field" rows="5" readonly
+                      placeholder="@L("扫码结果会显示在这里", "Scan results appear here")">@BarCode</textarea>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(CapturedImageDataUrl))
         {
-
-            &lt;BarcodeReader ScanResult="((e) => { BarCode=e; ShowScanBarcode = !ShowScanBarcode; })"
-                           Close="(()=>ShowScanBarcode=!ShowScanBarcode)"
-                           OnError="OnError" /&gt;
-            @@code{
-                bool ShowScanBarcode { get; set; } = false;
-
-                public string? BarCode { get; set; }
-
-                private string message;
-
-                private Task OnError(string message)
-                {
-                    this.message = message;
-                    StateHasChanged();
-                    return Task.CompletedTask;
-                }
-
-            }
+            <figure class="capture-preview">
+                <img src="@CapturedImageDataUrl" alt="@L("扫码时捕获的画面", "Frame captured when the barcode was scanned")" />
+                <figcaption>@L("最近一次扫码截图", "Latest captured frame")</figcaption>
+            </figure>
         }
-    </code>
-</pre>
-}
-<p style="color:red">@message</p>
-<hr />
-<BarCodes @ref="barCodes" OnQRCodeGen="OnResult" OnDecodeFromImage="OnResult" OnError="OnError" QRCodeWidth="200"
-          Options="options" />
-<button class="btn btn-primary"
-        type="button" @onclick="DecodeFromImage">
-    Decode from image
-</button>
+    </div>
+</section>
 
-<hr />
+<section class="demo-section">
+    <div class="section-heading">
+        <div>
+            <h2>@L("从图片解码", "Decode from an image")</h2>
+            <p>@L("选择本地图片并识别其中的条码。", "Choose a local image and decode its barcode.")</p>
+        </div>
+        <button class="btn btn-outline-primary" type="button" @onclick="DecodeFromImage">
+            @L("选择图片", "Choose image")
+        </button>
+    </div>
+    <BarCodes @ref="barCodes" OnQRCodeGen="OnImageResult" OnDecodeFromImage="OnImageResult"
+              OnError="OnError" QRCodeWidth="200" Options="options" />
+</section>
 
-<button class="btn btn-primary"
-        type="button"
-        @onclick="(() => ShowScanBarcodeCustom = !ShowScanBarcodeCustom)">
-    Scan code [customize]
-</button>
-<br />
-<input type="text" class="form-control" style="min-width: 100px;"
-       @bind-value="BarCodeCustom"
-       placeholder="条码" />
-@if (ShowScanBarcodeCustom)
-{
-    <BarcodeReader ScanResult="((e) => { BarCodeCustom=e; ShowScanBarcodeCustom = !ShowScanBarcodeCustom; })"
-                   Close="(()=>ShowScanBarcodeCustom=!ShowScanBarcodeCustom)"
-                   OnError="OnError"
-                   UseBuiltinDiv="false"
-                   @ref="barcodeReaderCustom" />
+<section class="demo-section">
+    <div class="section-heading">
+        <div>
+            <h2>@L("自定义扫码界面", "Custom scanner UI")</h2>
+            <p>@L("关闭内置界面后，可用 data-action 元素控制扫码器。", "Disable the built-in UI and control the scanner with data-action elements.")</p>
+        </div>
+        <button class="btn btn-outline-primary" type="button" @onclick="ToggleCustomScanner">
+            @(ShowCustomScanner ? L("关闭示例", "Close example") : L("打开示例", "Open example"))
+        </button>
+    </div>
 
-    <div @ref="barcodeReaderCustom.Element">
-        <div style="width: 75vw; max-width: 260px;">
-            <div>
-                <video id="video" playsinline autoplay style="width:70vw;max-width:250px;height:200px;border: 1px solid red"></video>
-            </div>
+    @if (ShowCustomScanner)
+    {
+        <BarcodeReader ScanResult="OnCustomScanResult"
+                       Close="ToggleCustomScanner"
+                       OnError="OnError"
+                       UseBuiltinDiv="false"
+                       @ref="barcodeReaderCustom" />
+
+        <div @ref="barcodeReaderCustom.Element" class="custom-scanner">
+            <video id="custom-video" playsinline autoplay></video>
             <div data-action="sourceSelectPanel" style="display:none">
-                <label for="sourceSelect">SelectDevice:</label><span class="text-dark" data-action="result"></span>
-                <select data-action="sourceSelect" style="max-width:100%" class="form-control">
-                </select>
+                <label for="custom-source">@L("摄像头", "Camera")</label>
+                <select id="custom-source" data-action="sourceSelect" class="form-control"></select>
             </div>
-            <button class="btn btn-outline-success p-2 m-1 w-20" data-action="startButton">Scan</button>
-            <button class="btn btn-outline-success p-2 m-1 w-20" data-action="resetButton">Reset</button>
-            <button class="btn btn-outline-success p-2 m-1 w-20" @onclick="(async ()=>await barcodeReaderCustom.Reload())">Reload</button>
-            <button type="button" class="btn btn-outline-success p-2 m-1 w-20" data-action="closeButton">Close</button>
+            <div class="custom-actions">
+                <button class="btn btn-outline-success" data-action="startButton">@L("扫码", "Scan")</button>
+                <button class="btn btn-outline-success" data-action="resetButton">@L("重置", "Reset")</button>
+                <button class="btn btn-outline-success" @onclick="barcodeReaderCustom.Reload">@L("重新加载", "Reload")</button>
+                <button class="btn btn-outline-secondary" data-action="closeButton">@L("关闭", "Close")</button>
+            </div>
+        </div>
+    }
+</section>
 
+<section class="demo-section">
+    <div class="section-heading">
+        <div>
+            <h2>@L("使用示例", "Usage")</h2>
+            <p>@L("截图通过流式 JS 互操作返回，适用于 Blazor WebAssembly 和 Blazor Server。", "Captured frames are returned through streaming JS interop and work with both Blazor WebAssembly and Blazor Server.")</p>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" type="button" @onclick="(() => ShowCode = !ShowCode)">
+            @(ShowCode ? L("隐藏代码", "Hide code") : L("显示代码", "Show code"))
+        </button>
+    </div>
+    @if (ShowCode)
+    {
+        <pre class="code-block"><code>@CodeSample</code></pre>
+    }
+</section>
+
+<section class="demo-section">
+    <h2>@L("事件", "Events")</h2>
+    <p>@L("组件向调用方报告扫码结果、截图、关闭操作和错误。", "The component reports scan results, captured frames, close actions, and errors to its caller.")</p>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle api-table">
+            <thead>
+                <tr>
+                    <th>@L("事件", "Event")</th>
+                    <th>@L("类型", "Type")</th>
+                    <th>@L("说明", "Description")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Events)
+                {
+                    <tr>
+                        <td><code>@item.Name</code></td>
+                        <td><code>@item.Type</code></td>
+                        <td>@L(item.Zh, item.En)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="demo-section">
+    <h2>@L("主要参数", "Key parameters")</h2>
+    <p>
+        @L("以下参数覆盖界面、解码模式、摄像头选择和最新的扫码截图能力。完整高级解码提示可在 ZXingOptions 中配置。",
+           "These parameters cover UI, decoding modes, camera selection, and the latest scan-capture feature. Configure advanced decoding hints through ZXingOptions.")
+    </p>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle api-table">
+            <thead>
+                <tr>
+                    <th>@L("参数", "Parameter")</th>
+                    <th>@L("类型", "Type")</th>
+                    <th>@L("默认值", "Default")</th>
+                    <th>@L("说明", "Description")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Parameters)
+                {
+                    <tr>
+                        <td><code>@item.Name</code></td>
+                        <td><code>@item.Type</code></td>
+                        <td><code>@item.DefaultValue</code></td>
+                        <td>@L(item.Zh, item.En)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <a href="https://github.com/densen2014/ZXingBlazor/blob/master/src/ZXingBlazor/ZXingOptions.cs"
+       target="_blank" rel="noopener noreferrer">
+        @L("查看完整 ZXingOptions", "View the complete ZXingOptions")
+    </a>
+</section>
+
+<section class="demo-section">
+    <h2>@L("支持的条码格式", "Supported barcode formats")</h2>
+    <div class="format-groups">
+        <div>
+            <h3>@L("商品条码", "Product")</h3>
+            <p>UPC-A · UPC-E · EAN-8 · EAN-13</p>
+        </div>
+        <div>
+            <h3>@L("工业条码", "Industrial")</h3>
+            <p>Code 39 · Code 93 · Code 128 · Codabar · ITF · RSS-14 · RSS-Expanded</p>
+        </div>
+        <div>
+            <h3>@L("二维条码", "2D")</h3>
+            <p>QR Code · Data Matrix · Aztec · PDF417 · MaxiCode</p>
         </div>
     </div>
+</section>
 
+<footer class="demo-footer">ZXingBlazor @VersionText · .NET 10</footer>
 
+@code {
+    private readonly record struct ApiItem(string Name, string Type, string DefaultValue, string Zh, string En);
+
+    private static readonly ApiItem[] Events =
+    [
+        new("ScanResult", "EventCallback<string>", "-", "返回解码后的文本。启用截图时，在 ScanCaptured 完成后触发。", "Returns decoded text. When capture is enabled, it fires after ScanCaptured completes."),
+        new("ScanCaptured", "EventCallback<ScanCapturedEventArgs>", "-", "返回解码文本和当前视频帧的 JPEG Data URL。", "Returns the decoded text and a JPEG data URL for the current video frame."),
+        new("Close", "EventCallback", "-", "用户关闭扫码界面时触发。", "Raised when the user closes the scanner UI."),
+        new("OnError", "Func<string, Task>", "-", "摄像头、解码器或 JS 互操作出错时返回错误消息。", "Reports camera, decoder, or JS interop errors.")
+    ];
+
+    private static readonly ApiItem[] Parameters =
+    [
+        new("CaptureStillOnScan", "bool", "false", "扫码成功时冻结预览并捕获 JPEG 画面。", "Freezes the preview and captures a JPEG frame after a successful scan."),
+        new("CaptureStillAutoResumeDelay", "int", "3000", "捕获后恢复实时预览的延迟，单位为毫秒；最小值为 0。", "Delay in milliseconds before live preview resumes after capture; values are clamped to zero or greater."),
+        new("Decodeonce", "bool", "true", "单次解码；设为 false 时连续返回结果。", "Decodes once; set to false to keep reporting results."),
+        new("DecodeAllFormats", "bool", "false", "尝试全部格式，可能降低性能；可通过 Options.formats 缩小范围。", "Tries every format and may reduce performance; narrow the list with Options.formats."),
+        new("Pdf417Only", "bool", "false", "仅启用 PDF417 解码。", "Enables PDF417-only decoding."),
+        new("AlsoInverted", "bool", "true", "同时识别黑底白码等反色条码，并复用同一摄像头流。", "Also recognizes inverted barcodes, such as white-on-black codes, using the same camera stream."),
+        new("DeviceID", "string?", "null", "指定首选摄像头设备 ID。", "Selects a preferred camera device ID."),
+        new("SaveDeviceID", "bool", "true", "保存最后使用且仍然有效的摄像头设备 ID。", "Remembers the last selected camera when that device is still available."),
+        new("UseBuiltinDiv", "bool", "true", "使用组件内置扫码界面；设为 false 可提供自定义 data-action 元素。", "Uses the built-in scanner UI; set to false to provide custom data-action elements."),
+        new("Style", "ZXingBlazorStyle", "Modal", "选择内置界面的显示样式。", "Selects the presentation style of the built-in UI."),
+        new("Options", "ZXingOptions?", "null", "提供格式、图像尺寸、质量和高级 ZXing 解码提示。", "Provides formats, image dimensions, quality, and advanced ZXing decoding hints."),
+        new("ScanBtnTitle", "string", "\"扫码\"", "扫码按钮文本。", "Text shown on the scan button."),
+        new("ResetBtnTitle", "string", "\"复位\"", "重置按钮文本。", "Text shown on the reset button."),
+        new("CloseBtnTitle", "string", "\"关闭\"", "关闭按钮文本。", "Text shown on the close button."),
+        new("SelectDeviceBtnTitle", "string", "\"选择设备\"", "摄像头选择按钮文本。", "Text shown on the camera selection button.")
+    ];
+
+    private const string CodeSample = """
+<BarcodeReader ScanResult="OnScanResult"
+               ScanCaptured="OnScanCaptured"
+               Close="CloseScanner"
+               OnError="OnError"
+               CaptureStillOnScan="true"
+               CaptureStillAutoResumeDelay="3000" />
+
+@code {
+    private void OnScanResult(string text) { }
+    private void OnScanCaptured(ScanCapturedEventArgs args)
+    {
+        // args.Text and args.ImageDataUrl
+    }
 }
-<br />
-<br />
-<br />
-<br />
-<div class="table-attr d-none d-md-block">
+""";
 
-    <h4>Events</h4>
+    private BarCodes barCodes = default!;
+    private BarcodeReader barcodeReaderCustom = default!;
+    private readonly ZXingOptions options = new() { TRY_HARDER = true };
+    private bool IsEnglish;
+    private bool ShowScanBarcode;
+    private bool ShowCustomScanner;
+    private bool ShowCode;
+    private bool Pdf417Only;
+    private bool DecodeContinuously;
+    private bool DecodeAllFormats;
+    private bool CaptureStillOnScan;
+    private int CaptureStillAutoResumeDelay = 3000;
+    private string BarCode = string.Empty;
+    private string? CapturedImageDataUrl;
+    private string? ErrorMessage;
 
-    <div class="table-container">
+    private string VersionText =>
+        typeof(BarcodeReader).Assembly.GetName().Version?.ToString(3) ?? string.Empty;
 
-        <div class="table-wrapper">
-            <table class="table is-single table-demo">
-                <tbody>
-                    <tr>
-                        <td><div class="table-cell">ScanResult</div></td>
-                        <td><div class="table-cell">Scan result callback method</div></td>
-                        <td><div class="table-cell">EventCallback&lt;string&gt;</div></td>
-                    </tr>
-                    <tr>
-                        <td><div class="table-cell">Close</div></td>
-                        <td><div class="table-cell">Close scan code callback method</div></td>
-                        <td><div class="table-cell">EventCallback</div></td>
-                    </tr>
-                    <tr>
-                        <td><div class="table-cell">ScanBtnTitle</div></td>
-                        <td><div class="table-cell">Scan button title</div></td>
-                        <td><div class="table-cell">Parameter</div></td>
-                    </tr>
-                    <tr>
-                        <td><div class="table-cell">ResetBtnTitle</div></td>
-                        <td><div class="table-cell">Reset button title</div></td>
-                        <td><div class="table-cell">Parameter</div></td>
-                    </tr>
-                    <tr>
-                        <td><div class="table-cell">CloseBtnTitle</div></td>
-                        <td><div class="table-cell">Close button title</div></td>
-                        <td><div class="table-cell">Parameter</div></td>
-                    </tr>
-                    <tr>
-                        <td><div class="table-cell">Pdf417</div></td>
-                        <td><div class="table-cell">decode only Pdf417 format</div></td>
-                        <td><div class="table-cell">Parameter</div></td>
-                    </tr>
-                    <tr>
-                        <td><div class="table-cell">Decodeonce</div></td>
-                        <td><div class="table-cell">Decode Once or Decode Continuously, default is Once</div></td>
-                        <td><div class="table-cell">Parameter</div></td>
-                    </tr>
-                    <tr>
-                        <td><div class="table-cell">DecodeAllFormats</div></td>
-                        <td><div class="table-cell">Decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false</div></td>
-                        <td><div class="table-cell">Parameter</div></td>
-                    </tr>
-                    <tr>
-                        <td><div class="table-cell">options</div></td>
-                        <td>
-                            <div class="table-cell">
-                                ZXingOptions: Pdf417 | Decodeonce | TimeBetweenDecodingAttempts | DecodeAllFormats | formats,<br />
-                                <a href="https://github.com/densen2014/ZXingBlazor/blob/master/src/ZXingBlazor/ZXingOptions.cs"> more...</a>
-                            </div>
-                        </td>
-                        <td><div class="table-cell">Parameter</div></td>
-                        <td><div class="table-cell">Parameter</div></td>
-                    </tr>
-                    <tr>
-                        <td><div class="table-cell">SelectDeviceBtnTitle</div></td>
-                        <td><div class="table-cell">Select device button title</div></td>
-                        <td><div class="table-cell">Parameter</div></td>
-                    </tr>
-                    <tr>
-                        <td><div class="table-cell">OnError</div></td>
-                        <td><div class="table-cell">Error callback method</div></td>
-                        <td><div class="table-cell">Func&lt;string, Task&gt;</div></td>
-                    </tr>
-                    <tr>
-                        <td><div class="table-cell">UseBuiltinDiv</div></td>
-                        <td><div class="table-cell">Use builtin interface,defallt True</div></td>
-                        <td><div class="table-cell">bool</div></td>
-                    </tr>
-                </tbody>
-                <thead>
-                    <tr>
-                        <th><div class="table-cell"><span class="table-text">Parameter</span></div></th>
-                        <th><div class="table-cell"><span class="table-text">Description</span></div></th>
-                        <th><div class="table-cell"><span class="table-text">Type</span></div></th>
-                    </tr>
-                </thead>
-            </table>
-        </div>
+    private string L(string zh, string en) => IsEnglish ? en : zh;
 
-    </div>
-</div>
+    protected override void OnInitialized()
+    {
+        IsEnglish = string.Equals(
+            NavigationManager.ToBaseRelativePath(NavigationManager.Uri).Trim('/'),
+            "en",
+            StringComparison.OrdinalIgnoreCase);
+    }
 
-<br />
+    private void ToggleLanguage() => IsEnglish = !IsEnglish;
 
-<div class="table-attr d-none d-md-block table-container">
+    private void ToggleScanner()
+    {
+        ShowScanBarcode = !ShowScanBarcode;
+        ErrorMessage = null;
+        if (ShowScanBarcode)
+        {
+            BarCode = string.Empty;
+            CapturedImageDataUrl = null;
+        }
+    }
 
-    <h4>BarcodeFormat</h4>
+    private void CloseScanner() => ShowScanBarcode = false;
 
-    <table class="table is-single table-demo">
-        <thead>
-            <tr>
-                <th>1D product</th>
-                <th>1D industrial</th>
-                <th>2D</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>UPC-A</td>
-                <td>Code 39</td>
-                <td>QR Code</td>
-            </tr>
-            <tr>
-                <td>UPC-E</td>
-                <td><del>Code 93</del></td>
-                <td>Data Matrix</td>
-            </tr>
-            <tr>
-                <td>EAN-8</td>
-                <td>Code 128</td>
-                <td>Aztec</td>
-            </tr>
-            <tr>
-                <td>EAN-13</td>
-                <td><del>Codabar</del></td>
-                <td>PDF 417</td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>ITF</td>
-                <td><del>MaxiCode</del></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>RSS-14</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><del>RSS-Expanded</del> *</td>
-                <td></td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+    private void OnScanResult(string text)
+    {
+        if (DecodeContinuously)
+        {
+            if (BarCode.Length > 500)
+            {
+                BarCode = string.Empty;
+            }
 
-<h6 style="color:lightskyblue;">@ver</h6>
-<h6 style="color:lightskyblue;">@build</h6>
+            BarCode += text + Environment.NewLine;
+            return;
+        }
 
-@code{
-    BarCodes barCodes;
+        BarCode = text;
+        ShowScanBarcode = false;
+    }
 
-    /// <summary>
-    /// Display the scan code interface
-    /// </summary>
-    bool ShowScanBarcode { get; set; } = false;
-
-    /// <summary>
-    /// BarCode
-    /// </summary>
-    public string? BarCode { get; set; }
-
-    public bool Pdf417 { get; set; }
-    public bool DecodeContinuously { get; set; }
-    public bool DecodeAllFormats { get; set; }
-
-    private string message;
+    private void OnScanCaptured(ScanCapturedEventArgs args)
+    {
+        BarCode = args.Text;
+        CapturedImageDataUrl = args.ImageDataUrl;
+    }
 
     private Task OnError(string message)
     {
-        this.message = message;
-        StateHasChanged();
+        ErrorMessage = message;
         return Task.CompletedTask;
     }
 
-    bool ShowCodes;
+    private void ToggleCustomScanner() => ShowCustomScanner = !ShowCustomScanner;
 
-    private void ScanResult(string e)
+    private void OnCustomScanResult(string text)
     {
-        if (!DecodeContinuously)
-        {
-            BarCode = e;
-            ShowScanBarcode = !ShowScanBarcode;
-        }
-        else
-        {
-            if (BarCode.Length > 200) BarCode = "";
-            BarCode += e + Environment.NewLine;
-        }
+        BarCode = text;
+        ShowCustomScanner = false;
     }
 
-    #region Custom
-
-    /// <summary>
-    /// Display the Custom scan code interface
-    /// </summary>
-    bool ShowScanBarcodeCustom { get; set; } = false;
-
-    /// <summary>
-    /// BarCodeCustom
-    /// </summary>
-    public string? BarCodeCustom { get; set; }
-
-    BarcodeReader barcodeReaderCustom;
-
-    #endregion
-
-
-    string? ver { get; set; }
-    string? build { get; set; }
-
-
-    Version? version { get; set; } = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-
-    protected override async Task OnInitializedAsync()
+    private Task OnImageResult(string message)
     {
-        await base.OnInitializedAsync();
-
-        ver = $"Ver {version?.Major}.{version?.Minor}.{version?.Build}";
-
-    }
-
-    private ZXingOptions options = new ZXingOptions() { TRY_HARDER = true };
-
-    private Task OnResult(string message)
-    {
-        this.BarCode = message;
-        StateHasChanged();
+        BarCode = message;
         return Task.CompletedTask;
     }
 
-    private async Task DecodeFromImage()
-    {
-        this.BarCode = "";
-        this.message = "";
-        await barCodes!.DecodeFromImage();
-    }
+    private Task DecodeFromImage() => barCodes.DecodeFromImage();
 }
