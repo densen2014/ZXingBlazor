@@ -174,7 +174,9 @@ export function genHints(opt) {
 }
 
 async function populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPanel, version, elementid, elementRef) {
+    if (!isActiveLifecycle(version, elementid, elementRef)) return [];
     let devices = await navigator.mediaDevices.enumerateDevices();
+    if (!isActiveLifecycle(version, elementid, elementRef)) return [];
     let videoInputDevices = devices.filter(d => d.kind === 'videoinput');
 
     let needPermission = videoInputDevices.every(d => !d.label);
@@ -188,19 +190,23 @@ async function populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPane
             if (debug) console.warn('Permission request for labels failed', err);
         } finally {
             stopStream(tempStream);
+            if (tempStream) await sleep(200);
         }
     }
 
     if (!isActiveLifecycle(version, elementid, elementRef)) return [];
     if (videoInputDevices.length === 0) return [];
 
-    if (deviceID != null) {
-        selectedDeviceId = deviceID;
-    } else {
-        const backDevice = videoInputDevices.find(d => /back|rear|environment|wide/i.test(d.label));
-        if (backDevice) selectedDeviceId = backDevice.deviceId;
-        else if (videoInputDevices.length > 1) selectedDeviceId = videoInputDevices[1].deviceId;
-        else selectedDeviceId = videoInputDevices[0].deviceId;
+    const currentDeviceAvailable = selectedDeviceId && videoInputDevices.some(device => device.deviceId === selectedDeviceId);
+    if (!currentDeviceAvailable) {
+        if (deviceID && videoInputDevices.some(device => device.deviceId === deviceID)) {
+            selectedDeviceId = deviceID;
+        } else {
+            const backDevice = videoInputDevices.find(d => /back|rear|environment|wide/i.test(d.label));
+            if (backDevice) selectedDeviceId = backDevice.deviceId;
+            else if (videoInputDevices.length > 1) selectedDeviceId = videoInputDevices[1].deviceId;
+            else selectedDeviceId = videoInputDevices[0].deviceId;
+        }
     }
 
     if (sourceSelect && videoInputDevices.length > 1) {
@@ -219,7 +225,7 @@ async function populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPane
             sourceSelect.appendChild(sourceOption);
         });
 
-        elementRef._sourceSelectHandler = () => {
+        elementRef._sourceSelectHandler = async () => {
             if (!isActiveLifecycle(version, elementid, elementRef)) return;
             selectedDeviceId = sourceSelect.value;
             instance?.invokeMethodAsync('SelectDeviceID', selectedDeviceId, sourceSelect.options[sourceSelect.selectedIndex].text);
@@ -232,7 +238,10 @@ async function populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPane
                 elementRef._invertedStream = null;
             }
             try { codeReader.reset(); } catch { }
-            start(id);
+            await sleep(200);
+            if (isActiveLifecycle(version, elementid, elementRef)) {
+                load(elementid);
+            }
         };
         sourceSelect.addEventListener('change', elementRef._sourceSelectHandler);
         sourceSelectPanel.style.display = 'block';
@@ -342,16 +351,27 @@ export function load(elementid) {
     if (!options.height) options.height = 480;
     width = options.width;
 
+    let releasedStream = false;
     if (elementRef._activeStream) {
         stopStream(elementRef._activeStream);
         elementRef._activeStream = null;
+        releasedStream = true;
     }
     if (elementRef._invertedStream) {
         stopStream(elementRef._invertedStream);
         elementRef._invertedStream = null;
+        releasedStream = true;
+    }
+    if (elementRef._invertedTimer) {
+        try { clearInterval(elementRef._invertedTimer); } catch { }
+        elementRef._invertedTimer = null;
     }
 
-    populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPanel, version, elementid, elementRef)
+    sleep(releasedStream ? 200 : 0)
+        .then(() => {
+            if (!isActiveLifecycle(version, elementid, elementRef)) return [];
+            return populateVideoInputDevicesAndSelect(sourceSelect, sourceSelectPanel, version, elementid, elementRef);
+        })
         .then(videoInputDevices => {
             if (!isActiveLifecycle(version, elementid, elementRef)) return;
             const tryConstraints = [];
@@ -361,9 +381,7 @@ export function load(elementid) {
                     video: {
                         deviceId: { exact: selectedDeviceId },
                         width: { ideal: options.width },
-                        height: { ideal: options.height },
-                        facingMode: "environment",
-                        focusMode: "continuous"
+                        height: { ideal: options.height }
                     },
                     audio: false
                 });
@@ -373,8 +391,7 @@ export function load(elementid) {
                 video: {
                     facingMode: { ideal: "environment" },
                     width: { ideal: options.width },
-                    height: { ideal: options.height },
-                    focusMode: "continuous"
+                    height: { ideal: options.height }
                 },
                 audio: false
             });
@@ -469,62 +486,42 @@ export function start(elementid) {
         const elementRef = element;
 
         if (options?.ALSO_INVERTED) {
-            if (elementRef._invertedStream) {
-                stopStream(elementRef._invertedStream);
-                elementRef._invertedStream = null;
+            if (elementRef._invertedTimer) {
+                try { clearInterval(elementRef._invertedTimer); } catch { }
+                elementRef._invertedTimer = null;
             }
-            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-                .then((stream) => {
+            codeReaderFromImage = genCodeReaderImage(options);
+            const invertedVideo = findVideoElement(elementRef);
+            if (invertedVideo) {
+                const timer = setInterval(() => {
                     if (!isActiveLifecycle(version, elementid, elementRef)) {
-                        stopStream(stream);
+                        clearInterval(timer);
                         return;
                     }
-                    codeReaderFromImage = genCodeReaderImage(options);
-                    const video = findVideoElement(elementRef);
-                    if (video) {
-                        video.srcObject = stream;
-                        video.play();
-                        let timer = setInterval(() => {
-                            if (!isActiveLifecycle(version, elementid, elementRef)) {
-                                clearInterval(timer);
-                                stopStream(stream);
-                                return;
-                            }
-                            if (video.videoWidth > 0 && video.videoHeight > 0) {
-                                let base64Data = videoToDataURL(video);
-                                codeReaderFromImage.decodeFromImageUrl(base64Data)
-                                    .then(result => {
-                                        if (!isActiveLifecycle(version, elementid, elementRef)) return;
-                                        if (result && result.text) {
-                                            if (debug) console.log('[反色定时解码] 结果:', result.text);
-                                            vibrate();
-                                            instance?.invokeMethodAsync("GetResult", result.text);
-                                            if (options.decodeonce) {
-                                                if (debug) console.log('autostop');
-                                                codeReaderFromImage.reset();
-                                                codeReader.reset();
-                                                clearInterval(timer);
-                                                stopStream(stream);
-                                                return;
-                                            }
-                                        }
-                                    })
-                                    .catch(err => { });
-                            }
-                        }, 100);
-                        video.addEventListener('ended', () => clearInterval(timer));
-                        video.addEventListener('pause', () => clearInterval(timer));
-                        elementRef._invertedTimer = timer;
-                        elementRef._invertedStream = stream;
-                    } else {
-                        stopStream(stream);
+                    if (invertedVideo.videoWidth > 0 && invertedVideo.videoHeight > 0) {
+                        const base64Data = videoToDataURL(invertedVideo);
+                        codeReaderFromImage.decodeFromImageUrl(base64Data)
+                            .then(result => {
+                                if (!isActiveLifecycle(version, elementid, elementRef)) return;
+                                if (result && result.text) {
+                                    if (debug) console.log('[反色定时解码] 结果:', result.text);
+                                    vibrate();
+                                    instance?.invokeMethodAsync("GetResult", result.text);
+                                    if (options.decodeonce) {
+                                        if (debug) console.log('autostop');
+                                        codeReaderFromImage.reset();
+                                        codeReader.reset();
+                                        clearInterval(timer);
+                                    }
+                                }
+                            })
+                            .catch(err => { });
                     }
-                })
-                .catch((err) => {
-                    if (isActiveLifecycle(version, elementid, elementRef) && debug) {
-                        console.error('摄像头测试模式错误:', err);
-                    }
-                });
+                }, 100);
+                invertedVideo.addEventListener('ended', () => clearInterval(timer));
+                invertedVideo.addEventListener('pause', () => clearInterval(timer));
+                elementRef._invertedTimer = timer;
+            }
         }
 
         const callback = (result, err) => {
