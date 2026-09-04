@@ -1,0 +1,132 @@
+name: Publish NuGet package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Package version (for example, 1.1.8 or 1.2.0-beta.1)
+        required: true
+        type: string
+
+concurrency:
+  group: nuget-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Publish ZXingBlazor ${{ inputs.version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      PROJECT_FILE: src/ZXingBlazor/ZXingBlazor.csproj
+      VERSION: ${{ inputs.version }}
+      NUGET_API_KEY: ${{ secrets.NUGET_PUSH }}
+
+    steps:
+      - name: Check out master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Validate release version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$ ]]; then
+            echo "::error::Version '$VERSION' is not a supported semantic version."
+            exit 1
+          fi
+
+          current_version="$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' "$PROJECT_FILE")"
+          if [[ -z "$current_version" ]]; then
+            echo "::error::Could not read <Version> from $PROJECT_FILE."
+            exit 1
+          fi
+
+          if [[ "$current_version" == "$VERSION" ]]; then
+            echo "::error::Version $VERSION is already set in $PROJECT_FILE."
+            exit 1
+          fi
+
+          if git rev-parse --verify --quiet "refs/tags/$VERSION" >/dev/null; then
+            echo "::error::Tag $VERSION already exists."
+            exit 1
+          fi
+
+          if [[ -z "$NUGET_API_KEY" ]]; then
+            echo "::error::Repository secret NUGET_PUSH is not configured."
+            exit 1
+          fi
+
+      - name: Update project version
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i -E "s#<Version>[^<]+</Version>#<Version>${VERSION}</Version>#" "$PROJECT_FILE"
+          grep -q "<Version>${VERSION}</Version>" "$PROJECT_FILE"
+          git diff --check
+          if git diff --exit-code --quiet -- "$PROJECT_FILE"; then
+            echo "::error::The project version was not changed."
+            exit 1
+          fi
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore
+        run: dotnet restore "$PROJECT_FILE"
+
+      - name: Pack
+        run: >
+          dotnet pack "$PROJECT_FILE"
+          --configuration Release
+          --no-restore
+          --output artifacts
+          -p:ContinuousIntegrationBuild=true
+
+      - name: Verify package
+        shell: bash
+        run: |
+          set -euo pipefail
+          package="artifacts/ZXingBlazor.${VERSION}.nupkg"
+          if [[ ! -f "$package" ]]; then
+            echo "::error::Expected package $package was not created."
+            find artifacts -maxdepth 1 -type f -print
+            exit 1
+          fi
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZXingBlazor-${{ inputs.version }}
+          path: artifacts/ZXingBlazor.${{ inputs.version }}.nupkg
+          if-no-files-found: error
+
+      - name: Prepare release commit and tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$PROJECT_FILE"
+          git commit -m "Release ${VERSION}"
+          git tag -a "$VERSION" -m "Release ${VERSION}"
+
+      - name: Publish to NuGet
+        run: >
+          dotnet nuget push "artifacts/ZXingBlazor.${VERSION}.nupkg"
+          --api-key "$NUGET_API_KEY"
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
+
+      - name: Push release commit and tag
+        shell: bash
+        run: git push --atomic origin HEAD:master "refs/tags/${VERSION}"
