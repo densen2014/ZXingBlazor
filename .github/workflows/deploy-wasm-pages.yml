@@ -54,6 +54,7 @@ jobs:
           touch publish/wwwroot/.nojekyll
           grep -F '<base href="${{ steps.pages.outputs.base_path }}/" />' publish/wwwroot/index.html
           grep -F "./_framework/dotnet.js?v=${GITHUB_SHA}" publish/wwwroot/index.html
+          test -f publish/wwwroot/_framework/dotnet.js
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v5

@@ -16,4 +16,15 @@
         <ProjectReference Include="..\src\ZXingBlazor\ZXingBlazor.csproj" />
     </ItemGroup>
 
+    <Target Name="CreateStandaloneRuntimeAlias" AfterTargets="Publish">
+        <ItemGroup>
+            <_DotNetRuntimeScript Include="$(PublishDir)wwwroot\_framework\dotnet.*.js"
+                                  Exclude="$(PublishDir)wwwroot\_framework\dotnet.native.*.js;$(PublishDir)wwwroot\_framework\dotnet.runtime.*.js" />
+        </ItemGroup>
+        <Error Condition="'@(_DotNetRuntimeScript)' == ''"
+               Text="The fingerprinted dotnet.js runtime asset was not found." />
+        <Copy SourceFiles="@(_DotNetRuntimeScript)"
+              DestinationFiles="@(_DotNetRuntimeScript->'$(PublishDir)wwwroot\_framework\dotnet.js')" />
+    </Target>
+
 </Project>
