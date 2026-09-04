@@ -1,249 +1,142 @@
-﻿# ZXing Blazor Component 1.1.8
+# ZXingBlazor
 
-English | <a href="https://blazor.app1.es/"> Other Blazor components</a>
+[中文](README.zh-CN.md) · [Live demo](https://densen2014.github.io/ZXingBlazor/) · [NuGet](https://www.nuget.org/packages/ZXingBlazor/) · [GitHub](https://github.com/densen2014/ZXingBlazor)
 
----
+ZXingBlazor is a camera barcode reader for Blazor. It supports Blazor WebAssembly and Blazor Server on .NET 6 through .NET 10.
 
-## Introduction
+## Features
 
-This project is a Blazor component library packaged with ZXing, Support barcode, QR code, PDF417 format.
+- Scan QR Code, Data Matrix, PDF417, and common 1D barcode formats.
+- Use mobile and desktop cameras with camera selection and remembered device IDs.
+- Choose one-shot or continuous decoding.
+- Recognize regular and inverted barcodes without opening a second camera stream.
+- Capture the video frame when a scan succeeds.
+- Use the built-in scanner UI or provide custom `data-action` controls.
+- Decode barcodes from images and generate QR codes with the companion `BarCodes` component.
+- Load JavaScript through component isolation; no script tags are required.
 
 ## Demo
 
-https://blazor.app1.es/barcodescanner
+The .NET 10 WebAssembly sample is deployed to GitHub Pages:
 
-https://zxingblazor.app1.es
+**https://densen2014.github.io/ZXingBlazor/**
 
-https://zxingblazorwasm.app1.es
+Source: [`Demo.Wasm/Pages/Index.razor`](Demo.Wasm/Pages/Index.razor)
 
+GitHub Pages only hosts static files, so the hosted sample uses standalone Blazor WebAssembly. Blazor Interactive Auto requires an ASP.NET Core server for its initial interactive server rendering and can't run as a static Pages deployment.
 
-## Nuget
+## Getting started
 
-https://www.nuget.org/packages/ZXingBlazor/
+### 1. Install the package
 
-## Screenshot
-![ZXingBlazor](https://user-images.githubusercontent.com/8428709/94275844-c28cf500-ff47-11ea-9c65-2370752d2b5b.gif) 
+```bash
+dotnet add package ZXingBlazor
+```
 
-## Instructions:
+### 2. Import the namespace
 
-1. NuGet install pack 
+Add the namespace to `_Imports.razor` or to the Razor component that uses the scanner:
 
-    `ZXingBlazor`
+```razor
+@using ZXingBlazor.Components
+```
 
-2. _Imports.razor or Razor page
+### 3. Add the scanner
 
-   ```
-   @using ZXingBlazor.Components
-   ``` 
-   
-3. Razor page
+```razor
+<button class="btn btn-primary" @onclick="(() => scannerVisible = true)">
+    Scan
+</button>
 
-    Razor  
-    <https://github.com/densen2014/ZXingBlazor/blob/master/Demo.Server/Pages/Index.razor>
-    ```
-        <b>Result:</b>
-        <br />
-        <pre>@BarCode</pre>
+@if (scannerVisible)
+{
+    <BarcodeReader ScanResult="OnScanResult"
+                   Close="(() => scannerVisible = false)"
+                   OnError="OnError" />
+}
 
-        <BarcodeReader ScanResult="ScanResult" />
+@if (!string.IsNullOrWhiteSpace(result))
+{
+    <p>Result: @result</p>
+}
 
+@code {
+    private bool scannerVisible;
+    private string? result;
+    private string? error;
 
-    @code{
-
-        /// <summary>
-        /// BarCode
-        /// </summary>
-        public string? BarCode { get; set; }
-
-        private void ScanResult(string e)
-        {
-            BarCode = e;
-            ShowScanBarcode = !ShowScanBarcode;
-        }
+    private void OnScanResult(string text)
+    {
+        result = text;
+        scannerVisible = false;
     }
 
-    ```
-## Updates
+    private Task OnError(string message)
+    {
+        error = message;
+        return Task.CompletedTask;
+    }
+}
+```
 
-2026.3.7
-v1.1.6
-- New features: Enable invert-colors recognition for inverted barcodes/QR codes (white on black)
-- StreamFromZxing Obsolete
+Camera access requires HTTPS in production. Browsers also allow camera access on `localhost` during development.
 
-2023.12.2
-v1.1.2
-- Add parameters: screen recording decoding
-- Add parameters: use zxing built-in video stream opening method, default false
-- ZXingOptions adds new version of video stream parameters
-   a. Quality image quality, default is 0.9
-   a. Width image width, default is 640
-   a. Height image height, default is 480
-   
-2023.11.14
-v1.0.11
-- Add hints options in ZXingOptions
-<a href="https://github.com/densen2014/ZXingBlazor/blob/master/src/ZXingBlazor/ZXingOptions.cs"> more...</a>
+## Capture the scanned frame
 
-2023.11.5
-v1.0.8
-- fix issue 
-- hide debug info, manual open debug info, add options.Debug=true
+Set `CaptureStillOnScan` and handle `ScanCaptured` to receive both the decoded text and a JPEG data URL:
 
-2023.11.1
-- Add 1. Save the last used device ID and call it automatically next time. 2. Specify the camera device ID.
-- Add Start,Stop,Reload , DecodeFromImage(dataUrl)
+```razor
+<BarcodeReader ScanResult="OnScanResult"
+               ScanCaptured="OnScanCaptured"
+               CaptureStillOnScan="true"
+               CaptureStillAutoResumeDelay="3000" />
 
-2023.8.16
-- 1. Add BarCodes decode from image and Generate QRcode Components
+@code {
+    private string? imageDataUrl;
 
-2022.11.23 Add optiones
-
-- 1. Pdf417Only: decode only Pdf417 format
-- 2. Decodeonce: decode Once or Decode Continuously, default is Once
-- 3. DecodeAllFormats: decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false
-
-2022.3.6 
-- Upgrade to js isolated version, add image browser Viewer component, and upgrade demo project to net6 format
-
-2021.5.13 
-- BarcodeReader supports defining button text and supports multiple languages
-
-## Participate in contribution
-
-1. Fork this project
-2. Create new Feat_xxx branch
-3. Submit the code
-4. New Pull Request
-
-
-----
-
-# ZXing Blazor 扫码组件 1.0.8
-
- <a href="https://blazor.app1.es/"> 其他 Blazor 组件</a>
-
----
-
-## 项目介绍
-本项目是利用 ZXing 进行封装的 Blazor 组件库, 支持条码,二维码,PDF417格式.
-
-## 演示地址  
-
-https://zxingblazor.app1.es
-https://zxingblazorwasm.app1.es
-https://blazor.app1.es/barcodescanner
-
-
-## Nuget 包安装
-https://www.nuget.org/packages/ZXingBlazor/
-
-## 使用步骤:
-
-1. 安装 NuGet 包 
-
-    `ZXingBlazor`
-
-2. _Imports.razor 或者 Razor 页面引用
-
-   ```
-   @using ZXingBlazor.Components
-   ``` 
-   
-3. Razor 页面代码
-
-    Razor  
-    <https://github.com/densen2014/ZXingBlazor/blob/master/Demo.Server/Pages/Index.razor>
-    ```
-        <b>Result:</b>
-        <br />
-        <pre>@BarCode</pre>
-
-        <BarcodeReader ScanResult="ScanResult" />
-
-
-    @code{
-
-        /// <summary>
-        /// BarCode
-        /// </summary>
-        public string? BarCode { get; set; }
-
-        private void ScanResult(string e)
-        {
-            BarCode = e;
-            ShowScanBarcode = !ShowScanBarcode;
-        }
+    private void OnScanResult(string text)
+    {
     }
 
-    ```
-    
-## 更新
+    private void OnScanCaptured(ScanCapturedEventArgs args)
+    {
+        imageDataUrl = args.ImageDataUrl;
+    }
+}
+```
 
-2026.3.7
-v1.1.6
-- 反色识别,启用后可识别反色条码/二维码（黑底白码）
-- StreamFromZxing 弃用
+The image is transferred with streaming JavaScript interop, which avoids the default Blazor Server message-size limit for large images.
 
-2023.12.2
-v1.1.1
-- 添加参数:录屏解码
-- 添加参数:使用zxing内置视频流打开方式,默认 false
-- ZXingOptions 添加新版视频流参数
-  a. Quality 图像质量,默认为 0.9
-  a. Width 图像宽度,默认为 640
-  a. Height 图像高度,默认为 480
+## Key parameters and callbacks
 
-2023.11.14
-v1.0.11
-- 添加 hints 选项 in ZXingOptions
-<a href="https://github.com/densen2014/ZXingBlazor/blob/master/src/ZXingBlazor/ZXingOptions.cs"> more...</a>
+| Name | Type | Description |
+| --- | --- | --- |
+| `ScanResult` | `EventCallback<string>` | Returns decoded text. |
+| `ScanCaptured` | `EventCallback<ScanCapturedEventArgs>` | Returns decoded text and the captured JPEG data URL. |
+| `Close` | `EventCallback` | Raised when the scanner UI closes. |
+| `OnError` | `Func<string, Task>` | Reports camera, decoder, and interop errors. |
+| `Decodeonce` | `bool` | Selects one-shot or continuous decoding. |
+| `DecodeAllFormats` | `bool` | Enables all supported formats. Use `Options.formats` to narrow the list. |
+| `AlsoInverted` | `bool` | Enables inverted barcode recognition. |
+| `DeviceID` | `string?` | Selects a preferred camera. |
+| `SaveDeviceID` | `bool` | Remembers the last available camera. |
+| `UseBuiltinDiv` | `bool` | Uses the built-in UI or custom `data-action` controls. |
+| `Options` | `ZXingOptions?` | Configures formats, image quality, dimensions, and decoding hints. |
 
-2023.11.5
-v1.0.8
-- 修复问题
-- 隐藏调试信息，手动打开调试信息，添加options.Debug=true
-- 
-2023.11.1
-- 添加 1.保存最后使用设备ID下次自动调用, 2.指定摄像头设备ID
-- 添加 Start,Stop,Reload , DecodeFromImage(dataUrl)
+See [`ZXingOptions.cs`](src/ZXingBlazor/ZXingOptions.cs) and the [live demo](https://densen2014.github.io/ZXingBlazor/) for more examples.
 
-2023.8.16
+## Build the samples
 
-- 1. 添加 BarCodes 解码图片/QR码生成组件
+Both sample projects target .NET 10:
 
-2022.11.23 添加选项
+```bash
+dotnet run --project Demo.Wasm/Demo.Wasm.csproj
+dotnet run --project Demo.Server/Demo.Server.csproj
+```
 
-- 1. Pdf417Only: 只解码 Pdf417 格式 / decode only Pdf417 format
-- 2. Decodeonce: 单次|连续解码,默认单次 / Decode Once or Decode Continuously, default is Once
-- 3. DecodeAllFormats: 解码所有编码形式,性能较差, 开启后可用 options.formats 指定编码形式.默认为 false | Decodde All Formats, performance is poor, you can set options.formats to customize specify the encoding formats. The default is false
+## Contributing
 
-
-2022.3.6 
-
-- 升级为js隔离版本,添加图片浏览器 Viewer组件, 演示工程升级为net6格式
-
-2021.5.13
-
-- BarcodeReader 支持定义按钮文本,支持多语言
-
-
-## 参与贡献
-
-1. Fork 本项目
-2. 新建 Feat_xxx 分支
-3. 提交代码
-4. 新建 Pull Request 
-
-
----
- 
-#### AlexChow
-
-[今日头条](https://www.toutiao.com/c/user/token/MS4wLjABAAAAGMBzlmgJx0rytwH08AEEY8F0wIVXB2soJXXdUP3ohAE/?) | [博客园](https://www.cnblogs.com/densen2014) | [知乎](https://www.zhihu.com/people/alex-chow-54) | [Gitee](https://gitee.com/densen2014) | [GitHub](https://github.com/densen2014)
-
-
-![ChuanglinZhou](https://user-images.githubusercontent.com/8428709/205942253-8ff5f9ca-a033-4707-9c36-b8c9950e50d6.png)
-
-![Alex Chow's GitHub stats](https://github-readme-stats.vercel.app/api?username=densen2014&include_all_commits=true&count_private=true&show_icons=true)
-
-![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=densen2014&layout=compact)
+1. Fork the repository.
+2. Create a feature branch.
+3. Add and validate your changes.
+4. Open a pull request.

@@ -1,17 +1,18 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="site-shell">
+    <header class="site-header">
+        <a class="brand" href="">
+            <span class="brand-mark" aria-hidden="true"></span>
+            ZXingBlazor
+        </a>
+        <nav aria-label="Project links">
+            <a href="https://www.nuget.org/packages/ZXingBlazor/" target="_blank" rel="noopener noreferrer">NuGet</a>
+            <a class="github-link" href="https://github.com/densen2014/ZXingBlazor" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </nav>
+    </header>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://github.com/densen2014/ZXingBlazor" target="_blank" class="ml-md-auto">GitHub</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
+        @Body
     </main>
 </div>
