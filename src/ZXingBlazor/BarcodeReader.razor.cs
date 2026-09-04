@@ -61,6 +61,24 @@ public partial class BarcodeReader : IAsyncDisposable
     public EventCallback<string> ScanResult { get; set; }
 
     /// <summary>
+    /// 扫码成功时捕获当前画面/Capture the current frame when a scan succeeds
+    /// </summary>
+    [Parameter]
+    public bool CaptureStillOnScan { get; set; }
+
+    /// <summary>
+    /// 捕获后恢复实时预览的延迟（毫秒）/Delay before resuming the live preview after capture
+    /// </summary>
+    [Parameter]
+    public int CaptureStillAutoResumeDelay { get; set; } = 3000;
+
+    /// <summary>
+    /// 扫码及画面捕获回调/Scan and captured frame callback
+    /// </summary>
+    [Parameter]
+    public EventCallback<ScanCapturedEventArgs> ScanCaptured { get; set; }
+
+    /// <summary>
     /// 关闭扫码框回调方法/Close scan code callback method
     /// </summary>
     [Parameter]
@@ -189,6 +207,8 @@ public partial class BarcodeReader : IAsyncDisposable
                 //TRY_HARDER = true
                 Debug = true
             };
+            Options.CaptureStillOnScan = CaptureStillOnScan;
+            Options.CaptureStillAutoResumeDelay = Math.Max(0, CaptureStillAutoResumeDelay);
             await module.InvokeVoidAsync("init", Instance, Element, Element.Id, Options, DeviceID);
         }
         catch (Exception e)
@@ -218,6 +238,29 @@ public partial class BarcodeReader : IAsyncDisposable
 
     [JSInvokable]
     public async Task GetResult(string val) => await ScanResult.InvokeAsync(val);
+
+    [JSInvokable]
+    public async Task GetCapturedResult(string text, IJSStreamReference imageStream)
+    {
+        try
+        {
+            const long maxCaptureSize = 10 * 1024 * 1024;
+            await using var streamReference = imageStream;
+            await using var captureStream = await streamReference.OpenReadStreamAsync(maxCaptureSize);
+            using var buffer = new MemoryStream();
+            await captureStream.CopyToAsync(buffer);
+
+            await ScanCaptured.InvokeAsync(new ScanCapturedEventArgs
+            {
+                Text = text,
+                ImageDataUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(buffer.ToArray())}"
+            });
+        }
+        finally
+        {
+            await ScanResult.InvokeAsync(text);
+        }
+    }
 
     [JSInvokable]
     public async Task CloseScan() => await Close.InvokeAsync();

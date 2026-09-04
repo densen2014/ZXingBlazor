@@ -56,6 +56,73 @@ function isActiveLifecycle(version, elementid, elementRef) {
     return lifecycleVersion === version && id === elementid && element === elementRef;
 }
 
+function captureVideoFrame(video) {
+    const sourceWidth = video.videoWidth || video.width;
+    const sourceHeight = video.videoHeight || video.height;
+    if (!sourceWidth || !sourceHeight) {
+        throw new Error('The video frame is not ready for capture.');
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = sourceWidth;
+    canvas.height = sourceHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, sourceWidth, sourceHeight);
+    return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => {
+            if (blob) {
+                resolve(blob);
+            } else {
+                reject(new Error('The browser could not encode the captured frame.'));
+            }
+        }, 'image/jpeg', options?.quality ?? 0.9);
+    });
+}
+
+function reportScanResult(text, video, version, elementid, elementRef) {
+    if (!isActiveLifecycle(version, elementid, elementRef)) return false;
+    if (options?.captureStillOnScan && elementRef._captureInProgress) return false;
+
+    if (options?.captureStillOnScan) {
+        try {
+            const imageBlob = captureVideoFrame(video);
+            elementRef._captureInProgress = true;
+            try { video.pause(); } catch { }
+            imageBlob
+                .then(blob => {
+                    if (!isActiveLifecycle(version, elementid, elementRef)) return;
+                    const streamReference = DotNet.createJSStreamReference(blob);
+                    instance?.invokeMethodAsync("GetCapturedResult", text, streamReference)
+                        .catch(err => {
+                            if (debug) console.warn('Unable to deliver captured frame', err);
+                        });
+                }, err => {
+                    if (!isActiveLifecycle(version, elementid, elementRef)) return;
+                    instance?.invokeMethodAsync('GetError', `Unable to capture scanned frame: ${err?.message || err}`);
+                    instance?.invokeMethodAsync("GetResult", text);
+                });
+
+            const resumeDelay = Math.max(0, options.captureStillAutoResumeDelay ?? 3000);
+            elementRef._captureResumeTimer = setTimeout(() => {
+                elementRef._captureResumeTimer = null;
+                elementRef._captureInProgress = false;
+                if (isActiveLifecycle(version, elementid, elementRef)) {
+                    video.play()?.catch(err => {
+                        if (debug) console.warn('Unable to resume video after still capture', err);
+                    });
+                }
+            }, resumeDelay);
+        } catch (err) {
+            instance?.invokeMethodAsync('GetError', `Unable to capture scanned frame: ${err?.message || err}`);
+            instance?.invokeMethodAsync("GetResult", text);
+        }
+    } else {
+        instance?.invokeMethodAsync("GetResult", text);
+    }
+
+    vibrate();
+    return true;
+}
+
 async function ensureVideoPlaying(video, stream, timeoutMs = 2000) {
     if (!video) return Promise.reject(new Error('No video element'));
     video.srcObject = stream;
@@ -250,6 +317,11 @@ export function load(elementid) {
         try { clearInterval(elementRef._domWatcher); } catch { }
         elementRef._domWatcher = null;
     }
+    if (elementRef._captureResumeTimer) {
+        try { clearTimeout(elementRef._captureResumeTimer); } catch { }
+        elementRef._captureResumeTimer = null;
+    }
+    elementRef._captureInProgress = false;
     const sourceSelect = elementRef.querySelector("[data-action=sourceSelect]") || elementRef.querySelector("select[data-action=sourceSelect]");
     const sourceSelectPanel = elementRef.querySelector("[data-action=sourceSelectPanel]") || elementRef.querySelector("[data-action=sourceSelectPanel]");
     codeReader = genCodeReaderImage(options);
@@ -282,9 +354,7 @@ export function load(elementid) {
                                         if (!isActiveLifecycle(version, elementid, elementRef)) return;
                                         if (result && result.text) {
                                             if (debug) console.log('[反色定时解码] 结果:', result.text);
-                                            vibrate();
-                                            instance?.invokeMethodAsync("GetResult", result.text);
-                                            if (options.decodeonce) {
+                                            if (reportScanResult(result.text, video, version, elementid, elementRef) && options.decodeonce && !options.captureStillOnScan) {
                                                 if (debug) console.log('autostop');
                                                 codeReaderFromImage.reset();
                                                 codeReader.reset();
@@ -297,7 +367,9 @@ export function load(elementid) {
                             }
                         }, 100);
                         video.addEventListener('ended', () => clearInterval(timer));
-                        video.addEventListener('pause', () => clearInterval(timer));
+                        video.addEventListener('pause', () => {
+                            if (!elementRef._captureInProgress) clearInterval(timer);
+                        });
                         elementRef._invertedTimer = timer;
                         elementRef._invertedStream = stream;
                     } else {
@@ -312,8 +384,7 @@ export function load(elementid) {
                         if (!isActiveLifecycle(version, elementid, elementRef)) return;
                         if (result) {
                             if (debug) console.log(result)
-                            vibrate();
-                            instance?.invokeMethodAsync("GetResult", result.text);
+                            reportScanResult(result.text, videoElem, version, elementid, elementRef);
                         }
                         if (err && !(err instanceof ZXing.NotFoundException)) {
                             console.log(err)
@@ -497,9 +568,7 @@ export function start(elementid) {
                                         if (!isActiveLifecycle(version, elementid, elementRef)) return;
                                         if (result && result.text) {
                                             if (debug) console.log('[反色定时解码] 结果:', result.text);
-                                            vibrate();
-                                            instance?.invokeMethodAsync("GetResult", result.text);
-                                            if (options.decodeonce) {
+                                            if (reportScanResult(result.text, video, version, elementid, elementRef) && options.decodeonce && !options.captureStillOnScan) {
                                                 if (debug) console.log('autostop');
                                                 codeReaderFromImage.reset();
                                                 codeReader.reset();
@@ -513,7 +582,9 @@ export function start(elementid) {
                             }
                         }, 100);
                         video.addEventListener('ended', () => clearInterval(timer));
-                        video.addEventListener('pause', () => clearInterval(timer));
+                        video.addEventListener('pause', () => {
+                            if (!elementRef._captureInProgress) clearInterval(timer);
+                        });
                         elementRef._invertedTimer = timer;
                         elementRef._invertedStream = stream;
                     } else {
@@ -531,8 +602,7 @@ export function start(elementid) {
             if (!isActiveLifecycle(version, elementid, elementRef)) return;
             if (result) {
                 if (debug) console.log(result)
-                vibrate();
-                instance?.invokeMethodAsync("GetResult", result.text);
+                reportScanResult(result.text, findVideoElement(elementRef), version, elementid, elementRef);
             }
             if (err && !(err instanceof ZXing.NotFoundException)) {
                 console.log(err)
@@ -554,11 +624,10 @@ export function start(elementid) {
                     } else {
                         if (debug) console.warn('No video element to attach controlled stream');
                         // still call decodeFromVideoDevice fallback so ZXing handles stream creation
-                        if (options.decodeonce) {
+                        if (options.decodeonce && !options.captureStillOnScan) {
                             codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then(r => {
                                 if (r && isActiveLifecycle(version, elementid, elementRef)) {
-                                    vibrate();
-                                    instance?.invokeMethodAsync("GetResult", r.text);
+                                    reportScanResult(r.text, findVideoElement(elementRef), version, elementid, elementRef);
                                 }
                             }).catch(e => {
                                 if (isActiveLifecycle(version, elementid, elementRef) && e && !(e instanceof ZXing.NotFoundException)) {
@@ -577,14 +646,13 @@ export function start(elementid) {
             }
         } else {
             // fallback to ZXing device helpers
-            if (options.decodeonce) {
+            if (options.decodeonce && !options.captureStillOnScan) {
                 codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
                     if (!isActiveLifecycle(version, elementid, elementRef)) return;
                     if (debug) console.log(result)
-                    vibrate();
+                    reportScanResult(result.text, findVideoElement(elementRef), version, elementid, elementRef);
                     if (debug) console.log('autostop');
                     codeReader.reset();
-                    return instance?.invokeMethodAsync("GetResult", result.text);
                 }).catch((err) => {
                     if (isActiveLifecycle(version, elementid, elementRef) && err && !(err instanceof ZXing.NotFoundException)) {
                         console.log(err)
@@ -597,7 +665,7 @@ export function start(elementid) {
         }
 
         var x = `decodeContinuously`;
-        if (options.decodeonce) x = `decodeOnce`;
+        if (options.decodeonce && !options.captureStillOnScan) x = `decodeOnce`;
         if (debug) console.log(`Started ` + x + ` decode from camera with id ${selectedDeviceId}`)
         if (debug) console.log(id, 'start');
     }
@@ -617,6 +685,13 @@ export function stop(elementid) {
         if (element && element._invertedTimer) {
             try { clearInterval(element._invertedTimer); } catch { }
             element._invertedTimer = null;
+        }
+        if (element && element._captureResumeTimer) {
+            try { clearTimeout(element._captureResumeTimer); } catch { }
+            element._captureResumeTimer = null;
+        }
+        if (element) {
+            element._captureInProgress = false;
         }
         if (debug) console.log(id, 'stop');
     }
@@ -727,6 +802,11 @@ export function destroy(elementid) {
                 try { clearInterval(element._domWatcher); } catch { }
                 element._domWatcher = null;
             }
+            if (element._captureResumeTimer) {
+                try { clearTimeout(element._captureResumeTimer); } catch { }
+                element._captureResumeTimer = null;
+            }
+            element._captureInProgress = false;
             const sourceSelect = element.querySelector("[data-action=sourceSelect]");
             if (sourceSelect && element._sourceSelectHandler) {
                 try { sourceSelect.removeEventListener('change', element._sourceSelectHandler); } catch { }

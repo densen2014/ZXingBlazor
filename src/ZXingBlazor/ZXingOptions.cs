@@ -46,6 +46,16 @@ public class ZXingOptions
     public bool Screenshot { get; set; }
 
     /// <summary>
+    /// Capture the current video frame when a scan succeeds.
+    /// </summary>
+    public bool CaptureStillOnScan { get; set; }
+
+    /// <summary>
+    /// Delay in milliseconds before resuming the preview after a captured scan.
+    /// </summary>
+    public int CaptureStillAutoResumeDelay { get; set; } = 3000;
+
+    /// <summary>
     /// 使用zxing内置视频流打开方式,默认 false
     /// </summary>
     [Obsolete("This option is deprecated and will be removed in future versions. The library now uses the built-in video stream handling by default. 此选项已弃用，将在未来的版本中移除。库现在默认使用内置的视频流处理功能。")]
