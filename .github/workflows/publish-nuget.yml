@@ -1,4 +1,4 @@
-name: Publish NuGet package
+name: Publish NuGet and GitHub Release
 
 on:
   workflow_dispatch:
@@ -49,17 +49,26 @@ jobs:
             exit 1
           fi
 
-          if [[ "$current_version" == "$VERSION" ]]; then
-            echo "::error::Version $VERSION is already set in $PROJECT_FILE."
-            exit 1
+          tag_exists=false
+          if git rev-parse --verify --quiet "refs/tags/$VERSION" >/dev/null; then
+            tag_exists=true
           fi
 
-          if git rev-parse --verify --quiet "refs/tags/$VERSION" >/dev/null; then
+          if [[ "$current_version" == "$VERSION" && "$tag_exists" == true ]]; then
+            echo "RESUME_RELEASE=true" >> "$GITHUB_ENV"
+            echo "::notice::Resuming release $VERSION from its existing commit and tag."
+          elif [[ "$current_version" == "$VERSION" ]]; then
+            echo "::error::Version $VERSION is already set but its release tag is missing."
+            exit 1
+          elif [[ "$tag_exists" == true ]]; then
             echo "::error::Tag $VERSION already exists."
             exit 1
+          else
+            echo "RESUME_RELEASE=false" >> "$GITHUB_ENV"
           fi
 
       - name: Update project version
+        if: env.RESUME_RELEASE != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -113,6 +122,7 @@ jobs:
           if-no-files-found: error
 
       - name: Prepare release commit and tag
+        if: env.RESUME_RELEASE != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -138,5 +148,31 @@ jobs:
           --skip-duplicate
 
       - name: Push release commit and tag
+        if: env.RESUME_RELEASE != 'true'
         shell: bash
         run: git push --atomic origin HEAD:master "refs/tags/${VERSION}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          package="artifacts/ZXingBlazor.${VERSION}.nupkg"
+
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            gh release upload "$VERSION" "$package" --clobber
+            exit 0
+          fi
+
+          release_args=(
+            "$VERSION"
+            "$package"
+            --verify-tag
+            --generate-notes
+            --title "ZXingBlazor ${VERSION}"
+          )
+          if [[ "$VERSION" == *-* ]]; then
+            release_args+=(--prerelease)
+          fi
+          gh release create "${release_args[@]}"
