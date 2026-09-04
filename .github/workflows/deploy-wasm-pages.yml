@@ -1,0 +1,63 @@
+name: Deploy WASM to GitHub Pages
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/deploy-wasm-pages.yml"
+      - "Demo.Wasm/**"
+      - "src/ZXingBlazor/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v6
+
+      - name: Restore
+        run: dotnet restore Demo.Wasm/Demo.Wasm.csproj
+
+      - name: Publish
+        run: dotnet publish Demo.Wasm/Demo.Wasm.csproj --configuration Release --no-restore --output publish
+
+      - name: Prepare GitHub Pages content
+        shell: bash
+        run: |
+          sed -i 's|<base href="/" />|<base href="${{ steps.pages.outputs.base_path }}/" />|' publish/wwwroot/index.html
+          cp publish/wwwroot/index.html publish/wwwroot/404.html
+          touch publish/wwwroot/.nojekyll
+          grep -F '<base href="${{ steps.pages.outputs.base_path }}/" />' publish/wwwroot/index.html
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: publish/wwwroot
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
