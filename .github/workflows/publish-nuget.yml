@@ -136,7 +136,7 @@ jobs:
         id: nuget_login
         uses: NuGet/login@v1.2.0
         with:
-          user: DensenInformatica
+          user: alex_zou
 
       - name: Publish to NuGet
         env:
